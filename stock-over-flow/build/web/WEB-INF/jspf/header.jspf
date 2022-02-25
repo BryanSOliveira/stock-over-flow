@@ -1,0 +1,63 @@
+<%-- any content can be specified here e.g.: --%>
+<%@ page pageEncoding="UTF-8" %>
+<%
+    if (request.getParameter("username") != null && request.getParameter("password") != null) {
+        String username = request.getParameter("username");
+        session.setAttribute("username", username);
+        String password = request.getParameter("password");
+        session.setAttribute("password", password);
+        response.sendRedirect(request.getRequestURI());
+    } else if (request.getParameter("logout") != null) {
+        session.removeAttribute("username");
+        session.removeAttribute("password");
+        response.sendRedirect(request.getRequestURI());
+    }
+
+    String sessionUsername = (String) session.getAttribute("username");
+%>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-box2"></i></a>
+        <% if (sessionUsername != null) { %>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="<%= request.getContextPath()%>/index.jsp">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<%= request.getContextPath()%>">Produtos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="<%= request.getContextPath()%>">Meu perfil</a>
+                </li>
+            </ul>
+            <form method="post">
+                <button type="submit" name="logout" class="btn btn-dark">Logout</button>
+            </form>
+        </div>
+        <% } %>
+    </div>
+</nav>
+<% if (sessionUsername == null) { %>
+<div class="container mt-2">
+    <form method="post">
+        <div class="mb-3">
+            <label for="username" class="form-label">Email address</label>
+            <input type="email" name="username" class="form-control" id="username" aria-describedby="emailHelp">
+            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" id="password">
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="remember">
+            <label class="form-check-label" for="remember">Check me out</label>
+        </div>
+        <button type="submit" name="login" class="btn btn-primary">Login</button>
+    </form>
+</div>
+<% } %>
