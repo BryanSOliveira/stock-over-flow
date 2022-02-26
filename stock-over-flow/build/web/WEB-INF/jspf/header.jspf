@@ -1,19 +1,36 @@
 <%-- any content can be specified here e.g.: --%>
+<%@page import="web.DbListener"%>
+<%@page import="db.User"%>
 <%@ page pageEncoding="UTF-8" %>
 <%
+    String headerError = null;
+    
     if (request.getParameter("username") != null && request.getParameter("password") != null) {
-        String username = request.getParameter("username");
-        session.setAttribute("username", username);
+        String login = request.getParameter("username");
         String password = request.getParameter("password");
-        session.setAttribute("password", password);
-        response.sendRedirect(request.getRequestURI());
+        headerError = null;
+        try { 
+            User user = User.getUser(login, password);
+            if (user == null) {
+                headerError = "Usuário / senha não encontrado";
+            } else {
+                session.setAttribute("user.login", user.getLogin());
+                session.setAttribute("user.name", user.getName());
+                session.setAttribute("user.role", user.getRole());
+                response.sendRedirect(request.getRequestURI());
+            }
+        } catch(Exception ex) {
+            headerError = ex.getMessage();
+        }
     } else if (request.getParameter("logout") != null) {
-        session.removeAttribute("username");
-        session.removeAttribute("password");
+        session.removeAttribute("user.login");
+        session.removeAttribute("user.name");
+        session.removeAttribute("user.role");
         response.sendRedirect(request.getRequestURI());
     }
 
-    String sessionUsername = (String) session.getAttribute("username");
+    String sessionUsername = (String) session.getAttribute("user.login");
+    String sessionRole = (String) session.getAttribute("user.role");
 %>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -25,39 +42,70 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="<%= request.getContextPath()%>/index.jsp">Home</a>
+                    <% if(request.getRequestURI().contains("index.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>/index.jsp">Home</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/index.jsp">Home</a>
+                    <% } %>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<%= request.getContextPath()%>">Produtos</a>
+                    <% if(request.getRequestURI().contains("products.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>"><i class="bi bi-list"></i> Produtos</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>"><i class="bi bi-list"></i> Produtos</a>
+                    <% } %>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="<%= request.getContextPath()%>">Meu perfil</a>
+                    <% if(request.getRequestURI().contains("my-profile.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% } %>
                 </li>
+                <% if(sessionRole.equals("admin")) { %>
+                    <li class="nav-item">
+                        <% if(request.getRequestURI().contains("users.jsp")) { %>
+                            <a class="nav-link active" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
+                        <% } else { %>
+                            <a class="nav-link" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
+                        <% } %>
+                    </li>
+                <% } %>
             </ul>
             <form method="post">
-                <button type="submit" name="logout" class="btn btn-dark">Logout</button>
+                <button type="submit" name="logout" class="btn btn-dark"><i class="bi bi-box-arrow-right"></i> Logout</button>
             </form>
         </div>
         <% } %>
     </div>
 </nav>
+<% if(DbListener.exception != null) { %>
+    <div class="alert alert-danger" role="alert">
+        <%= DbListener.exception.getMessage() %>
+    </div>
+<% } %>
+<% if(headerError != null) { %>
+    <div class="alert alert-danger" role="alert">
+        <%= headerError %>
+    </div>
+<% } %>
 <% if (sessionUsername == null) { %>
 <div class="container mt-2">
-    <form method="post">
-        <div class="mb-3">
-            <label for="username" class="form-label">Email address</label>
-            <input type="email" name="username" class="form-control" id="username" aria-describedby="emailHelp">
-            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                <div class="mb-3">
+                    <label for="username" class="form-label"><i class="bi bi-person-circle"></i> Username</label>
+                    <input type="text" name="username" class="form-control" id="username" aria-describedby="emailHelp" required>
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label"><i class="bi bi-lock"></i> Password</label>
+                    <input type="password" name="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" name="login" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Login</button>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" id="password">
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="remember">
-            <label class="form-check-label" for="remember">Check me out</label>
-        </div>
-        <button type="submit" name="login" class="btn btn-primary">Login</button>
-    </form>
+    </div>
 </div>
 <% } %>
