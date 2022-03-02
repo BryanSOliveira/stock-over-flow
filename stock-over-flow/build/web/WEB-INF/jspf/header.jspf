@@ -52,14 +52,35 @@
                     <% if(request.getRequestURI().contains("products.jsp")) { %>
                         <a class="nav-link active" href="<%= request.getContextPath()%>"><i class="bi bi-list"></i> Produtos</a>
                     <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>"><i class="bi bi-list"></i> Produtos</a>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/products.jsp"><i class="bi bi-list"></i> Produtos</a>
                     <% } %>
                 </li>
                 <li class="nav-item">
                     <% if(request.getRequestURI().contains("my-profile.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
                     <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% } %>
+                </li>
+                <li class="nav-item">
+                    <% if(request.getRequestURI().contains("brands.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
+                    <% } %>
+                </li>
+                <li class="nav-item">
+                    <% if(request.getRequestURI().contains("providers.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
+                    <% } %>
+                </li>
+                <li class="nav-item">
+                    <% if(request.getRequestURI().contains("movements.jsp")) { %>
+                        <a class="nav-link active" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
+                    <% } else { %>
+                        <a class="nav-link" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
                     <% } %>
                 </li>
                 <% if(sessionRole.equals("admin")) { %>

@@ -30,6 +30,10 @@ public class User {
                 + ")";
     }
     
+    public static String getDestroyStatement() {
+        return "DROP TABLE IF EXISTS users";
+    }
+    
     public static ArrayList<User> getUsers() throws Exception {
         ArrayList<User> list = new ArrayList<>();
         Connection con = DbListener.getConnection();

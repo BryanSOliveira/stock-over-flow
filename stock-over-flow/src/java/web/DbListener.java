@@ -5,6 +5,9 @@
  */
 package web;
 
+import db.Marca;
+import db.Movement;
+import db.Provider;
 import db.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -34,6 +37,9 @@ public class DbListener implements ServletContextListener {
             Connection con = getConnection();
             Statement stmt = con.createStatement();
             stmt.execute(User.getCreateStatement());
+            stmt.execute(Marca.getCreateStatement());
+            stmt.execute(Provider.getCreateStatement());
+            stmt.execute(Movement.getCreateStatement());
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123");
             }
@@ -46,5 +52,17 @@ public class DbListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        try {
+            Connection con = getConnection();
+            Statement stmt = con.createStatement();
+            stmt.execute(Marca.getDestroyStatement());
+            stmt.execute(User.getDestroyStatement());
+            stmt.execute(Provider.getDestroyStatement());
+            stmt.execute(Movement.getCreateStatement());
+            stmt.close();
+            con.close();
+        } catch(Exception ex) {
+            exception = ex;
+        }
     }
 }

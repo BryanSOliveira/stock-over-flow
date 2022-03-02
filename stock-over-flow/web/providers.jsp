@@ -1,35 +1,35 @@
 <%-- 
-    Document   : users
-    Created on : 25 de fev. de 2022, 22:25:44
+    Document   : providers
+    Created on : 2 de mar. de 2022, 19:05:37
     Author     : spbry
 --%>
-<%@page import="db.User"%>
+
+<%@page import="db.Provider"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestError = null;
-    ArrayList<User> users = new ArrayList<>();
+    ArrayList<Provider> providers = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            String login = request.getParameter("login");
             String name = request.getParameter("name");
-            String role = request.getParameter("role");
-            String password = request.getParameter("password");
-            User.insertUser(login, name, role, password);
+            String address = request.getParameter("address");
+            String telephone = request.getParameter("telephone");
+            Provider.insertProvider(name, address, telephone);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            String login = request.getParameter("login");
-            User.deleteUser(login);
+            int id = Integer.parseInt(request.getParameter("id"));
+            Provider.deleteProvider(id);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            String login = request.getParameter("login");
+            int id = Integer.parseInt(request.getParameter("id"));
             String name = request.getParameter("name");
-            String role = request.getParameter("role");
-            String password = request.getParameter("password");
-            User.alterUser(login, name, role, password);
+            String address = request.getParameter("address");
+            String telephone = request.getParameter("telephone");
+            Provider.alterProvider(id, name, address, telephone);
             response.sendRedirect(request.getRequestURI());
         }
-        users = User.getUsers();
+        providers = Provider.getProviders();
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -39,7 +39,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Usuários</title>
+        <title>Fornecedores</title>
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>
@@ -48,37 +48,29 @@
             <% if (sessionUsername != null) { %>
             <div class="card">
                 <div class="card-body">
-                    <% if (sessionRole.equals("admin")) {%>
-                    <h2>Usuários(<%= users.size()%>)
-                        <!-- Button add user -->
+                    <h2>Fornecedores
+                        <!-- Button add providers -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
-                            <i class="bi bi-person-plus"></i>
+                            <i class="bi bi-plus-lg"></i>
                         </button>
                     </h2>
-                    <!-- Modal add user -->
+                    <!-- Modal add provider -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <form method="post">
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="login">Login</label>
-                                            <input type="text" class="form-control" name="login" id="login"/>
-                                        </div>
-                                        <div class="mb-3">
                                             <label for="name">Nome</label>
                                             <input type="text" class="form-control" name="name" id="name"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="role">Papel</label>
-                                            <select name="role" class="form-select" id="role">
-                                                <option value="admin">admin</option>
-                                                <option value="user" selected>user</option>
-                                            </select>
+                                            <label for="address">Endereço</label>
+                                            <input type="text" class="form-control" name="address" id="address"/>
                                         </div>
-                                        <div>
-                                            <label for="password">Senha</label>
-                                            <input type="password" class="form-control" name="password" id="password" autocomplete="on"/>
+                                        <div class="mb-3">
+                                            <label for="telephone">Telefone</label>
+                                            <input type="text" class="form-control" name="telephone" id="telephone"/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -94,32 +86,34 @@
                         <%= requestError%>
                     </div>
                     <% } %>
-                    <!-- Table user -->
+                    <!-- Table provider -->
                     <div class="table-responsive">
                         <table class="table table-striped w-auto">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Login</th>
+                                    <th>ID</th>
                                     <th>Name</th>
-                                    <th>Role</th>
+                                    <th>Address</th>
+                                    <th>Telephone</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% int i = 0; %>
-                                <% for (User user : users) { %>
+                                <% for (Provider provider : providers) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= user.getLogin()%></td>
-                                    <td><%= user.getName()%></td>
-                                    <td><%= user.getRole()%></td>
+                                    <td><%= provider.getId()%></td>
+                                    <td><%= provider.getName()%></td>
+                                    <td><%= provider.getAddress()%></td>
+                                    <td><%= provider.getTelephone()%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="login" value="<%= user.getLogin()%>"/>
+                                            <input type="hidden" name="id" value="<%= provider.getId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -131,35 +125,29 @@
                                                     <form>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label for="login-<%= i%>">Login</label>
-                                                                <input type="text" class="form-control" name="login" id="login-<%= i%>" 
-                                                                       value="<%= user.getLogin()%>" disabled/>
+                                                                <label for="id-<%= i%>">ID</label>
+                                                                <input type="text" class="form-control" name="id" id="id-<%= i%>" 
+                                                                       value="<%= provider.getId()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="name-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="name" id="name-<%= i%>" 
-                                                                       value="<%= user.getName()%>"/>
+                                                                       value="<%= provider.getName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="role-<%= i%>">Papel</label>
-                                                                <select name="role" class="form-select" id="role-<%= i%>">
-                                                                    <% if (user.getRole().equals("admin")) { %>
-                                                                    <option value="admin" selected>admin</option>
-                                                                    <option value="user">user</option>
-                                                                    <% } else { %>
-                                                                    <option value="admin">admin</option>
-                                                                    <option value="user" selected>user</option>
-                                                                    <% }%>
-                                                                </select>
+                                                                <label for="address-<%= i%>">Endereço</label>
+                                                                <input type="text" class="form-control" name="address" id="address-<%= i%>" 
+                                                                       value="<%= provider.getAddress()%>"/>
                                                             </div>
-                                                            <div>
-                                                                <label for="password-<%= i%>">Senha</label>
-                                                                <input type="password" class="form-control" name="password" id="password-<%= i%>" autocomplete="on"/>
+                                                            <div class="mb-3">
+                                                                <label for="telephone-<%= i%>">Telefone</label>
+                                                                <input type="text" class="form-control" name="telephone" id="telephone-<%= i%>" 
+                                                                       value="<%= provider.getTelephone()%>"/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="login" value="<%= user.getLogin()%>"/>
+                                                            <input type="hidden" name="id" value="<%= provider.getId()%>"/>
                                                             <input type="submit" name="edit" value="Save" class="btn btn-primary">
                                                         </div>
                                                     </form>
@@ -174,10 +162,7 @@
                     </div>
                 </div>
             </div>
-            <% } else { %>
-            Página restrita
             <% } %>
-            <% }%>
         </div>
     </body>
 </html>
