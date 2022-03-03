@@ -5,10 +5,12 @@
  */
 package web;
 
-import db.Marca;
+import db.*;
+/*import db.Marca;
 import db.Movement;
+import db.Produto;
 import db.Provider;
-import db.User;
+import db.User;*/
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -40,8 +42,13 @@ public class DbListener implements ServletContextListener {
             stmt.execute(Marca.getCreateStatement());
             stmt.execute(Provider.getCreateStatement());
             stmt.execute(Movement.getCreateStatement());
+            stmt.execute(Produto.getCreateStatement());
+            //stmt.execute(Produto.getDestroyStatement());
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123");
+            }
+            if(Produto.getProds().isEmpty()) {
+                Produto.insertProd(18, "Redbull", "Aluminium", "250 ml");
             }
             stmt.close();
             con.close();
