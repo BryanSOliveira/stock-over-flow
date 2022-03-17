@@ -16,10 +16,10 @@ import web.DbListener;
  * @author spbry
  */
 public class Produto {
-    private int prod_id;
-    private String prod_nm;
-    private String prod_mt;
-    private String prod_sz;
+    private int prodId;
+    private String prodName;
+    private String prodMaterial;
+    private String prodSize;
     
     /*
     private Marca brand;
@@ -30,29 +30,29 @@ public class Produto {
     */
     
     public static String getCreateStatement() {
-        return "create table if not exists prods("
-                + "prod_id integer unique not null,"
-                + "prod_nm varchar(200) not null,"
-                + "prod_mt varchar(200) not null,"
-                + "prod_sz varchar(20) not null"
+        return "CREATE TABLE IF NOT EXISTS produtos("
+                + "prodId INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "prodName VARCHAR(200) NOT NULL,"
+                + "prodMaterial VARCHAR(200) NOT NULL,"
+                + "prodSize VARCHAR(20) NOT NULL"
                 + ")";
     }
     
     public static String getDestroyStatement() {
-        return "drop table if exists prods";
+        return "DROP TABLE IF EXISTS produtos";
     }
     
-    public static ArrayList<Produto> getProds() throws Exception {
+    public static ArrayList<Produto> getProdutos() throws Exception {
         ArrayList<Produto> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("select * from prods");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM produtos");
         while(rs.next()) {
-            Integer prod_id = rs.getInt("prod_id");
-            String prod_nm = rs.getString("prod_nm");
-            String prod_mt = rs.getString("prod_mt");
-            String prod_sz = rs.getString("prod_sz");
-            list.add(new Produto(prod_id, prod_nm, prod_mt, prod_sz));
+            Integer prodId = rs.getInt("prodId");
+            String prodName = rs.getString("prodName");
+            String prodMaterial = rs.getString("prodMaterial");
+            String prodSize = rs.getString("prodSize");
+            list.add(new Produto(prodId, prodName, prodMaterial, prodSize));
         }
         rs.close();
         stmt.close();
@@ -60,19 +60,18 @@ public class Produto {
         return list;
     }
     
-    public static Produto getProd(Integer prod_id, String prod_nm, String prod_mt, String prod_sz) throws Exception {
+    public static Produto getProd(Integer prodId) throws Exception {
         Produto prod = null;
         Connection con = DbListener.getConnection();
-        String sql = "select * from prods where id=?";
+        String sql = "SELECT * FROM produtos WHERE prodId=?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, prod_id);
+        stmt.setInt(1, prodId);
         ResultSet rs = stmt.executeQuery();
         if(rs.next()) {
-            Integer id = rs.getInt("prod_id");
-            String name = rs.getString("prod_nm");
-            String material = rs.getString("prod_mt");
-            String size = rs.getString("prod_sz");
-            prod = new Produto(id, name, material, size);
+            String prodName = rs.getString("prodName");
+            String prodMaterial = rs.getString("prodMaterial");
+            String prodSize = rs.getString("prodSize");
+            prod = new Produto(prodId, prodName, prodMaterial, prodSize);
         }
         stmt.close();
         con.close();
@@ -80,78 +79,77 @@ public class Produto {
         return prod;
     }
     
-    public static void insertProd(Integer id, String name, String material, String size) throws Exception {
+    public static void insertProd(String prodName, String prodMaterial, String prodSize) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "insert into prods(prod_id, prod_nm, prod_mt, prod_sz) "
-                + "values(?, ?, ?, ?)";
+        String sql = "INSERT INTO produtos(prodName, prodMaterial, prodSize) "
+                + "VALUES(?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, id);
-        stmt.setString(2, name); 
-        stmt.setString(3, material);
-        stmt.setString(4, size);
+        stmt.setString(1, prodName); 
+        stmt.setString(2, prodMaterial);
+        stmt.setString(3, prodSize);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterProd(Integer id, String name, String material, String size) throws Exception {
+    public static void alterProd(Integer prodId, String prodName, String prodMaterial, String prodSize) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "update prods set prod_nm = ?, prod_mt = ?, prod_sz = ? "
-                + "where prod_id = ?";
+        String sql = "UPDATE produtos SET prodName = ?, prodMaterial = ?, prodSize = ? "
+                + "WHERE prodId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name); 
-        stmt.setString(2, material);
-        stmt.setString(3, size);
-        stmt.setInt(4, id);
+        stmt.setString(1, prodName); 
+        stmt.setString(2, prodMaterial);
+        stmt.setString(3, prodSize);
+        stmt.setInt(4, prodId);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteProd(Integer id) throws Exception {
+    public static void deleteProd(Integer prodId) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "delete from prods where prod_id = ?";
+        String sql = "DELETE FROM produtos WHERE prodId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, id);
+        stmt.setInt(1, prodId);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public Produto(Integer id, String name, String material, String size) {
-        this.prod_id = id;
-        this.prod_nm = name;
-        this.prod_mt = material;
-        this.prod_sz = size;
+    public Produto(Integer prodId, String prodName, String prodMaterial, String prodSize) {
+        this.prodId = prodId;
+        this.prodName = prodName;
+        this.prodMaterial = prodMaterial;
+        this.prodSize = prodSize;
     }
 
     public Integer getProdId() {
-        return prod_id;
+        return prodId;
     }
 
-    public void setProdId(Integer id) {
-        this.prod_id = id;
+    public void setProdId(Integer prodId) {
+        this.prodId = prodId;
     }
 
-    public String getProdNm() {
-        return prod_nm;
+    public String getProdName() {
+        return prodName;
     }
 
-    public void setProdNm(String name) {
-        this.prod_nm = name;
+    public void setProdName(String prodName) {
+        this.prodName = prodName;
     }
-    public String getProdMt() {
-        return prod_mt;
-    }
-
-    public void setProdMt(String material) {
-        this.prod_mt = material;
-    }
-    public String getProdSz() {
-        return prod_sz;
+    public String getProdMaterial() {
+        return prodMaterial;
     }
 
-    public void setProdSz(String size) {
-        this.prod_sz = size;
+    public void setProdMaterial(String prodMaterial) {
+        this.prodMaterial = prodMaterial;
+    }
+    public String getProdSize() {
+        return prodSize;
+    }
+
+    public void setProdSize(String prodSize) {
+        this.prodSize = prodSize;
     }
 }

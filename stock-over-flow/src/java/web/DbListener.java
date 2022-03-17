@@ -47,8 +47,8 @@ public class DbListener implements ServletContextListener {
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123");
             }
-            if(Produto.getProds().isEmpty()) {
-                Produto.insertProd(18, "Redbull", "Aluminium", "250 ml");
+            if(Produto.getProdutos().isEmpty()) {
+                Produto.insertProd("Redbull", "Aluminium", "250 ml");
             }
             stmt.close();
             con.close();

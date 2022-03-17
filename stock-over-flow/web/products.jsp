@@ -9,28 +9,27 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestError = null;
-    ArrayList<Produto> prods = new ArrayList<>();
+    ArrayList<Produto> produtos = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            Integer id = Integer.parseInt(request.getParameter("prod_id"));
-            String nm = request.getParameter("prod_nm");
-            String mt = request.getParameter("prod_mt");
-            String sz = request.getParameter("prod_sz");
-            Produto.insertProd(id, nm, mt, sz);
+            String prodName = request.getParameter("prodName");
+            String prodMaterial = request.getParameter("prodMaterial");
+            String prodSize = request.getParameter("prodSize");
+            Produto.insertProd(prodName, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            Integer id = Integer.parseInt(request.getParameter("prod_id"));
-            Produto.deleteProd(id);
+            Integer prodId = Integer.parseInt(request.getParameter("prodId"));
+            Produto.deleteProd(prodId);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            Integer id = Integer.parseInt(request.getParameter("prod_id"));
-            String nm = request.getParameter("prod_nm");
-            String mt = request.getParameter("prod_mt");
-            String sz = request.getParameter("prod_sz");
-            Produto.alterProd(id, nm, mt, sz);
+            Integer prodId = Integer.parseInt(request.getParameter("prodId"));
+            String prodName = request.getParameter("prodName");
+            String prodMaterial = request.getParameter("prodMaterial");
+            String prodSize = request.getParameter("prodSize");
+            Produto.alterProd(prodId, prodName, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
         }
-        prods = Produto.getProds();
+        produtos = Produto.getProdutos();
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -50,7 +49,7 @@
             <div class="card">
                 <div class="card-body">
                     <% if (sessionRole.equals("admin")) {%>
-                    <h2>Produtos - <%= prods.size()%>
+                    <h2>Produtos - <%= produtos.size()%>
                         <!-- Button add prod -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -63,20 +62,16 @@
                                 <form method="post">
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="id">ID</label>
-                                            <input type="text" class="form-control" name="prod_id" id="prod_id"/>
+                                            <label for="prodName">Nome</label>
+                                            <input type="text" class="form-control" name="prodName" id="prodName"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="nm">Nome</label>
-                                            <input type="text" class="form-control" name="prod_nm" id="prod_nm"/>
+                                            <label for="prodMaterial">Material</label>
+                                            <input type="text" class="form-control" name="prodMaterial" id="prodMaterial"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="mt">Material</label>
-                                            <input type="text" class="form-control" name="prod_mt" id="prod_mt"/>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="sz">Tamanho</label>
-                                            <input type="text" class="form-control" name="prod_sz" id="prod_sz"/>
+                                            <label for="prodSize">Tamanho</label>
+                                            <input type="text" class="form-control" name="prodSize" id="prodSize"/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -106,20 +101,20 @@
                             </thead>
                             <tbody>
                                 <% int i = 0; %>
-                                <% for (Produto prod : prods) { %>
+                                <% for (Produto x : produtos) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= prod.getProdId()%></td>
-                                    <td><%= prod.getProdNm()%></td>
-                                    <td><%= prod.getProdMt()%></td>
-                                    <td><%= prod.getProdSz()%></td>
+                                    <td><%= x.getProdId()%></td>
+                                    <td><%= x.getProdName()%></td>
+                                    <td><%= x.getProdMaterial()%></td>
+                                    <td><%= x.getProdSize()%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="id" value="<%= prod.getProdId()%>"/>
+                                            <input type="hidden" name="prodId" value="<%= x.getProdId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -131,29 +126,29 @@
                                                     <form>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label for="prodid-<%= i%>">ID</label>
-                                                                <input type="text" class="form-control" name="prod_id" id="prodid-<%= i%>" 
-                                                                       value="<%= prod.getProdId()%>" disabled/>
+                                                                <label for="prodId-<%= i%>">ID</label>
+                                                                <input type="text" class="form-control" name="prodId" id="prodId-<%= i%>" 
+                                                                       value="<%= x.getProdId()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="prodnm-<%= i%>">Nome</label>
-                                                                <input type="text" class="form-control" name="prod_nm" id="prodnm-<%= i%>" 
-                                                                       value="<%= prod.getProdNm()%>"/>
+                                                                <label for="prodName-<%= i%>">Nome</label>
+                                                                <input type="text" class="form-control" name="prodName" id="prodName-<%= i%>" 
+                                                                       value="<%= x.getProdName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="prodmt-<%= i%>">Material</label>
-                                                                <input type="text" class="form-control" name="prod_mt" id="prodmt-<%= i%>" 
-                                                                       value="<%= prod.getProdMt()%>"/>
+                                                                <label for="prodMaterial-<%= i%>">Material</label>
+                                                                <input type="text" class="form-control" name="prodMaterial" id="prodMaterial-<%= i%>" 
+                                                                       value="<%= x.getProdMaterial()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="prodsz-<%= i%>">Tamanho</label>
-                                                                <input type="text" class="form-control" name="prod_sz" id="prodsz-<%= i%>" 
-                                                                       value="<%= prod.getProdSz()%>"/>
+                                                                <label for="prodSize-<%= i%>">Tamanho</label>
+                                                                <input type="text" class="form-control" name="prodSize" id="prodSize-<%= i%>" 
+                                                                       value="<%= x.getProdSize()%>"/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="id" value="<%= prod.getProdId()%>"/>
+                                                            <input type="hidden" name="prodId" value="<%= x.getProdId()%>"/>
                                                             <input type="submit" name="edit" value="Save" class="btn btn-primary">
                                                         </div>
                                                     </form>
