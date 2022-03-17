@@ -152,4 +152,33 @@ public class Produto {
     public void setProdSize(String prodSize) {
         this.prodSize = prodSize;
     }
+    
+    public static ArrayList<String> getProdNames() throws Exception {
+        ArrayList<String> nameList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT prodName FROM produtos");
+        while(rs.next()) {
+            String prodName = rs.getString("prodName");
+            nameList.add(prodName);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return nameList;
+    }
+    
+    public static int countProds() throws Exception {
+        int prodQuantity = 0;
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM produtos");
+        while(rs.next()) {
+            prodQuantity = rs.getInt("COUNT(*)");
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return prodQuantity;
+    }
 }

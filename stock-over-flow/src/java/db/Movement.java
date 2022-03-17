@@ -9,7 +9,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import web.DbListener;
 
@@ -18,19 +21,21 @@ import web.DbListener;
  * @author spbry
  */
 public class Movement {
-    private int id;
-    private String date;
-    private double mediumValue;
-    private double batchValue;
-    private String description;
+    private int movId;
+    private String movDate;
+    private String prodType;
+    private int movQuantity;
+    private double movValue;
+    private String movDescription;
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS movement("
-                + "id integer PRIMARY KEY AUTOINCREMENT,"
-                + "date TEXT NOT NULL,"
-                + "medium_value REAL NOT NULL,"
-                + "batch_value REAL NOT NULL,"
-                + "description TEXT NOT NULL"
+                + "movId INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "movDate VARCHAR(21),"
+                + "prodType VARCHAR(200),"
+                + "movQuantity INTEGER,"
+                + "movValue REAL,"
+                + "movDescription VARCHAR(500)"
                 + ")";
     }
     
@@ -42,14 +47,15 @@ public class Movement {
         ArrayList<Movement> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * from movement");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM movement");
         while(rs.next()) {
-            int id = rs.getInt("id");
-            String date = rs.getString("date");
-            Double mediumValue = rs.getDouble("medium_value");
-            Double batchValue = rs.getDouble("batch_value");
-            String description = rs.getString("description");
-            list.add(new Movement(id, date, mediumValue, batchValue, description));
+            int movId = rs.getInt("movId");
+            String prodType = rs.getString("prodType");
+            String movDate = rs.getString("movDate");
+            int movQuantity = rs.getInt("movQuantity");
+            Double movValue = rs.getDouble("movValue");
+            String movDescription = rs.getString("movDescription");
+            list.add(new Movement(movId, movDate, prodType, movQuantity, movValue, movDescription));
         }
         rs.close();
         stmt.close();
@@ -57,90 +63,96 @@ public class Movement {
         return list;
     }
     
-    public static void insertMovement(String date, Double mediumValue, Double batchValue, String description) throws Exception {
+    public static void insertMovement(String prodType, int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO movement(date, medium_value, batch_value, description) "
-                + "VALUES(?, ?, ?, ?)";
+        String sql = "INSERT INTO movement(movDate, prodType, movQuantity, movValue, movDescription) "
+                + "VALUES(?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, date);
-        stmt.setDouble(2, mediumValue);
-        stmt.setDouble(3, batchValue);
-        stmt.setString(4, description);
+        String currentDate = new SimpleDateFormat("HH:mm:ss | dd/MM/yyyy").format(Calendar.getInstance().getTime());
+        stmt.setString(1, currentDate);
+        stmt.setString(2, prodType);
+        stmt.setDouble(3, movQuantity);
+        stmt.setDouble(4, movValue);
+        stmt.setString(5, movDescription);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterMovement(int id, String date, Double mediumValue, Double batchValue, String description) throws Exception {
+    public static void alterMovement(int movId, int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE movement SET date = ?, medium_value = ?, batch_value = ?, description = ? "
-                + "WHERE id = ?";
+        String sql = "UPDATE movement SET movQuantity = ?, movValue = ?, movDescription = ? "
+                + "WHERE movId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, date);
-        stmt.setDouble(2, mediumValue);
-        stmt.setDouble(3, batchValue);
-        stmt.setString(4, description);
-        stmt.setInt(5, id);
+        stmt.setInt(1, movQuantity);
+        stmt.setDouble(2, movValue);
+        stmt.setString(3, movDescription);
+        stmt.setInt(4, movId);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteMovement(int id) throws Exception {
+    public static void deleteMovement(int movId) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM movement WHERE id = ? ";
+        String sql = "DELETE FROM movement WHERE movId = ? ";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, id);
+        stmt.setInt(1, movId);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public Movement(int id, String date, double mediumValue, double batchValue, String description) {
-        this.id = id;
-        this.date = date;
-        this.mediumValue = mediumValue;
-        this.batchValue = batchValue;
-        this.description = description;
+    public Movement(int movId, String movDate, String prodType, int movQuantity, double movValue, String movDescription) {
+        this.movId = movId;
+        this.movDate = movDate;
+        this.prodType = prodType;
+        this.movQuantity = movQuantity;
+        this.movValue = movValue;
+        this.movDescription = movDescription;
     }
 
-    public int getId() {
-        return id;
+    public int getMovId() {
+        return movId;
     }
 
-    public String getDate() {
-        return date;
+    public String getMovDate() {
+        return movDate;
+    }
+    
+    public String getMovProdType() {
+        return prodType;
     }
 
-    public double getMediumValue() {
-        return mediumValue;
+    public int getMovQuantity() {
+        return movQuantity;
     }
 
-    public double getBatchValue() {
-        return batchValue;
+    public double getMovValue() {
+        return movValue;
     }
 
-    public String getDescription() {
-        return description;
+    public String getMovDescription() {
+        return movDescription;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setMovId(int movId) {
+        this.movId = movId;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setMovDate(String movDate) {
+        this.movDate = movDate;
     }
 
-    public void setMediumValue(double mediumValue) {
-        this.mediumValue = mediumValue;
+    public void setMovQuantity(int movQuantity) {
+        this.movQuantity = movQuantity;
     }
 
-    public void setBatchValue(double batchValue) {
-        this.batchValue = batchValue;
+    public void setMovValue(double movValue) {
+        this.movValue = movValue;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setMovDescription(String movDescription) {
+        this.movDescription = movDescription;
     }
 }

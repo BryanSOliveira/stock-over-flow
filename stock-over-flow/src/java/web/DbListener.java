@@ -41,14 +41,18 @@ public class DbListener implements ServletContextListener {
             stmt.execute(User.getCreateStatement());
             stmt.execute(Marca.getCreateStatement());
             stmt.execute(Provider.getCreateStatement());
-            stmt.execute(Movement.getCreateStatement());
-            stmt.execute(Produto.getCreateStatement());
-            //stmt.execute(Produto.getDestroyStatement());
+            //stmt.execute(Movement.getCreateStatement());
+            stmt.execute(Movement.getDestroyStatement());
+            //stmt.execute(Produto.getCreateStatement());
+            stmt.execute(Produto.getDestroyStatement());
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123");
             }
             if(Produto.getProdutos().isEmpty()) {
                 Produto.insertProd("Redbull", "Aluminium", "250 ml");
+            }
+            if(Movement.getMovements().isEmpty()) {
+                Movement.insertMovement("Redbull", 20, 15.99, "Input Teste");
             }
             stmt.close();
             con.close();

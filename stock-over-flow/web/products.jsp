@@ -75,8 +75,8 @@
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <input type="submit" name="insert" value="Add" class="btn btn-primary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <input type="submit" name="insert" value="Adicionar" class="btn btn-primary">
                                     </div>
                                 </form>
                             </div>
@@ -147,9 +147,9 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                                             <input type="hidden" name="prodId" value="<%= x.getProdId()%>"/>
-                                                            <input type="submit" name="edit" value="Save" class="btn btn-primary">
+                                                            <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>
                                                 </div>
