@@ -153,19 +153,32 @@ public class Produto {
         this.prodSize = prodSize;
     }
     
-    public static ArrayList<String> getProdNames() throws Exception {
-        ArrayList<String> nameList = new ArrayList<>();
+    public static ArrayList<Integer> getProdIds() throws Exception {
+        ArrayList<Integer> idList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT prodName FROM produtos");
+        ResultSet rs = stmt.executeQuery("SELECT prodId FROM produtos");
         while(rs.next()) {
-            String prodName = rs.getString("prodName");
-            nameList.add(prodName);
+            int prodId = rs.getInt("prodId");
+            idList.add(prodId);
         }
         rs.close();
         stmt.close();
         con.close();
-        return nameList;
+        return idList;
+    }
+    
+    public static String getNameById(Integer prodId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT prodName FROM produtos WHERE prodId=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, prodId);
+        ResultSet rs = stmt.executeQuery();
+        String prodName = rs.getString("prodName"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return prodName;
     }
     
     public static int countProds() throws Exception {

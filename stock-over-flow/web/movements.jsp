@@ -16,11 +16,20 @@
     ArrayList<Movement> movements = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            String prodType = request.getParameter("prodType");
+            int movProd = Integer.parseInt(request.getParameter("movProd"));
+            String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDescription = request.getParameter("movDescription");
-            Movement.insertMovement(prodType, movQuantity, movValue, movDescription);
+            if(movType.equals("in")){
+            movType = "Entrada";
+            movQuantity = Math.abs(movQuantity);
+            }else if(movType.equals("out")){
+            movType = "Saída";
+            movQuantity = -movQuantity;
+            }else{movType = "Invalido";}
+            
+            Movement.insertMovement(movProd, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
@@ -28,10 +37,19 @@
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
+            String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDescription = request.getParameter("movDescription");
-            Movement.alterMovement(movId, movQuantity, movValue, movDescription);
+            if(movType.equals("in")){
+            movType = "Entrada";
+            movQuantity = Math.abs(movQuantity);
+            }else if(movType.equals("out")){
+            movType = "Saída";
+            movQuantity = -movQuantity;
+            }else{movType = "Invalido";}
+            
+            Movement.alterMovement(movId, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         }
         movements = Movement.getMovements();
@@ -67,13 +85,20 @@
                                 <form method="post">
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="prodType">Tipo de Produto</label>
-                                            <select name="prodType" id="prodType">
+                                            <label for="movProd">Produto</label>
+                                            <select name="movProd" id="movProd">
                                                 <% 
-                                                   ArrayList<String> prodNames = Produto.getProdNames();
-                                                   for(int p = 0; p < prodNames.size(); p++){ %>
-                                                <option value="prodType"><%=prodNames.get(p)%></option>
+                                                   ArrayList<Integer> prodIds = Produto.getProdIds();
+                                                   for(int p = 0; p < prodIds.size(); p++){ %>
+                                                   <option value="<%=prodIds.get(p)%>"><%=Produto.getNameById(prodIds.get(p))%></option>
                                                 <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="movType">Tipo de Movimentação</label>
+                                            <select name="movType" id="movType">
+                                                 <option value="out">Saída</option>
+                                                 <option value="in">Entrada</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
@@ -125,8 +150,8 @@
                                 <tr>
                                     <td><%= x.getMovId()%></td>
                                     <td><%= x.getMovDate()%></td>
-                                    <td>||</td>
-                                    <td><%= x.getMovProdType()%></td>
+                                    <td><%= x.getMovType()%></td>
+                                    <td><%= Produto.getNameById(x.getMovProd())%></td>
                                     <td><%= x.getMovQuantity()%></td>
                                     <td><%= x.getMovValue()%></td>
                                     <td><%= x.getMovDescription()%></td>
@@ -136,7 +161,7 @@
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="id" value="<%= x.getMovId()%>"/>
+                                            <input type="hidden" name="movId" value="<%= x.getMovId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -160,7 +185,7 @@
                                                             <div class="mb-3">
                                                                 <label for="prodType-<%= i%>">Produto</label>
                                                                 <input type="text" class="form-control" name="prodType" id="prodType-<%= i%>" 
-                                                                       value="<%=x.getMovProdType()%>" disabled/>
+                                                                       value="<%=Produto.getNameById(x.getMovProd())%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>

@@ -4,6 +4,7 @@
     Author     : spbry
 --%>
 
+<%@page import="db.Movement"%>
 <%@page import="db.Produto"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -96,6 +97,7 @@
                                     <th>Nome</th>
                                     <th>Material</th>
                                     <th>Tamanho</th>
+                                    <th>Quantidade</th>
                                     <th>Opções</th>
                                 </tr>
                             </thead>
@@ -108,6 +110,7 @@
                                     <td><%= x.getProdName()%></td>
                                     <td><%= x.getProdMaterial()%></td>
                                     <td><%= x.getProdSize()%></td>
+                                    <td><%= Movement.getQntById(x.getProdId())%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
@@ -144,6 +147,11 @@
                                                                 <label for="prodSize-<%= i%>">Tamanho</label>
                                                                 <input type="text" class="form-control" name="prodSize" id="prodSize-<%= i%>" 
                                                                        value="<%= x.getProdSize()%>"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="movQuantity-<%= i%>">Quantidade</label>
+                                                                <input type="number" class="form-control" name="movQuantity" id="movQuantity-<%= i%>" 
+                                                                       value="<%= Movement.getQntById(x.getProdId())%>" disabled/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
