@@ -37,6 +37,7 @@
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
+            int movProd = Integer.parseInt(request.getParameter("movProd"));
             String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
@@ -49,7 +50,7 @@
             movQuantity = -movQuantity;
             }else{movType = "Invalido";}
             
-            Movement.alterMovement(movId, movType, movQuantity, movValue, movDescription);
+            Movement.alterMovement(movId, movProd, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         }
         movements = Movement.getMovements();
@@ -90,7 +91,7 @@
                                                 <% 
                                                    ArrayList<Integer> prodIds = Produto.getProdIds();
                                                    for(int p = 0; p < prodIds.size(); p++){ %>
-                                                   <option value="<%=prodIds.get(p)%>"><%=Produto.getNameById(prodIds.get(p))%></option>
+                                                   <option value="<%=prodIds.get(p)%>"><%=Produto.getProdNameById(prodIds.get(p))%></option>
                                                 <%}%>
                                             </select>
                                         </div>
@@ -151,8 +152,14 @@
                                     <td><%= x.getMovId()%></td>
                                     <td><%= x.getMovDate()%></td>
                                     <td><%= x.getMovType()%></td>
-                                    <td><%= Produto.getNameById(x.getMovProd())%></td>
-                                    <td><%= x.getMovQuantity()%></td>
+                                    <td><%= Produto.getProdNameById(x.getMovProd())%></td>
+                                    <%if(x.getMovQuantity() > 0){%>
+                                    <td style="color:green;"><%= x.getMovQuantity()%></td>
+                                    <%}else if(x.getMovQuantity() < 0){%>
+                                    <td style="color:red;"><%= x.getMovQuantity()%></td>
+                                    <%}else{%>
+                                    <td style="color:blue;><%= x.getMovQuantity()%></td>
+                                    <%}%>
                                     <td><%= x.getMovValue()%></td>
                                     <td><%= x.getMovDescription()%></td>
                                     <td>
@@ -183,14 +190,20 @@
                                                                        value="<%= x.getMovDate()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="prodType-<%= i%>">Produto</label>
-                                                                <input type="text" class="form-control" name="prodType" id="prodType-<%= i%>" 
-                                                                       value="<%=Produto.getNameById(x.getMovProd())%>" disabled/>
+                                                                <label for="movProd-<%= i%>">Produto</label>
+                                                                <select name="movProd" id="movProd">
+                                                                <% ArrayList<Integer> editProdIds = Produto.getProdIds();
+                                                                   for(int f = 0; f < editProdIds.size(); f++){ %>
+                                                                <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
+                                                                <%}%>
+                                                                </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>
-                                                                <input type="text" class="form-control" name="movType" id="movType-<%= i%>" 
-                                                                       value="||"/>
+                                                                <select name="movType" id="movType">
+                                                                <option value="out">Saída</option>
+                                                                <option value="in">Entrada</option>
+                                                                </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movQuantity-<%= i%>">Quantidade</label>

@@ -38,33 +38,41 @@ public class DbListener implements ServletContextListener {
             Class.forName(CLASS_NAME);
             Connection con = getConnection();
             Statement stmt = con.createStatement();
+            
+            ///*
             stmt.execute(User.getCreateStatement());
-            //stmt.execute(User.getDestroyStatement());
-            
-            stmt.execute(Marca.getCreateStatement());
-            //stmt.execute(Marca.getDestroyStatement());
-            
-            stmt.execute(Provider.getCreateStatement());
-            //stmt.execute(Provider.getDestroyStatement());
-            
-            stmt.execute(Movement.getCreateStatement());
-            //stmt.execute(Movement.getDestroyStatement());
-            
             stmt.execute(Produto.getCreateStatement());
-            //stmt.execute(Produto.getDestroyStatement());
+            stmt.execute(Marca.getCreateStatement());
+            stmt.execute(Provider.getCreateStatement());
+            stmt.execute(Movement.getCreateStatement());
+            //*/
+            
+            /*
+            stmt.execute(User.getDestroyStatement());
+            stmt.execute(Marca.getDestroyStatement());
+            stmt.execute(Provider.getDestroyStatement());
+            stmt.execute(Movement.getDestroyStatement());
+            stmt.execute(Produto.getDestroyStatement());
+            */
             
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123");
             }
             if(Produto.getProdutos().isEmpty()) {
-                Produto.insertProd("Redbull", "Aluminium", "250 ml");
-                Produto.insertProd("Camisa Polo", "Poliester", "G");
-                Produto.insertProd("Calça Jeans", "Jeans", "42");
+                Produto.insertProd("Tênis", 1, "Composto", "41/42");
+                Produto.insertProd("Camisa", 2, "Poliester", "G");
+                Produto.insertProd("Calça Jeans", 3, "Jeans", "42");
             }
             if(Movement.getMovements().isEmpty()) {
                 Movement.insertMovement(1, "Entrada", 20, 15.99, "Entrada de produtos");
                 Movement.insertMovement(1, "Entrada", 30, 14.99, "Preparação de estoque");
                 Movement.insertMovement(1, "Saida", -4, 17.99, "Venda padrão");
+            }
+            if(Marca.getBrands().isEmpty()) {
+                Marca.insertBrand("Nike", "Roupas");
+                Marca.insertBrand("Adidas", "Roupas");
+                Marca.insertBrand("Offtrack", "Tenis");
+                
             }
             stmt.close();
             con.close();

@@ -4,6 +4,7 @@
     Author     : spbry
 --%>
 
+<%@page import="db.Marca"%>
 <%@page import="db.Movement"%>
 <%@page import="db.Produto"%>
 <%@page import="java.util.ArrayList"%>
@@ -14,9 +15,10 @@
     try {
         if (request.getParameter("insert") != null) {
             String prodName = request.getParameter("prodName");
+            Integer prodBrand = Integer.parseInt(request.getParameter("prodBrand"));
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
-            Produto.insertProd(prodName, prodMaterial, prodSize);
+            Produto.insertProd(prodName, prodBrand, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
@@ -25,9 +27,10 @@
         } else if (request.getParameter("edit") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
             String prodName = request.getParameter("prodName");
+            Integer prodBrand = Integer.parseInt(request.getParameter("prodBrand"));
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
-            Produto.alterProd(prodId, prodName, prodMaterial, prodSize);
+            Produto.alterProd(prodId, prodName, prodBrand, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
         }
         produtos = Produto.getProdutos();
@@ -67,6 +70,16 @@
                                             <input type="text" class="form-control" name="prodName" id="prodName"/>
                                         </div>
                                         <div class="mb-3">
+                                            <label for="prodBrand">Marca</label>
+                                            <select name="prodBrand" id="prodBrand">
+                                                <% 
+                                                   ArrayList<Integer> brandIds = Marca.getBrandIds();
+                                                   for(int p = 0; p < brandIds.size(); p++){ %>
+                                                   <option value="<%=brandIds.get(p)%>"><%=Marca.getBrandNameById(brandIds.get(p))%></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
                                             <label for="prodMaterial">Material</label>
                                             <input type="text" class="form-control" name="prodMaterial" id="prodMaterial"/>
                                         </div>
@@ -95,6 +108,7 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Nome</th>
+                                    <th>Marca</th>
                                     <th>Material</th>
                                     <th>Tamanho</th>
                                     <th>Quantidade</th>
@@ -102,12 +116,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% int i = 0; %>
-                                <% for (Produto x : produtos) { %>
-                                <% i++;%>
+                                <% int i = 0; 
+                                   for (Produto x : produtos) { 
+                                   i++;
+                                   %>
                                 <tr>
                                     <td><%= x.getProdId()%></td>
-                                    <td><%= x.getProdName()%></td>
+                                    <td><%= x.getProdName()%></td>     
+                                    
+                                    <td><%= Marca.getBrandNameById(x.getProdBrand())%></td>
+                                    
                                     <td><%= x.getProdMaterial()%></td>
                                     <td><%= x.getProdSize()%></td>
                                     <td><%= Movement.getQntById(x.getProdId())%></td>
@@ -139,6 +157,15 @@
                                                                        value="<%= x.getProdName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
+                                                                <label for="prodBrand-<%= i%>">Marca</label>
+                                                                <select name="prodBrand" id="prodBrand">
+                                                                <% ArrayList<Integer> editBrandIds = Marca.getBrandIds();
+                                                                   for(int f = 0; f < editBrandIds.size(); f++){ %>
+                                                                <option value="<%=editBrandIds.get(f)%>"><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
+                                                                <%}%>
+                                                                </select>
+                                                            </div>
+                                                            <div class="mb-3">
                                                                 <label for="prodMaterial-<%= i%>">Material</label>
                                                                 <input type="text" class="form-control" name="prodMaterial" id="prodMaterial-<%= i%>" 
                                                                        value="<%= x.getProdMaterial()%>"/>
@@ -165,6 +192,7 @@
                                         </div>
                                     </td>
                                 </tr>
+                                <% i++; %>
                                 <% } %>
                             </tbody>
                         </table>

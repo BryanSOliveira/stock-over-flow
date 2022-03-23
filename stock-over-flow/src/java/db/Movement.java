@@ -38,7 +38,8 @@ public class Movement {
                 + "movQuantity INTEGER NOT NULL,"
                 + "movValue REAL,"
                 + "movDescription VARCHAR(500),"
-                + "FOREIGN KEY (movProd) REFERENCES produtos(prodId))";
+                + "FOREIGN KEY (movProd) REFERENCES produtos(prodId)"
+                + ")";
     }
     
     public static String getDestroyStatement() {
@@ -83,16 +84,17 @@ public class Movement {
         con.close();
     }
     
-    public static void alterMovement(int movId, String movType, int movQuantity, Double movValue, String movDescription) throws Exception {
+    public static void alterMovement(int movId, int movProd ,String movType, int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE movement SET movQuantity = ?, movType = ?, movValue = ?, movDescription = ? "
+        String sql = "UPDATE movement SET movProd = ?, movType = ?,  movQuantity = ?, movValue = ?, movDescription = ? "
                 + "WHERE movId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, movType);
-        stmt.setInt(2, movQuantity);
-        stmt.setDouble(3, movValue);
-        stmt.setString(4, movDescription);
-        stmt.setInt(5, movId);
+        stmt.setInt(1, movProd);
+        stmt.setString(2, movType);
+        stmt.setInt(3, movQuantity);
+        stmt.setDouble(4, movValue);
+        stmt.setString(5, movDescription);
+        stmt.setInt(6, movId);
         stmt.execute();
         stmt.close();
         con.close();

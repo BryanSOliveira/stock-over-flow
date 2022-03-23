@@ -18,6 +18,7 @@ import web.DbListener;
 public class Produto {
     private int prodId;
     private String prodName;
+    private int prodBrand;
     private String prodMaterial;
     private String prodSize;
     
@@ -33,8 +34,10 @@ public class Produto {
         return "CREATE TABLE IF NOT EXISTS produtos("
                 + "prodId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "prodName VARCHAR(200) NOT NULL,"
+                + "prodBrand INTEGER,"
                 + "prodMaterial VARCHAR(200) NOT NULL,"
-                + "prodSize VARCHAR(20) NOT NULL"
+                + "prodSize VARCHAR(20) NOT NULL,"
+                + "FOREIGN KEY (prodBrand) REFERENCES brands(brandId)"
                 + ")";
     }
     
@@ -50,9 +53,10 @@ public class Produto {
         while(rs.next()) {
             Integer prodId = rs.getInt("prodId");
             String prodName = rs.getString("prodName");
+            Integer prodBrand = rs.getInt("prodBrand");
             String prodMaterial = rs.getString("prodMaterial");
             String prodSize = rs.getString("prodSize");
-            list.add(new Produto(prodId, prodName, prodMaterial, prodSize));
+            list.add(new Produto(prodId, prodName, prodBrand, prodMaterial, prodSize));
         }
         rs.close();
         stmt.close();
@@ -69,9 +73,10 @@ public class Produto {
         ResultSet rs = stmt.executeQuery();
         if(rs.next()) {
             String prodName = rs.getString("prodName");
+            Integer prodBrand = rs.getInt("prodBrand");
             String prodMaterial = rs.getString("prodMaterial");
             String prodSize = rs.getString("prodSize");
-            prod = new Produto(prodId, prodName, prodMaterial, prodSize);
+            prod = new Produto(prodId, prodName, prodBrand, prodMaterial, prodSize);
         }
         stmt.close();
         con.close();
@@ -79,28 +84,30 @@ public class Produto {
         return prod;
     }
     
-    public static void insertProd(String prodName, String prodMaterial, String prodSize) throws Exception {
+    public static void insertProd(String prodName, Integer prodBrand,String prodMaterial, String prodSize) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO produtos(prodName, prodMaterial, prodSize) "
-                + "VALUES(?, ?, ?)";
+        String sql = "INSERT INTO produtos(prodName, prodBrand, prodMaterial, prodSize) "
+                + "VALUES(?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, prodName); 
-        stmt.setString(2, prodMaterial);
-        stmt.setString(3, prodSize);
+        stmt.setInt(2, prodBrand); 
+        stmt.setString(3, prodMaterial);
+        stmt.setString(4, prodSize);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterProd(Integer prodId, String prodName, String prodMaterial, String prodSize) throws Exception {
+    public static void alterProd(Integer prodId, String prodName, Integer prodBrand, String prodMaterial, String prodSize) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE produtos SET prodName = ?, prodMaterial = ?, prodSize = ? "
+        String sql = "UPDATE produtos SET prodName = ?, prodBrand = ?, prodMaterial = ?, prodSize = ? "
                 + "WHERE prodId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, prodName); 
-        stmt.setString(2, prodMaterial);
-        stmt.setString(3, prodSize);
-        stmt.setInt(4, prodId);
+        stmt.setInt(2, prodBrand); 
+        stmt.setString(3, prodMaterial);
+        stmt.setString(4, prodSize);
+        stmt.setInt(5, prodId);
         stmt.execute();
         stmt.close();
         con.close();
@@ -116,9 +123,10 @@ public class Produto {
         con.close();
     }
 
-    public Produto(Integer prodId, String prodName, String prodMaterial, String prodSize) {
+    public Produto(Integer prodId, String prodName, Integer prodBrand, String prodMaterial, String prodSize) {
         this.prodId = prodId;
         this.prodName = prodName;
+        this.prodBrand = prodBrand;
         this.prodMaterial = prodMaterial;
         this.prodSize = prodSize;
     }
@@ -138,6 +146,15 @@ public class Produto {
     public void setProdName(String prodName) {
         this.prodName = prodName;
     }
+    
+    public Integer getProdBrand() {
+        return prodBrand;
+    }
+
+    public void setProdBrand(Integer prodBrand) {
+        this.prodBrand = prodBrand;
+    }
+    
     public String getProdMaterial() {
         return prodMaterial;
     }
@@ -168,9 +185,9 @@ public class Produto {
         return idList;
     }
     
-    public static String getNameById(Integer prodId) throws Exception {
+    public static String getProdNameById(Integer prodId) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "SELECT prodName FROM produtos WHERE prodId=?";
+        String sql = "SELECT prodName FROM produtos WHERE prodId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, prodId);
         ResultSet rs = stmt.executeQuery();
@@ -179,6 +196,19 @@ public class Produto {
         con.close();
         rs.close();
         return prodName;
+    }
+    
+    public static String getBrandNameById(Integer brandId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT brandName FROM brand WHERE brandId = ?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, brandId);
+        ResultSet rs = stmt.executeQuery();
+        String prodBrand = rs.getString("brandName"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return prodBrand;
     }
     
     public static int countProds() throws Exception {

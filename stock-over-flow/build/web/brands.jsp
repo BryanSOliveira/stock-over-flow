@@ -12,17 +12,19 @@
     ArrayList<Marca> brands = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            String name = request.getParameter("name");
-            Marca.insertBrand(name);
+            String brandName = request.getParameter("brandName");
+            String brandDesc = request.getParameter("brandDesc");
+            Marca.insertBrand(brandName, brandDesc);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Marca.deleteBrand(id);
+            int brandId = Integer.parseInt(request.getParameter("brandId"));
+            Marca.deleteBrand(brandId);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            String name = request.getParameter("name");
-            Marca.alterBrand(id, name);
+            int brandId = Integer.parseInt(request.getParameter("brandId"));
+            String brandName = request.getParameter("brandName");
+            String brandDesc = request.getParameter("brandDesc");
+            Marca.alterBrand(brandId, brandName, brandDesc);
             response.sendRedirect(request.getRequestURI());
         }
         brands = Marca.getBrands();
@@ -58,12 +60,16 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label for="name">Nome</label>
-                                            <input type="text" class="form-control" name="name" id="name"/>
+                                            <input type="text" class="form-control" name="brandName" id="brandName"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="name">Descrição</label>
+                                            <input type="text" class="form-control" name="brandDesc" id="brandDesc"/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <input type="submit" name="insert" value="Save" class="btn btn-primary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <input type="submit" name="insert" value="Salvar" class="btn btn-primary">
                                     </div>
                                 </form>
                             </div>
@@ -80,8 +86,9 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Actions</th>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Opções</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -89,15 +96,16 @@
                                 <% for (Marca brand : brands) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= brand.getId()%></td>
-                                    <td><%= brand.getName()%></td>
+                                    <td><%= brand.getBrandId()%></td>
+                                    <td><%= brand.getBrandName()%></td>
+                                    <td><%= brand.getBrandDesc()%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="id" value="<%= brand.getId()%>"/>
+                                            <input type="hidden" name="brandId" value="<%= brand.getBrandId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -109,20 +117,25 @@
                                                     <form>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label for="id-<%= i%>">ID</label>
-                                                                <input type="text" class="form-control" name="id" id="id-<%= i%>" 
-                                                                       value="<%= brand.getId()%>" disabled/>
+                                                                <label for="brandId-<%= i%>">ID</label>
+                                                                <input type="text" class="form-control" name="brandId" id="brandId-<%= i%>" 
+                                                                       value="<%= brand.getBrandId()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="name-<%= i%>">Nome</label>
-                                                                <input type="text" class="form-control" name="name" id="name-<%= i%>" 
-                                                                       value="<%= brand.getName()%>"/>
+                                                                <label for="brandName-<%= i%>">Nome</label>
+                                                                <input type="text" class="form-control" name="brandName" id="brandName-<%= i%>" 
+                                                                       value="<%= brand.getBrandName()%>"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="brandDesc-<%= i%>">Descrição</label>
+                                                                <input type="text" class="form-control" name="brandDesc" id="brandDesc-<%= i%>" 
+                                                                       value="<%= brand.getBrandDesc()%>"/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="id" value="<%= brand.getId()%>"/>
-                                                            <input type="submit" name="edit" value="Save" class="btn btn-primary">
+                                                            <input type="hidden" name="brandId" value="<%= brand.getBrandId()%>"/>
+                                                            <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>
                                                 </div>

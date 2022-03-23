@@ -18,13 +18,15 @@ import web.DbListener;
  */
 public class Marca {
 
-    private int id;
-    private String name;
+    private int brandId;
+    private String brandName;
+    private String brandDesc;
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS brand("
-                + "id integer PRIMARY KEY AUTOINCREMENT,"
-                + "name VARCHAR(50) UNIQUE NOT NULL"
+                + "brandId INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "brandName VARCHAR(50) NOT NULL,"
+                + "brandDesc varchar(1000)"
                 + ")";
     }
     
@@ -36,11 +38,12 @@ public class Marca {
         ArrayList<Marca> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * from brand");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM brand");
         while(rs.next()) {
-            int id = rs.getInt("id");
-            String name = rs.getString("name");
-            list.add(new Marca(id, name));
+            int brandId = rs.getInt("brandId");
+            String brandName = rs.getString("brandName");
+            String brandDesc = rs.getString("brandDesc");
+            list.add(new Marca(brandId, brandName, brandDesc));
         }
         rs.close();
         stmt.close();
@@ -48,57 +51,97 @@ public class Marca {
         return list;
     }
     
-    public static void insertBrand(String name) throws Exception {
+    public static void insertBrand(String brandName, String brandDesc) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO brand(name) "
-                + "VALUES(?)";
+        String sql = "INSERT INTO brand(brandName, brandDesc) "
+                + "VALUES(?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name);
+        stmt.setString(1, brandName);
+        stmt.setString(2, brandDesc);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterBrand(int id, String name) throws Exception {
+    public static void alterBrand(int brandId, String brandName, String brandDesc) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE brand SET name = ? "
-                + "WHERE id = ?";
+        String sql = "UPDATE brand SET brandName = ?, brandDesc = ? "
+                + "WHERE brandId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name); 
-        stmt.setInt(2, id);
+        stmt.setString(1, brandName); 
+        stmt.setString(2, brandDesc); 
+        stmt.setInt(3, brandId);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteBrand(int id) throws Exception {
+    public static void deleteBrand(int brandId) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM brand WHERE id = ? ";
+        String sql = "DELETE FROM brand WHERE brandId = ? ";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, id);
+        stmt.setInt(1, brandId);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public Marca(int id, String name) {
-        this.id = id;
-        this.name = name;
+    public Marca(int brandId, String brandName, String brandDesc) {
+        this.brandId = brandId;
+        this.brandName = brandName;
+        this.brandDesc = brandDesc;
     }
 
-    public int getId() {
-        return id;
+    public int getBrandId() {
+        return brandId;
     }
 
-    public String getName() {
-        return name;
+    public String getBrandName() {
+        return brandName;
+    }
+    
+    public String getBrandDesc() {
+        return brandDesc;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setBrandId(int brandId) {
+        this.brandId = brandId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
+    
+    public void setBrandDesc(String brandDesc) {
+        this.brandDesc = brandDesc;
+    }
+    
+    public static ArrayList<Integer> getBrandIds() throws Exception {
+        ArrayList<Integer> idList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT brandId FROM brand");
+        while(rs.next()) {
+            int brandId = rs.getInt("brandId");
+            idList.add(brandId);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return idList;
+    }
+    
+    public static String getBrandNameById(Integer brandId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT brandName FROM brand WHERE brandId = ?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, brandId);
+        ResultSet rs = stmt.executeQuery();
+        String brandName = rs.getString("brandName"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return brandName;
+    }
+    
 }
