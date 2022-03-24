@@ -17,16 +17,18 @@ import web.DbListener;
  * @author spbry
  */
 public class User {
-    private String login;
-    private String name;
-    private String role;
+    private String userEmail;
+    private String userName;
+    private String userRole;
+    private Boolean userVerified;
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS users("
-                + "login VARCHAR(50) UNIQUE NOT NULL,"
-                + "name VARCHAR(200) NOT NULL,"
-                + "role VARCHAR(20) NOT NULL,"
-                + "password_hash LONG NOT NULL"
+                + "userEmail VARCHAR(50) UNIQUE NOT NULL,"
+                + "userName VARCHAR(200) NOT NULL,"
+                + "userRole VARCHAR(20) NOT NULL,"
+                + "userPassword LONG NOT NULL,"
+                + "userVerified BIT"              
                 + ")";
     }
     
@@ -38,12 +40,13 @@ public class User {
         ArrayList<User> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * from users");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM users");
         while(rs.next()) {
-            String login = rs.getString("login");
-            String name = rs.getString("name");
-            String role = rs.getString("role");
-            list.add(new User(login, name, role));
+            String userEmail = rs.getString("userEmail");
+            String userName = rs.getString("userName");
+            String userRole = rs.getString("userRole");
+            Boolean userVerified = rs.getBoolean("userVerified");
+            list.add(new User(userEmail, userName, userRole, userVerified));
         }
         rs.close();
         stmt.close();
@@ -51,101 +54,113 @@ public class User {
         return list;
     }
     
-    public static User getUser(String login, String password) throws Exception {
-        User user = null;
+    public static User getUser(String userEmail, String userPassword) throws Exception {
+        User gotUser = null;
         Connection con = DbListener.getConnection();
-        String sql = "SELECT * from users WHERE login=? AND password_hash=?";
+        String sql = "SELECT * FROM users WHERE userEmail = ? AND userPassword = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, login);
-        stmt.setLong(2, password.hashCode());
+        stmt.setString(1, userEmail);
+        stmt.setLong(2, userPassword.hashCode());
         ResultSet rs = stmt.executeQuery();
         if(rs.next()) {
-            String name = rs.getString("name");
-            String role = rs.getString("role");
-            user = new User(login, name, role);
+            String userName = rs.getString("userName");
+            String userRole = rs.getString("userRole");
+            Boolean userVerified = rs.getBoolean("userVerified");
+            gotUser = new User(userEmail, userName, userRole, userVerified);
         }
         stmt.close();
         con.close();
         rs.close();
-        return user;
+        return gotUser;
     }
     
-    public static void insertUser(String login, String name, String role, String password) throws Exception {
+    public static void insertUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO users(login, name, role, password_hash) "
-                + "VALUES(?, ?, ?, ?)";
+        String sql = "INSERT INTO users( userEmail, userName, userRole, userPassword, userVerified) "
+                + "VALUES(?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, login);
-        stmt.setString(2, name); 
-        stmt.setString(3, role);
-        stmt.setLong(4, password.hashCode());
+        stmt.setString(1, userEmail);
+        stmt.setString(2, userName); 
+        stmt.setString(3, userRole);
+        stmt.setLong(4, userPassword.hashCode());
+        stmt.setBoolean(5, userVerified);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterUser(String login, String name, String role, String password) throws Exception {
+    public static void alterUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET name = ?, role = ?, password_hash = ? "
-                + "WHERE login = ?";
+        String sql = "UPDATE users SET userName = ?, userRole = ?, userPassword = ?, userVerified = ? "
+                + "WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name); 
-        stmt.setString(2, role);
-        stmt.setLong(3, password.hashCode());
-        stmt.setString(4, login);
+        stmt.setString(1, userName); 
+        stmt.setString(2, userRole);
+        stmt.setLong(3, userPassword.hashCode());
+        stmt.setBoolean(4, userVerified);
+        stmt.setString(5, userEmail);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteUser(String login) throws Exception {
+    public static void deleteUser(String userEmail) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM users WHERE login = ? AND role <> 'admin'";
+        String sql = "DELETE FROM users WHERE userEmail = ? AND userRole <> 'admin'";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, login);
+        stmt.setString(1, userEmail);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void changePassword(String login, String password) throws Exception {
+    public static void changePassword(String userEmail, String userPassword) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET password_hash = ? WHERE login = ?";
+        String sql = "UPDATE users SET userPassword = ? WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setLong(1, password.hashCode());
-        stmt.setString(2, login);
+        stmt.setLong(1, userPassword.hashCode());
+        stmt.setString(2, userEmail);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public User(String login, String name, String role) {
-        this.login = login;
-        this.name = name;
-        this.role = role;
+    public User(String userEmail, String userName, String userRole, Boolean userVerified) {
+        this.userEmail = userEmail;
+        this.userName = userName;
+        this.userRole = userRole;
+        this.userVerified = userVerified;
     }
 
-    public String getRole() {
-        return role;
+    public String getUserRole() {
+        return userRole;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
     }
 
-    public String getLogin() {
-        return login;
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
-    public String getName() {
-        return name;
+    public String getUserName() {
+        return userName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setName(String userName) {
+        this.userName = userName;
+    }
+    
+    public Boolean getUserVerified() {
+        return userVerified;
+    }
+
+    public void setUserVarified(Boolean userVerified) {
+        this.userVerified = userVerified;
     }
 }

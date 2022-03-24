@@ -24,7 +24,7 @@ import javax.servlet.ServletContextListener;
  */
 public class DbListener implements ServletContextListener {
     public static final String CLASS_NAME = "org.sqlite.JDBC";
-    public static final String URL = "jdbc:sqlite:stock.db";
+    public static final String URL = "jdbc:sqlite:stock27.db";
     
     public static Exception exception = null;
     
@@ -56,7 +56,7 @@ public class DbListener implements ServletContextListener {
             */
             
             if(User.getUsers().isEmpty()) {
-                User.insertUser("admin", "Administrador", "admin", "123");
+                User.insertUser("admin", "Administrador", "admin", "123", true);
             }
             if(Produto.getProdutos().isEmpty()) {
                 Produto.insertProd("Tênis", 1, "Composto", "41/42");
@@ -64,14 +64,20 @@ public class DbListener implements ServletContextListener {
                 Produto.insertProd("Calça Jeans", 3, "Jeans", "42");
             }
             if(Movement.getMovements().isEmpty()) {
-                Movement.insertMovement(1, "Entrada", 20, 15.99, "Entrada de produtos");
-                Movement.insertMovement(1, "Entrada", 30, 14.99, "Preparação de estoque");
-                Movement.insertMovement(1, "Saida", -4, 17.99, "Venda padrão");
+                Movement.insertMovement(1, 1, "Entrada", 20, 15.99, "Entrada de produtos");
+                Movement.insertMovement(1, 2, "Entrada", 30, 14.99, "Preparação de estoque");
+                Movement.insertMovement(1, 1, "Saida", -4, 17.99, "Venda padrão");
             }
             if(Marca.getBrands().isEmpty()) {
                 Marca.insertBrand("Nike", "Roupas");
                 Marca.insertBrand("Adidas", "Roupas");
                 Marca.insertBrand("Offtrack", "Tenis");
+                
+            }
+            if(Provider.getProviders().isEmpty()) {
+                Provider.insertProvider("Departure Selling", "Rua São Paulo, 158", "(11) 98570-9815", "marketing@departure.com.br");
+                Provider.insertProvider("Manugaroupas", "Av. Anchieta, 5981", "(13) 4567-4222", "maguroupas@gmail.com");
+                
                 
             }
             stmt.close();

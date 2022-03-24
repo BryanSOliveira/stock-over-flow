@@ -11,22 +11,25 @@
     ArrayList<User> users = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            String login = request.getParameter("login");
-            String name = request.getParameter("name");
-            String role = request.getParameter("role");
-            String password = request.getParameter("password");
-            User.insertUser(login, name, role, password);
+            String userEmail = request.getParameter("targetUserEmail");
+            String userName = request.getParameter("targetUserName");
+            String userRole = request.getParameter("targetUserRole");
+            String userPassword = request.getParameter("targetUserPassword");
+            Boolean userVerified = Boolean.parseBoolean(request.getParameter("targetUserVerified"));
+            User.insertUser(userEmail, userName, userRole, userPassword, userVerified);
             response.sendRedirect(request.getRequestURI());
+            //response.sendRedirect("VerifyUser");
         } else if (request.getParameter("delete") != null) {
-            String login = request.getParameter("login");
-            User.deleteUser(login);
+            String userEmail = request.getParameter("targetUserEmail");
+            User.deleteUser(userEmail);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            String login = request.getParameter("login");
-            String name = request.getParameter("name");
-            String role = request.getParameter("role");
-            String password = request.getParameter("password");
-            User.alterUser(login, name, role, password);
+            String userEmail = request.getParameter("targetUserEmail");
+            String userName = request.getParameter("targetUserName");
+            String userRole = request.getParameter("targetUserRole");
+            String userPassword = request.getParameter("targetUserPassword");
+            Boolean userVerified = Boolean.parseBoolean(request.getParameter("targetUserVerified"));
+            User.alterUser(userEmail, userName, userRole, userPassword, userVerified);
             response.sendRedirect(request.getRequestURI());
         }
         users = User.getUsers();
@@ -37,7 +40,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Conten<t-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Usuários</title>
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
@@ -45,10 +48,10 @@
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUsername != null) { %>
+            <% if (sessionUserEmail != null) { %>
             <div class="card">
                 <div class="card-body">
-                    <% if (sessionRole.equals("admin")) {%>
+                    <% if (sessionUserRole.equals("admin")) {%>
                     <h2>Usuários(<%= users.size()%>)
                         <!-- Button add user -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
@@ -62,28 +65,28 @@
                                 <form method="post">
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="login">Login</label>
-                                            <input type="text" class="form-control" name="login" id="login"/>
+                                            <label for="targetUserEmail">Email</label>
+                                            <input type="text" class="form-control" name="targetUserEmail" id="targetUserEmail"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="name">Nome</label>
-                                            <input type="text" class="form-control" name="name" id="name"/>
+                                            <label for="targetUserName">Nome</label>
+                                            <input type="text" class="form-control" name="targetUserName" id="targetUserName"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="role">Papel</label>
-                                            <select name="role" class="form-select" id="role">
+                                            <label for="targetUserRole">Permissão</label>
+                                            <select name="targetUserRole" class="form-select" id="tagetUserRole">
                                                 <option value="admin">admin</option>
                                                 <option value="user" selected>user</option>
                                             </select>
                                         </div>
                                         <div>
-                                            <label for="password">Senha</label>
-                                            <input type="password" class="form-control" name="password" id="password" autocomplete="on"/>
+                                            <label for="targetUserPassword">Senha</label>
+                                            <input type="password" class="form-control" name="targetUserPassword" id="targetUserPassword" autocomplete="on"/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <input type="submit" name="insert" value="Save" class="btn btn-primary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <input type="submit" name="insert" value="Salvar" class="btn btn-primary">
                                     </div>
                                 </form>
                             </div>
@@ -99,10 +102,11 @@
                         <table class="table table-striped w-auto">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Login</th>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th>Actions</th>
+                                    <th>Email</th>
+                                    <th>Nome</th>
+                                    <th>Permissão</th>
+                                    <th>Verificado</th>
+                                    <th>Opções</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,16 +114,17 @@
                                 <% for (User user : users) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= user.getLogin()%></td>
-                                    <td><%= user.getName()%></td>
-                                    <td><%= user.getRole()%></td>
+                                    <td><%= user.getUserEmail()%></td>
+                                    <td><%= user.getUserName()%></td>
+                                    <td><%= user.getUserRole()%></td>
+                                    <td><%= user.getUserVerified()%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="login" value="<%= user.getLogin()%>"/>
+                                            <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -131,19 +136,19 @@
                                                     <form>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label for="login-<%= i%>">Login</label>
-                                                                <input type="text" class="form-control" name="login" id="login-<%= i%>" 
-                                                                       value="<%= user.getLogin()%>" disabled/>
+                                                                <label for="targetUserEmail-<%= i%>">Email</label>
+                                                                <input type="text" class="form-control" name="targetUserEmail" id="targetUserEmail-<%= i%>" 
+                                                                       value="<%= user.getUserEmail()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="name-<%= i%>">Nome</label>
-                                                                <input type="text" class="form-control" name="name" id="name-<%= i%>" 
-                                                                       value="<%= user.getName()%>"/>
+                                                                <label for="targetUserName-<%= i%>">Nome</label>
+                                                                <input type="text" class="form-control" name="targetUserName" id="targetUserName-<%= i%>" 
+                                                                       value="<%= user.getUserName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="role-<%= i%>">Papel</label>
-                                                                <select name="role" class="form-select" id="role-<%= i%>">
-                                                                    <% if (user.getRole().equals("admin")) { %>
+                                                                <label for="targetUserRole-<%= i%>">Permissão</label>
+                                                                <select name="targetUserRole" class="form-select" id="targetUserRole-<%= i%>">
+                                                                    <% if (user.getUserRole().equals("admin")) { %>
                                                                     <option value="admin" selected>admin</option>
                                                                     <option value="user">user</option>
                                                                     <% } else { %>
@@ -152,16 +157,30 @@
                                                                     <% }%>
                                                                 </select>
                                                             </div>
-                                                            <div>
-                                                                <label for="password-<%= i%>">Senha</label>
-                                                                <input type="password" class="form-control" name="password" id="password-<%= i%>" autocomplete="on"/>
+                                                            <div class="mb-3">
+                                                                <label for="targetUserPassword-<%= i%>">Senha</label>
+                                                                <input type="password" class="form-control" name="targetUserPassword" id="targetUserPassword-<%= i%>" autocomplete="on"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="targetUserVerified-<%= i%>">Verificação</label>
+                                                                <select name="targetUserVerified" class="form-select" id="targetUserVerified-<%= i%>">
+                                                                   <% if (user.getUserVerified().equals("true")) { %>
+                                                                   <option value="true" selected>Verificado</option>
+                                                                   <option value="false">Não Verificado</option>
+                                                                   <% } else { %>
+                                                                   <option value="true">Verificado</option>
+                                                                   <option value="false" selected>Não Verificado</option>
+                                                                   <% }%>
+                                                                </select>
                                                             </div>
                                                         </div>
+                                                        
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="login" value="<%= user.getLogin()%>"/>
-                                                            <input type="submit" name="edit" value="Save" class="btn btn-primary">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
+                                                            <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
+                                                        
                                                     </form>
                                                 </div>
                                             </div>

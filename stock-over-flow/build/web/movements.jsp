@@ -4,6 +4,7 @@
     Author     : spbry
 --%>
 
+<%@page import="db.Provider"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
 <%@page import="java.text.SimpleDateFormat"%>
@@ -17,6 +18,7 @@
     try {
         if (request.getParameter("insert") != null) {
             int movProd = Integer.parseInt(request.getParameter("movProd"));
+            int movProv = Integer.parseInt(request.getParameter("movProv"));
             String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
@@ -29,7 +31,7 @@
             movQuantity = -movQuantity;
             }else{movType = "Invalido";}
             
-            Movement.insertMovement(movProd, movType, movQuantity, movValue, movDescription);
+            Movement.insertMovement(movProd, movProv, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
@@ -38,6 +40,7 @@
         } else if (request.getParameter("edit") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
             int movProd = Integer.parseInt(request.getParameter("movProd"));
+            int movProv = Integer.parseInt(request.getParameter("movProv"));
             String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
@@ -50,7 +53,7 @@
             movQuantity = -movQuantity;
             }else{movType = "Invalido";}
             
-            Movement.alterMovement(movId, movProd, movType, movQuantity, movValue, movDescription);
+            Movement.alterMovement(movId, movProd, movProv, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         }
         movements = Movement.getMovements();
@@ -96,6 +99,16 @@
                                             </select>
                                         </div>
                                         <div class="mb-3">
+                                            <label for="movProv">Fornecedor</label>
+                                            <select name="movProv" id="movProv">
+                                                <% 
+                                                   ArrayList<Integer> provIds = Provider.getProvIds();
+                                                   for(int r = 0; r < provIds.size(); r++){ %>
+                                                   <option value="<%=provIds.get(r)%>"><%=Provider.getProvNameById(provIds.get(r))%></option>
+                                                <%}%>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
                                             <label for="movType">Tipo de Movimentação</label>
                                             <select name="movType" id="movType">
                                                  <option value="out">Saída</option>
@@ -109,10 +122,8 @@
                                         <div class="mb-3">
                                             <label for="movValue">Valor</label>
                                             <input type="number" step="0.1" class="form-control" name="movValue" id="movValue"/>
-                                            <!--DROPDOWN DOS PRODUTOS EXISTENTES-->
                                         </div>
                                         <div class="mb-3">
-                                            <!--BOTAO DE ENTREDA OU SAIDA-->
                                             <label for="movDescription">Descrição</label>
                                             <input type="text" class="form-control" name="movDescription" id="movDescription"/>
                                         </div>
@@ -139,6 +150,7 @@
                                     <th>Horário | Data</th>
                                     <th>Tipo de Movimentação</th>
                                     <th>Produto</th>
+                                    <th>Fornecedor</th>
                                     <th>Quantidade</th>
                                     <th>Valor</th>
                                     <th>Descrição</th>
@@ -153,6 +165,7 @@
                                     <td><%= x.getMovDate()%></td>
                                     <td><%= x.getMovType()%></td>
                                     <td><%= Produto.getProdNameById(x.getMovProd())%></td>
+                                    <td><%= Provider.getProvNameById(x.getMovProv())%></td>
                                     <%if(x.getMovQuantity() > 0){%>
                                     <td style="color:green;"><%= x.getMovQuantity()%></td>
                                     <%}else if(x.getMovQuantity() < 0){%>
@@ -195,6 +208,15 @@
                                                                 <% ArrayList<Integer> editProdIds = Produto.getProdIds();
                                                                    for(int f = 0; f < editProdIds.size(); f++){ %>
                                                                 <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
+                                                                <%}%>
+                                                                </select>
+                                                            </div>
+                                                             <div class="mb-3">
+                                                                <label for="movProv-<%= i%>">Fornecedor</label>
+                                                                <select name="movProv" id="movProv">
+                                                                <% ArrayList<Integer> editProvIds = Provider.getProvIds();
+                                                                   for(int q = 0; q < editProvIds.size(); q++){ %>
+                                                                <option value="<%=editProvIds.get(q)%>"><%=Provider.getProvNameById(editProvIds.get(q))%></option>
                                                                 <%}%>
                                                                 </select>
                                                             </div>

@@ -198,19 +198,6 @@ public class Produto {
         return prodName;
     }
     
-    public static String getBrandNameById(Integer brandId) throws Exception {
-        Connection con = DbListener.getConnection();
-        String sql = "SELECT brandName FROM brand WHERE brandId = ?";
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, brandId);
-        ResultSet rs = stmt.executeQuery();
-        String prodBrand = rs.getString("brandName"); 
-        stmt.close();
-        con.close();
-        rs.close();
-        return prodBrand;
-    }
-    
     public static int countProds() throws Exception {
         int prodQuantity = 0;
         Connection con = DbListener.getConnection();

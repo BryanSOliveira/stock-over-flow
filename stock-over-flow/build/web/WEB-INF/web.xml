@@ -4,6 +4,30 @@
         <description>ServletContextListener</description>
         <listener-class>web.DbListener</listener-class>
     </listener>
+    <servlet>
+        <servlet-name>UserVerify</servlet-name>
+        <servlet-class>account.UserVerify</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyUser</servlet-name>
+        <servlet-class>mail.VerifyUser</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>VerifyToken</servlet-name>
+        <servlet-class>mail.VerifyToken</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>UserVerify</servlet-name>
+        <url-pattern>/UserVerify</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyUser</servlet-name>
+        <url-pattern>/VerifyUser</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>VerifyToken</servlet-name>
+        <url-pattern>/VerifyToken</url-pattern>
+    </servlet-mapping>
     <session-config>
         <session-timeout>
             30

@@ -12,21 +12,23 @@
     ArrayList<Provider> providers = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
-            String name = request.getParameter("name");
-            String address = request.getParameter("address");
-            String telephone = request.getParameter("telephone");
-            Provider.insertProvider(name, address, telephone);
+            String provName = request.getParameter("provName");
+            String provLocation = request.getParameter("provLocation");
+            String provTelephone = request.getParameter("provTelephone");
+            String provMail = request.getParameter("provMail");
+            Provider.insertProvider(provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            Provider.deleteProvider(id);
+            int provId = Integer.parseInt(request.getParameter("provId"));
+            Provider.deleteProvider(provId);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            int id = Integer.parseInt(request.getParameter("id"));
-            String name = request.getParameter("name");
-            String address = request.getParameter("address");
-            String telephone = request.getParameter("telephone");
-            Provider.alterProvider(id, name, address, telephone);
+            int provId = Integer.parseInt(request.getParameter("provId"));
+            String provName = request.getParameter("provName");
+            String provLocation = request.getParameter("provLocation");
+            String provTelephone = request.getParameter("provTelephone");
+            String provMail = request.getParameter("provMail");
+            Provider.alterProvider(provId, provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
         }
         providers = Provider.getProviders();
@@ -61,21 +63,25 @@
                                 <form method="post">
                                     <div class="modal-body">
                                         <div class="mb-3">
-                                            <label for="name">Nome</label>
-                                            <input type="text" class="form-control" name="name" id="name"/>
+                                            <label for="provName">Nome</label>
+                                            <input type="text" class="form-control" name="provName" id="provName"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="address">Endereço</label>
-                                            <input type="text" class="form-control" name="address" id="address"/>
+                                            <label for="provLocation">Endereço</label>
+                                            <input type="text" class="form-control" name="provLocation" id="provLocation"/>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="telephone">Telefone</label>
-                                            <input type="text" class="form-control" name="telephone" id="telephone"/>
+                                            <label for="provTelephone">Telefone</label>
+                                            <input type="text" class="form-control" name="provTelephone" id="provTelephone"/>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="provMail">E-mail</label>
+                                            <input type="text" class="form-control" name="provMail" id="provMail"/>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <input type="submit" name="insert" value="Save" class="btn btn-primary">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                        <input type="submit" name="insert" value="Salvar" class="btn btn-primary">
                                     </div>
                                 </form>
                             </div>
@@ -92,10 +98,12 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Address</th>
-                                    <th>Telephone</th>
-                                    <th>Actions</th>
+                                    <th>Nome</th>
+                                    <th>Endereço</th>
+                                    <th>Telefone</th>
+                                    <th>Email</th>
+                                    <th>Produtos (Estoque)</th>
+                                    <th>Opções</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,17 +111,19 @@
                                 <% for (Provider provider : providers) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= provider.getId()%></td>
-                                    <td><%= provider.getName()%></td>
-                                    <td><%= provider.getAddress()%></td>
-                                    <td><%= provider.getTelephone()%></td>
+                                    <td><%= provider.getProvId()%></td>
+                                    <td><%= provider.getProvName()%></td>
+                                    <td><%= provider.getProvLocation()%></td>
+                                    <td><%= provider.getProvTelephone()%></td>
+                                    <td><%= provider.getProvMail()%></td>
+                                    <td><%= Provider.getProvQntById(provider.getProvId())%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="id" value="<%= provider.getId()%>"/>
+                                            <input type="hidden" name="provId" value="<%= provider.getProvId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -125,30 +135,40 @@
                                                     <form>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label for="id-<%= i%>">ID</label>
-                                                                <input type="text" class="form-control" name="id" id="id-<%= i%>" 
-                                                                       value="<%= provider.getId()%>" disabled/>
+                                                                <label for="provId-<%= i%>">ID</label>
+                                                                <input type="text" class="form-control" name="provId" id="provId-<%= i%>" 
+                                                                       value="<%= provider.getProvId()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="name-<%= i%>">Nome</label>
-                                                                <input type="text" class="form-control" name="name" id="name-<%= i%>" 
-                                                                       value="<%= provider.getName()%>"/>
+                                                                <label for="provName-<%= i%>">Nome</label>
+                                                                <input type="text" class="form-control" name="provName" id="provName-<%= i%>" 
+                                                                       value="<%= provider.getProvName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="address-<%= i%>">Endereço</label>
-                                                                <input type="text" class="form-control" name="address" id="address-<%= i%>" 
-                                                                       value="<%= provider.getAddress()%>"/>
+                                                                <label for="provLocation-<%= i%>">Endereço</label>
+                                                                <input type="text" class="form-control" name="provLocation" id="provLocation-<%= i%>" 
+                                                                       value="<%= provider.getProvLocation()%>"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="telephone-<%= i%>">Telefone</label>
-                                                                <input type="text" class="form-control" name="telephone" id="telephone-<%= i%>" 
-                                                                       value="<%= provider.getTelephone()%>"/>
+                                                                <label for="provTelephone-<%= i%>">Telefone</label>
+                                                                <input type="text" class="form-control" name="provTelephone" id="provTelephone-<%= i%>" 
+                                                                       value="<%= provider.getProvTelephone()%>"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="provMail-<%= i%>">E-mail</label>
+                                                                <input type="text" class="form-control" name="provMail" id="provMail-<%= i%>" 
+                                                                       value="<%= provider.getProvMail()%>"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="provQnt-<%= i%>">Produto (Estoque)</label>
+                                                                <input type="text" class="form-control" name="provQnt" id="provQnt-<%= i%>" 
+                                                                       value="<%= Provider.getProvQntById(provider.getProvId())%>" disabled/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="id" value="<%= provider.getId()%>"/>
-                                                            <input type="submit" name="edit" value="Save" class="btn btn-primary">
+                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                            <input type="hidden" name="provId" value="<%= provider.getProvId()%>"/>
+                                                            <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>
                                                 </div>

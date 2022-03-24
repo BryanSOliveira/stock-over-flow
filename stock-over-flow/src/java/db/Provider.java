@@ -17,17 +17,19 @@ import web.DbListener;
  * @author spbry
  */
 public class Provider {
-    private int id;
-    private String name;
-    private String address;
-    private String telephone;
+    private int provId;
+    private String provName;
+    private String provLocation;
+    private String provTelephone;
+    private String provMail;
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS provider("
-                + "id integer PRIMARY KEY AUTOINCREMENT,"
-                + "name VARCHAR(50) UNIQUE NOT NULL,"
-                + "address VARCHAR(100) NOT NULL,"
-                + "telephone VARCHAR(15) UNIQUE NOT NULL"
+                + "provId INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + "provName VARCHAR(50) UNIQUE NOT NULL,"
+                + "provLocation VARCHAR(100),"
+                + "provTelephone VARCHAR(15) UNIQUE,"
+                + "provMail VARCHAR(100) UNIQUE"
                 + ")";
     }
     
@@ -39,13 +41,14 @@ public class Provider {
         ArrayList<Provider> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * from provider");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM provider");
         while(rs.next()) {
-            int id = rs.getInt("id");
-            String name = rs.getString("name");
-            String address = rs.getString("address");
-            String telephone = rs.getString("telephone");
-            list.add(new Provider(id, name, address, telephone));
+            int provId = rs.getInt("provId");
+            String provName = rs.getString("provName");
+            String provLocation = rs.getString("provLocation");
+            String provTelephone = rs.getString("provTelephone");
+            String provMail = rs.getString("provMail");
+            list.add(new Provider(provId, provName, provLocation, provTelephone, provMail));
         }
         rs.close();
         stmt.close();
@@ -53,79 +56,131 @@ public class Provider {
         return list;
     }
     
-    public static void insertProvider(String name, String address, String telephone) throws Exception {
+    public static void insertProvider(String provName, String provLocation, String provTelephone, String provMail) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO provider(name, address, telephone) "
-                + "VALUES(?, ?, ?)";
+        String sql = "INSERT INTO provider(provName, provLocation, provTelephone, provMail) "
+                + "VALUES(?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name);
-        stmt.setString(2, address);
-        stmt.setString(3, telephone);
+        stmt.setString(1, provName);
+        stmt.setString(2, provLocation);
+        stmt.setString(3, provTelephone);
+        stmt.setString(4, provMail);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterProvider(int id, String name, String address, String telephone) throws Exception {
+    public static void alterProvider(int provId, String provName, String provLocation, String provTelephone, String provMail) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE provider SET name = ?, address = ?, telephone = ? "
-                + "WHERE id = ?";
+        String sql = "UPDATE provider SET provName = ?, provLocation = ?, provTelephone = ?, provMail = ? "
+                + "WHERE provId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, name); 
-        stmt.setString(2, address);
-        stmt.setString(3, telephone);
-        stmt.setInt(4, id);
+        stmt.setString(1, provName); 
+        stmt.setString(2, provLocation);
+        stmt.setString(3, provTelephone);
+        stmt.setString(4, provMail);
+        stmt.setInt(5, provId);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteProvider(int id) throws Exception {
+    public static void deleteProvider(int provId) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM provider WHERE id = ? ";
+        String sql = "DELETE FROM provider WHERE provId = ? ";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, id);
+        stmt.setInt(1, provId);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public Provider(int id, String name, String address, String telephone) {
-        this.id = id;
-        this.name = name;
-        this.address = address;
-        this.telephone = telephone;
+    public Provider(int provId, String provName, String provLocation, String provTelephone, String provMail) {
+        this.provId = provId;
+        this.provName = provName;
+        this.provLocation = provLocation;
+        this.provTelephone = provTelephone;
+        this.provMail = provMail;
     }
 
-    public int getId() {
-        return id;
+    public int getProvId() {
+        return provId;
     }
 
-    public String getName() {
-        return name;
+    public String getProvName() {
+        return provName;
     }
 
-    public String getAddress() {
-        return address;
+    public String getProvLocation() {
+        return provLocation;
     }
 
-    public String getTelephone() {
-        return telephone;
+    public String getProvTelephone() {
+        return provTelephone;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public String getProvMail() {
+        return provMail;
+    }
+    
+    public void setProvId(int provId) {
+        this.provId = provId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setProvName(String provName) {
+        this.provName = provName;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setProvLocation(String provLocation) {
+        this.provLocation = provLocation;
     }
 
-    public void setTelephone(String telephone) {
-        this.telephone = telephone;
+    public void setProvTelephone(String provTelephone) {
+        this.provTelephone = provTelephone;
+    }
+    
+    public void setProvMail(String provMail) {
+        this.provMail = provMail;
+    }
+    
+    public static ArrayList<Integer> getProvIds() throws Exception {
+        ArrayList<Integer> idList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT provId FROM provider");
+        while(rs.next()) {
+            int provId = rs.getInt("provId");
+            idList.add(provId);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return idList;
+    }
+    
+    public static String getProvNameById(Integer provId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT provName FROM provider WHERE provId=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, provId);
+        ResultSet rs = stmt.executeQuery();
+        String provName = rs.getString("provName"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return provName;
+    }
+    
+    public static Integer getProvQntById(Integer provId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT SUM(movQuantity) FROM movement WHERE movProv=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, provId);
+        ResultSet rs = stmt.executeQuery();
+        Integer provQnt = rs.getInt("SUM(movQuantity)"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return provQnt;
     }
 }

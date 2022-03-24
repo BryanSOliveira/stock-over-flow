@@ -5,37 +5,37 @@
 <%
     String headerError = null;
     
-    if (request.getParameter("username") != null && request.getParameter("password") != null) {
-        String login = request.getParameter("username");
-        String password = request.getParameter("password");
+    if (request.getParameter("userEmail") != null && request.getParameter("userPassword") != null) {
+        String userEmail = request.getParameter("userEmail");
+        String userPassword = request.getParameter("userPassword");
         headerError = null;
         try { 
-            User user = User.getUser(login, password);
-            if (user == null) {
+            User loggedUser = User.getUser(userEmail, userPassword);
+            if (loggedUser == null) {
                 headerError = "Usuário / senha não encontrado";
             } else {
-                session.setAttribute("user.login", user.getLogin());
-                session.setAttribute("user.name", user.getName());
-                session.setAttribute("user.role", user.getRole());
+                session.setAttribute("loggedUser.userEmail", loggedUser.getUserEmail());
+                session.setAttribute("loggedUser.userName", loggedUser.getUserName());
+                session.setAttribute("loggedUser.userRole", loggedUser.getUserRole());
                 response.sendRedirect(request.getRequestURI());
             }
         } catch(Exception ex) {
             headerError = ex.getMessage();
         }
     } else if (request.getParameter("logout") != null) {
-        session.removeAttribute("user.login");
-        session.removeAttribute("user.name");
-        session.removeAttribute("user.role");
+        session.removeAttribute("loggedUser.userEmail");
+        session.removeAttribute("loggedUser.userName");
+        session.removeAttribute("loggedUser.userRole");
         response.sendRedirect(request.getRequestURI());
     }
 
-    String sessionUsername = (String) session.getAttribute("user.login");
-    String sessionRole = (String) session.getAttribute("user.role");
+    String sessionUserEmail = (String) session.getAttribute("loggedUser.userEmail");
+    String sessionUserRole = (String) session.getAttribute("loggedUser.userRole");
 %>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-box2"></i></a>
-        <% if (sessionUsername != null) { %>
+        <% if (sessionUserEmail != null) { %>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -83,7 +83,7 @@
                         <a class="nav-link" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
                     <% } %>
                 </li>
-                <% if(sessionRole.equals("admin")) { %>
+                <% if(sessionUserRole.equals("admin")) { %>
                     <li class="nav-item">
                         <% if(request.getRequestURI().contains("users.jsp")) { %>
                             <a class="nav-link active" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
@@ -110,21 +110,21 @@
         <%= headerError %>
     </div>
 <% } %>
-<% if (sessionUsername == null) { %>
+<% if (sessionUserEmail == null) { %>
 <div class="container mt-2">
     <div class="card">
         <div class="card-body">
             <form method="post">
                 <div class="mb-3">
-                    <label for="username" class="form-label"><i class="bi bi-person-circle"></i> Username</label>
-                    <input type="text" name="username" class="form-control" id="username" aria-describedby="emailHelp" required>
-                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                    <label for="userEmail" class="form-label"><i class="bi bi-person-circle"></i> E-mail</label>
+                    <input type="text" name="userEmail" class="form-control" id="userEmail" aria-describedby="emailHelp" required>
+                    <div id="emailHelp" class="form-text">Nós nunca compartilharemos seu e-mail com mais ninguém.</div>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label"><i class="bi bi-lock"></i> Password</label>
-                    <input type="password" name="password" class="form-control" id="password" required>
+                    <label for="userPassword" class="form-label"><i class="bi bi-lock"></i> Senha</label>
+                    <input type="password" name="userPassword" class="form-control" id="userPassword" required>
                 </div>
-                <button type="submit" name="login" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Login</button>
+                <button type="submit" name="login" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
             </form>
         </div>
     </div>

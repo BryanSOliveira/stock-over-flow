@@ -24,6 +24,7 @@ public class Movement {
     private int movId;
     private String movDate;
     private int movProd;
+    private int movProv;
     private String movType;
     private int movQuantity;
     private double movValue;
@@ -34,11 +35,13 @@ public class Movement {
                 + "movId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "movDate VARCHAR(21) NOT NULL,"
                 + "movProd INTEGER,"
+                + "movProv INTEGER,"
                 + "movType VARCHAR(7),"
                 + "movQuantity INTEGER NOT NULL,"
                 + "movValue REAL,"
                 + "movDescription VARCHAR(500),"
-                + "FOREIGN KEY (movProd) REFERENCES produtos(prodId)"
+                + "FOREIGN KEY (movProd) REFERENCES produtos(prodId),"
+                + "FOREIGN KEY (movProv) REFERENCES provider(provId)"
                 + ")";
     }
     
@@ -54,12 +57,13 @@ public class Movement {
         while(rs.next()) {
             int movId = rs.getInt("movId");
             int movProd = rs.getInt("movProd");
+            int movProv = rs.getInt("movProv");
             String movDate = rs.getString("movDate");
             String movType = rs.getString("movType");
             int movQuantity = rs.getInt("movQuantity");
             Double movValue = rs.getDouble("movValue");
             String movDescription = rs.getString("movDescription");
-            list.add(new Movement(movId, movDate, movProd, movType, movQuantity, movValue, movDescription));
+            list.add(new Movement(movId, movDate, movProd, movProv, movType, movQuantity, movValue, movDescription));
         }
         rs.close();
         stmt.close();
@@ -67,34 +71,36 @@ public class Movement {
         return list;
     }
     
-    public static void insertMovement(int movProd, String movType,int movQuantity, Double movValue, String movDescription) throws Exception {
+    public static void insertMovement(int movProd, int movProv, String movType,int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO movement(movDate, movProd, movType, movQuantity, movValue, movDescription) "
-                + "VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO movement(movDate, movProd, movProv, movType, movQuantity, movValue, movDescription) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
         String currentDate = new SimpleDateFormat("HH:mm:ss | dd/MM/yyyy").format(Calendar.getInstance().getTime());
         stmt.setString(1, currentDate);
         stmt.setInt(2, movProd);
-        stmt.setString(3, movType);
-        stmt.setDouble(4, movQuantity);
-        stmt.setDouble(5, movValue);
-        stmt.setString(6, movDescription);
+        stmt.setInt(3, movProv);
+        stmt.setString(4, movType);
+        stmt.setDouble(5, movQuantity);
+        stmt.setDouble(6, movValue);
+        stmt.setString(7, movDescription);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterMovement(int movId, int movProd ,String movType, int movQuantity, Double movValue, String movDescription) throws Exception {
+    public static void alterMovement(int movId, int movProd , int movProv, String movType, int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE movement SET movProd = ?, movType = ?,  movQuantity = ?, movValue = ?, movDescription = ? "
+        String sql = "UPDATE movement SET movProd = ?, movProv = ?, movType = ?,  movQuantity = ?, movValue = ?, movDescription = ? "
                 + "WHERE movId = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, movProd);
-        stmt.setString(2, movType);
-        stmt.setInt(3, movQuantity);
-        stmt.setDouble(4, movValue);
-        stmt.setString(5, movDescription);
-        stmt.setInt(6, movId);
+        stmt.setInt(2, movProv);
+        stmt.setString(3, movType);
+        stmt.setInt(4, movQuantity);
+        stmt.setDouble(5, movValue);
+        stmt.setString(6, movDescription);
+        stmt.setInt(7, movId);
         stmt.execute();
         stmt.close();
         con.close();
@@ -110,10 +116,11 @@ public class Movement {
         con.close();
     }
 
-    public Movement(int movId, String movDate, int movProd, String movType, int movQuantity, double movValue, String movDescription) {
+    public Movement(int movId, String movDate, int movProd, int movProv, String movType, int movQuantity, double movValue, String movDescription) {
         this.movId = movId;
         this.movDate = movDate;
         this.movProd = movProd;
+        this.movProv = movProv;
         this.movType = movType;
         this.movQuantity = movQuantity;
         this.movValue = movValue;
@@ -130,6 +137,10 @@ public class Movement {
     
     public int getMovProd() {
         return movProd;
+    }
+    
+    public int getMovProv() {
+        return movProv;
     }
     
     public String getMovType() {
@@ -154,6 +165,14 @@ public class Movement {
 
     public void setMovDate(String movDate) {
         this.movDate = movDate;
+    }
+    
+    public void setMovProd(int movProd) {
+        this.movProv = movProd;
+    }
+    
+    public void setMovProv(int movProv) {
+        this.movProv = movProv;
     }
     
     public void setMovType(String movType) {
@@ -184,4 +203,6 @@ public class Movement {
         rs.close();
         return actualQuantity;
     }
+    
+    
 }

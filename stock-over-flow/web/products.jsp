@@ -11,7 +11,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestError = null;
-    ArrayList<Produto> produtos = new ArrayList<>();
+    ArrayList<Produto> products = new ArrayList<>();
     try {
         if (request.getParameter("insert") != null) {
             String prodName = request.getParameter("prodName");
@@ -33,7 +33,7 @@
             Produto.alterProd(prodId, prodName, prodBrand, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
         }
-        produtos = Produto.getProdutos();
+        products = Produto.getProdutos();
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -53,7 +53,7 @@
             <div class="card">
                 <div class="card-body">
                     <% if (sessionRole.equals("admin")) {%>
-                    <h2>Produtos - <%= produtos.size()%>
+                    <h2>Produtos - <%= products.size()%>
                         <!-- Button add prod -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -117,25 +117,25 @@
                             </thead>
                             <tbody>
                                 <% int i = 0; 
-                                   for (Produto x : produtos) { 
+                                   for (Produto prod : products) { 
                                    i++;
                                    %>
                                 <tr>
-                                    <td><%= x.getProdId()%></td>
-                                    <td><%= x.getProdName()%></td>     
+                                    <td><%= prod.getProdId()%></td>
+                                    <td><%= prod.getProdName()%></td>     
                                     
-                                    <td><%= Marca.getBrandNameById(x.getProdBrand())%></td>
+                                    <td><%= Marca.getBrandNameById(prod.getProdBrand())%></td>
                                     
-                                    <td><%= x.getProdMaterial()%></td>
-                                    <td><%= x.getProdSize()%></td>
-                                    <td><%= Movement.getQntById(x.getProdId())%></td>
+                                    <td><%= prod.getProdMaterial()%></td>
+                                    <td><%= prod.getProdSize()%></td>
+                                    <td><%= Movement.getQntById(prod.getProdId())%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="prodId" value="<%= x.getProdId()%>"/>
+                                            <input type="hidden" name="prodId" value="<%= prod.getProdId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -149,12 +149,12 @@
                                                             <div class="mb-3">
                                                                 <label for="prodId-<%= i%>">ID</label>
                                                                 <input type="text" class="form-control" name="prodId" id="prodId-<%= i%>" 
-                                                                       value="<%= x.getProdId()%>" disabled/>
+                                                                       value="<%= prod.getProdId()%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="prodName-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="prodName" id="prodName-<%= i%>" 
-                                                                       value="<%= x.getProdName()%>"/>
+                                                                       value="<%= prod.getProdName()%>"/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="prodBrand-<%= i%>">Marca</label>
@@ -168,22 +168,22 @@
                                                             <div class="mb-3">
                                                                 <label for="prodMaterial-<%= i%>">Material</label>
                                                                 <input type="text" class="form-control" name="prodMaterial" id="prodMaterial-<%= i%>" 
-                                                                       value="<%= x.getProdMaterial()%>"/>
+                                                                       value="<%= prod.getProdMaterial()%>"/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="prodSize-<%= i%>">Tamanho</label>
                                                                 <input type="text" class="form-control" name="prodSize" id="prodSize-<%= i%>" 
-                                                                       value="<%= x.getProdSize()%>"/>
+                                                                       value="<%= prod.getProdSize()%>"/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movQuantity-<%= i%>">Quantidade</label>
                                                                 <input type="number" class="form-control" name="movQuantity" id="movQuantity-<%= i%>" 
-                                                                       value="<%= Movement.getQntById(x.getProdId())%>" disabled/>
+                                                                       value="<%= Movement.getQntById(prod.getProdId())%>" disabled/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                            <input type="hidden" name="prodId" value="<%= x.getProdId()%>"/>
+                                                            <input type="hidden" name="prodId" value="<%= prod.getProdId()%>"/>
                                                             <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>
