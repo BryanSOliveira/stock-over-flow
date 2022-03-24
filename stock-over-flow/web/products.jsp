@@ -49,10 +49,10 @@
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUsername != null) { %>
+            <% if (sessionUserEmail != null) { %>
             <div class="card">
                 <div class="card-body">
-                    <% if (sessionRole.equals("admin")) {%>
+                    <% if (sessionUserRole.equals("admin")) {%>
                     <h2>Produtos - <%= products.size()%>
                         <!-- Button add prod -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">

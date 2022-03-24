@@ -15,5 +15,10 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <% if (sessionUserEmail != null) { %>
+          <div class="container">
+          <h1 class="text-center">Hello World :)</h1>
+          </div>
+        <%}%>
     </body>
 </html>
