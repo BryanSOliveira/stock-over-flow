@@ -38,15 +38,18 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Marcas</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
+        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
+        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUserEmail != null) { %>
+            <% if (sessionUserEmail != null) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Marcas
+                    <h2>Marcas (<%= brands.size()%>)
                         <!-- Button add brand -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -82,13 +85,13 @@
                     <% } %>
                     <!-- Table brand -->
                     <div class="table-responsive">
-                        <table class="table table-striped w-auto">
+                        <table class="table table-striped" id="table-brands">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
                                     <th>Nome</th>
                                     <th>Descrição</th>
-                                    <th>Opções</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -151,5 +154,18 @@
             </div>
             <% }%>
         </div>
+        <script>
+            $(document).ready(function () {
+                $('#table-brands').DataTable({
+                    "language": {
+                        "lengthMenu": "Mostrando _MENU_ registros por página",
+                        "zeroRecords": "Nada encontrado",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "Nenhum registro disponível",
+                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

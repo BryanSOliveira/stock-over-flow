@@ -11,14 +11,17 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Home</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <% if (sessionUserEmail != null) { %>
-          <div class="container">
-          <h1 class="text-center">Hello World :)</h1>
-          </div>
+        <div class="container mt-5">
+            <h1 class="text-center">
+                <img src="https://pbs.twimg.com/media/DlDgB8BU4AAXoGq.jpg"/>
+            </h1>
+        </div>
         <%}%>
     </body>
 </html>

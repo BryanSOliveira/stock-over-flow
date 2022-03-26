@@ -43,16 +43,19 @@
         <meta http-equiv="Conten<t-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Usuários</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
+        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null) { %>
             <div class="card">
                 <div class="card-body">
                     <% if (sessionUserRole.equals("admin")) {%>
-                    <h2>Usuários(<%= users.size()%>)
+                    <h2>Usuários (<%= users.size()%>)
                         <!-- Button add user -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-person-plus"></i>
@@ -99,14 +102,14 @@
                     <% } %>
                     <!-- Table user -->
                     <div class="table-responsive">
-                        <table class="table table-striped w-auto">
+                        <table class="table table-striped" id="table-user">
                             <thead class="bg-light">
                                 <tr>
                                     <th>Email</th>
                                     <th>Nome</th>
                                     <th>Permissão</th>
                                     <th>Verificado</th>
-                                    <th>Opções</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -164,23 +167,23 @@
                                                             <div class="mb-3">
                                                                 <label for="targetUserVerified-<%= i%>">Verificação</label>
                                                                 <select name="targetUserVerified" class="form-select" id="targetUserVerified-<%= i%>">
-                                                                   <% if (user.getUserVerified().equals("true")) { %>
-                                                                   <option value="true" selected>Verificado</option>
-                                                                   <option value="false">Não Verificado</option>
-                                                                   <% } else { %>
-                                                                   <option value="true">Verificado</option>
-                                                                   <option value="false" selected>Não Verificado</option>
-                                                                   <% }%>
+                                                                    <% if (user.getUserVerified().equals("true")) { %>
+                                                                    <option value="true" selected>Verificado</option>
+                                                                    <option value="false">Não Verificado</option>
+                                                                    <% } else { %>
+                                                                    <option value="true">Verificado</option>
+                                                                    <option value="false" selected>Não Verificado</option>
+                                                                    <% }%>
                                                                 </select>
                                                             </div>
                                                         </div>
-                                                        
+
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                                             <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
                                                             <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
-                                                        
+
                                                     </form>
                                                 </div>
                                             </div>
@@ -198,5 +201,18 @@
             <% } %>
             <% }%>
         </div>
+        <script>
+            $(document).ready(function () {
+                $('#table-user').DataTable({
+                    "language": {
+                        "lengthMenu": "Mostrando _MENU_ registros por página",
+                        "zeroRecords": "Nada encontrado",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "Nenhum registro disponível",
+                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

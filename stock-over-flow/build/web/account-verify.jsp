@@ -13,7 +13,7 @@
     </head>
     <body>
         <span>We already send a verification code to your email.</span>
-        
+
         <form action="VerifyToken" method="post">
             <input type="text" name="authToken" >
             <input type="submit" value="verify">

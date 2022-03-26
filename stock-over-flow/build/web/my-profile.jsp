@@ -11,6 +11,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Meu perfil</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>
@@ -21,8 +22,11 @@
                 <div class="card-body">
                     <h2>Meu perfil</h2>
                 </div>
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle"></i> Em obras!
+                </div>
             </div>
-            <% } %>
+            <% }%>
         </div>
     </body>
 </html>

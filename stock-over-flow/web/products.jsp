@@ -44,7 +44,10 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Produtos</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
+        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
+        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
@@ -53,7 +56,7 @@
             <div class="card">
                 <div class="card-body">
                     <% if (sessionUserRole.equals("admin")) {%>
-                    <h2>Produtos - <%= products.size()%>
+                    <h2>Produtos (<%= products.size()%>)
                         <!-- Button add prod -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -71,11 +74,11 @@
                                         </div>
                                         <div class="mb-3">
                                             <label for="prodBrand">Marca</label>
-                                            <select name="prodBrand" id="prodBrand">
-                                                <% 
-                                                   ArrayList<Integer> brandIds = Marca.getBrandIds();
-                                                   for(int p = 0; p < brandIds.size(); p++){ %>
-                                                   <option value="<%=brandIds.get(p)%>"><%=Marca.getBrandNameById(brandIds.get(p))%></option>
+                                            <select class="form-control" name="prodBrand" id="prodBrand">
+                                                <%
+                                                    ArrayList<Integer> brandIds = Marca.getBrandIds();
+                                                    for (int p = 0; p < brandIds.size(); p++) {%>
+                                                <option value="<%=brandIds.get(p)%>"><%=Marca.getBrandNameById(brandIds.get(p))%></option>
                                                 <%}%>
                                             </select>
                                         </div>
@@ -103,7 +106,7 @@
                     <% } %>
                     <!-- Table prod -->
                     <div class="table-responsive">
-                        <table class="table table-striped w-auto">
+                        <table class="table table-striped" id="table-products">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
@@ -112,20 +115,20 @@
                                     <th>Material</th>
                                     <th>Tamanho</th>
                                     <th>Quantidade</th>
-                                    <th>Opções</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% int i = 0; 
-                                   for (Produto prod : products) { 
-                                   i++;
-                                   %>
+                                <% int i = 0;
+                                    for (Produto prod : products) {
+                                        i++;
+                                %>
                                 <tr>
                                     <td><%= prod.getProdId()%></td>
                                     <td><%= prod.getProdName()%></td>     
-                                    
+
                                     <td><%= Marca.getBrandNameById(prod.getProdBrand())%></td>
-                                    
+
                                     <td><%= prod.getProdMaterial()%></td>
                                     <td><%= prod.getProdSize()%></td>
                                     <td><%= Movement.getQntById(prod.getProdId())%></td>
@@ -158,11 +161,11 @@
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="prodBrand-<%= i%>">Marca</label>
-                                                                <select name="prodBrand" id="prodBrand">
-                                                                <% ArrayList<Integer> editBrandIds = Marca.getBrandIds();
-                                                                   for(int f = 0; f < editBrandIds.size(); f++){ %>
-                                                                <option value="<%=editBrandIds.get(f)%>"><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
-                                                                <%}%>
+                                                                <select class="form-control" name="prodBrand" id="prodBrand-<%= i%>">
+                                                                    <% ArrayList<Integer> editBrandIds = Marca.getBrandIds();
+                                                                    for (int f = 0; f < editBrandIds.size(); f++) {%>
+                                                                    <option value="<%=editBrandIds.get(f)%>"><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
+                                                                    <%}%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">
@@ -204,5 +207,18 @@
             <% } %>
             <% }%>
         </div>
+        <script>
+            $(document).ready(function () {
+                $('#table-products').DataTable({
+                    "language": {
+                        "lengthMenu": "Mostrando _MENU_ registros por página",
+                        "zeroRecords": "Nada encontrado",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "Nenhum registro disponível",
+                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
+                    }
+                });
+            });
+        </script>
     </body>
 </html>

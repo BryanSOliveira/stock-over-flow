@@ -23,14 +23,16 @@
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDescription = request.getParameter("movDescription");
-            if(movType.equals("in")){
-            movType = "Entrada";
-            movQuantity = Math.abs(movQuantity);
-            }else if(movType.equals("out")){
-            movType = "Saída";
-            movQuantity = -movQuantity;
-            }else{movType = "Invalido";}
-            
+            if (movType.equals("in")) {
+                movType = "Entrada";
+                movQuantity = Math.abs(movQuantity);
+            } else if (movType.equals("out")) {
+                movType = "Saída";
+                movQuantity = -movQuantity;
+            } else {
+                movType = "Invalido";
+            }
+
             Movement.insertMovement(movProd, movProv, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
@@ -45,19 +47,21 @@
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDescription = request.getParameter("movDescription");
-            if(movType.equals("in")){
-            movType = "Entrada";
-            movQuantity = Math.abs(movQuantity);
-            }else if(movType.equals("out")){
-            movType = "Saída";
-            movQuantity = -movQuantity;
-            }else{movType = "Invalido";}
-            
+            if (movType.equals("in")) {
+                movType = "Entrada";
+                movQuantity = Math.abs(movQuantity);
+            } else if (movType.equals("out")) {
+                movType = "Saída";
+                movQuantity = -movQuantity;
+            } else {
+                movType = "Invalido";
+            }
+
             Movement.alterMovement(movId, movProd, movProv, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
         }
         movements = Movement.getMovements();
-        
+
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -68,15 +72,18 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Movimentações</title>
+        <link rel="icon" type="image/x-icon" href="images/favicon.png">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
+        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
+        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUserEmail != null) { %>
+            <% if (sessionUserEmail != null) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Movimentações
+                    <h2>Movimentações (<%= movements.size()%>)
                         <!-- Button add movements -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -90,29 +97,29 @@
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label for="movProd">Produto</label>
-                                            <select name="movProd" id="movProd">
-                                                <% 
-                                                   ArrayList<Integer> prodIds = Produto.getProdIds();
-                                                   for(int p = 0; p < prodIds.size(); p++){ %>
-                                                   <option value="<%=prodIds.get(p)%>"><%=Produto.getProdNameById(prodIds.get(p))%></option>
+                                            <select class="form-control" name="movProd" id="movProd">
+                                                <%
+                                                    ArrayList<Integer> prodIds = Produto.getProdIds();
+                                                    for (int p = 0; p < prodIds.size(); p++) {%>
+                                                <option value="<%=prodIds.get(p)%>"><%=Produto.getProdNameById(prodIds.get(p))%></option>
                                                 <%}%>
                                             </select>
                                         </div>
                                         <div class="mb-3">
                                             <label for="movProv">Fornecedor</label>
-                                            <select name="movProv" id="movProv">
-                                                <% 
-                                                   ArrayList<Integer> provIds = Provider.getProvIds();
-                                                   for(int r = 0; r < provIds.size(); r++){ %>
-                                                   <option value="<%=provIds.get(r)%>"><%=Provider.getProvNameById(provIds.get(r))%></option>
+                                            <select class="form-control" name="movProv" id="movProv">
+                                                <%
+                                                    ArrayList<Integer> provIds = Provider.getProvIds();
+                                                    for (int r = 0; r < provIds.size(); r++) {%>
+                                                <option value="<%=provIds.get(r)%>"><%=Provider.getProvNameById(provIds.get(r))%></option>
                                                 <%}%>
                                             </select>
                                         </div>
                                         <div class="mb-3">
                                             <label for="movType">Tipo de Movimentação</label>
-                                            <select name="movType" id="movType">
-                                                 <option value="out">Saída</option>
-                                                 <option value="in">Entrada</option>
+                                            <select class="form-control" name="movType" id="movType">
+                                                <option value="out">Saída</option>
+                                                <option value="in">Entrada</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">
@@ -143,7 +150,7 @@
                     <% } %>
                     <!-- Table movements -->
                     <div class="table-responsive">
-                        <table class="table table-striped w-auto">
+                        <table class="table table-striped" id="table-movements">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
@@ -154,6 +161,7 @@
                                     <th>Quantidade</th>
                                     <th>Valor</th>
                                     <th>Descrição</th>
+                                    <th></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -166,25 +174,25 @@
                                     <td><%= x.getMovType()%></td>
                                     <td><%= Produto.getProdNameById(x.getMovProd())%></td>
                                     <td><%= Provider.getProvNameById(x.getMovProv())%></td>
-                                    <%if(x.getMovQuantity() > 0){%>
+                                    <%if (x.getMovQuantity() > 0) {%>
                                     <td style="color:green;"><%= x.getMovQuantity()%></td>
-                                    <%}else if(x.getMovQuantity() < 0){%>
+                                    <%} else if (x.getMovQuantity() < 0) {%>
                                     <td style="color:red;"><%= x.getMovQuantity()%></td>
-                                    <%}else{%>
+                                    <%} else {%>
                                     <td style="color:blue;><%= x.getMovQuantity()%></td>
-                                    <%}%>
-                                    <td><%= x.getMovValue()%></td>
-                                    <td><%= x.getMovDescription()%></td>
-                                    <td>
+                                        <%}%>
+                                        <td><%= x.getMovValue()%></td>
+                                        <td><%= x.getMovDescription()%></td>
+                                        <td>
                                         <form method="post">
-                                            <!-- Button edit modal -->
-                                            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <input type="hidden" name="movId" value="<%= x.getMovId()%>"/>
-                                            <button type="submit" name="delete" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
+                                        <!-- Button edit modal -->
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                        <input type="hidden" name="movId" value="<%= x.getMovId()%>"/>
+                                        <button type="submit" name="delete" class="btn btn-danger btn-sm">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
                                         </form>
                                         <!-- Modal edit -->
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
@@ -204,27 +212,27 @@
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movProd-<%= i%>">Produto</label>
-                                                                <select name="movProd" id="movProd">
-                                                                <% ArrayList<Integer> editProdIds = Produto.getProdIds();
-                                                                   for(int f = 0; f < editProdIds.size(); f++){ %>
-                                                                <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
-                                                                <%}%>
+                                                                <select class="form-control" name="movProd" id="movProd-<%= i%>">
+                                                                    <% ArrayList<Integer> editProdIds = Produto.getProdIds();
+                                                                    for (int f = 0; f < editProdIds.size(); f++) {%>
+                                                                    <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
+                                                                    <%}%>
                                                                 </select>
                                                             </div>
-                                                             <div class="mb-3">
+                                                            <div class="mb-3">
                                                                 <label for="movProv-<%= i%>">Fornecedor</label>
-                                                                <select name="movProv" id="movProv">
-                                                                <% ArrayList<Integer> editProvIds = Provider.getProvIds();
-                                                                   for(int q = 0; q < editProvIds.size(); q++){ %>
-                                                                <option value="<%=editProvIds.get(q)%>"><%=Provider.getProvNameById(editProvIds.get(q))%></option>
-                                                                <%}%>
+                                                                <select class="form-control" name="movProv" id="movProv-<%= i%>">
+                                                                    <% ArrayList<Integer> editProvIds = Provider.getProvIds();
+                                                                    for (int q = 0; q < editProvIds.size(); q++) {%>
+                                                                    <option value="<%=editProvIds.get(q)%>"><%=Provider.getProvNameById(editProvIds.get(q))%></option>
+                                                                    <%}%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>
-                                                                <select name="movType" id="movType">
-                                                                <option value="out">Saída</option>
-                                                                <option value="in">Entrada</option>
+                                                                <select class="form-control" name="movType" id="movType-<%= i%>">
+                                                                    <option value="out">Saída</option>
+                                                                    <option value="in">Entrada</option>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">
@@ -267,5 +275,18 @@
             </div>
             <% }%>
         </div>
+        <script>
+            $(document).ready(function () {
+                $('#table-movements').DataTable({
+                    "language": {
+                        "lengthMenu": "Mostrando _MENU_ registros por página",
+                        "zeroRecords": "Nada encontrado",
+                        "info": "Mostrando página _PAGE_ de _PAGES_",
+                        "infoEmpty": "Nenhum registro disponível",
+                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
