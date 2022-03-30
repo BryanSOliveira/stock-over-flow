@@ -3,10 +3,12 @@
     Created on : 25 de fev. de 2022, 22:25:44
     Author     : spbry
 --%>
+<%@page import="mail.SendEmail"%>
 <%@page import="db.User"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
+   
     String requestError = null;
     ArrayList<User> users = new ArrayList<>();
     try {
@@ -16,9 +18,20 @@
             String userRole = request.getParameter("targetUserRole");
             String userPassword = request.getParameter("targetUserPassword");
             Boolean userVerified = Boolean.parseBoolean(request.getParameter("targetUserVerified"));
-            User.insertUser(userEmail, userName, userRole, userPassword, userVerified);
+
+            SendEmail mailInstance = new SendEmail();
+            String userToken = mailInstance.genToken();
+
+            User.insertUser(userEmail, userName, userRole, userPassword, userVerified, userToken);
+            
+            User verifyUser = new User(userEmail, userName, userRole, userVerified, userToken);
+            boolean emailSent = mailInstance.sendEmail(verifyUser);
+
+           
+ 
             response.sendRedirect(request.getRequestURI());
-            //response.sendRedirect("VerifyUser");
+            
+            
         } else if (request.getParameter("delete") != null) {
             String userEmail = request.getParameter("targetUserEmail");
             User.deleteUser(userEmail);
@@ -28,8 +41,7 @@
             String userName = request.getParameter("targetUserName");
             String userRole = request.getParameter("targetUserRole");
             String userPassword = request.getParameter("targetUserPassword");
-            Boolean userVerified = Boolean.parseBoolean(request.getParameter("targetUserVerified"));
-            User.alterUser(userEmail, userName, userRole, userPassword, userVerified);
+            User.alterUser(userEmail, userName, userRole, userPassword);
             response.sendRedirect(request.getRequestURI());
         }
         users = User.getUsers();
@@ -51,7 +63,7 @@
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUserEmail != null) { %>
+            <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
             <div class="card">
                 <div class="card-body">
                     <% if (sessionUserRole.equals("admin")) {%>
@@ -108,7 +120,8 @@
                                     <th>Email</th>
                                     <th>Nome</th>
                                     <th>Permissão</th>
-                                    <th>Verificado</th>
+                                    <th>Status</th>
+                                    <th>Token</th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -121,6 +134,7 @@
                                     <td><%= user.getUserName()%></td>
                                     <td><%= user.getUserRole()%></td>
                                     <td><%= user.getUserVerified()%></td>
+                                    <td><%= user.getUserToken()%></td>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
@@ -165,15 +179,14 @@
                                                                 <input type="password" class="form-control" name="targetUserPassword" id="targetUserPassword-<%= i%>" autocomplete="on"/>
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="targetUserVerified-<%= i%>">Verificação</label>
-                                                                <select name="targetUserVerified" class="form-select" id="targetUserVerified-<%= i%>">
-                                                                    <% if (user.getUserVerified().equals("true")) { %>
-                                                                    <option value="true" selected>Verificado</option>
-                                                                    <option value="false">Não Verificado</option>
-                                                                    <% } else { %>
-                                                                    <option value="true">Verificado</option>
-                                                                    <option value="false" selected>Não Verificado</option>
-                                                                    <% }%>
+                                                                <label for="targetUserVerified-<%= i%>">Status</label>
+                                                                   <% if (user.getUserVerified() == true) { %>
+                                                                   <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
+                                                                       value="Ativada" disabled/>
+                                                                   <% } else { %>
+                                                                   <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
+                                                                       value="Pendente" disabled/>
+                                                                   <% }%>
                                                                 </select>
                                                             </div>
                                                         </div>

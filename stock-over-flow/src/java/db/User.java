@@ -21,6 +21,7 @@ public class User {
     private String userName;
     private String userRole;
     private Boolean userVerified;
+    private String userToken;
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS users("
@@ -28,7 +29,8 @@ public class User {
                 + "userName VARCHAR(200) NOT NULL,"
                 + "userRole VARCHAR(20) NOT NULL,"
                 + "userPassword LONG NOT NULL,"
-                + "userVerified BIT"              
+                + "userVerified BIT,"
+                + "userToken VARCHAR(8)"
                 + ")";
     }
     
@@ -46,7 +48,8 @@ public class User {
             String userName = rs.getString("userName");
             String userRole = rs.getString("userRole");
             Boolean userVerified = rs.getBoolean("userVerified");
-            list.add(new User(userEmail, userName, userRole, userVerified));
+            String userToken = rs.getString("userToken");
+            list.add(new User(userEmail, userName, userRole, userVerified, userToken));
         }
         rs.close();
         stmt.close();
@@ -66,7 +69,8 @@ public class User {
             String userName = rs.getString("userName");
             String userRole = rs.getString("userRole");
             Boolean userVerified = rs.getBoolean("userVerified");
-            gotUser = new User(userEmail, userName, userRole, userVerified);
+            String userToken = rs.getString("userToken");
+            gotUser = new User(userEmail, userName, userRole, userVerified, userToken);
         }
         stmt.close();
         con.close();
@@ -74,31 +78,31 @@ public class User {
         return gotUser;
     }
     
-    public static void insertUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified) throws Exception {
+    public static void insertUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified, String userToken) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO users( userEmail, userName, userRole, userPassword, userVerified) "
-                + "VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users( userEmail, userName, userRole, userPassword, userVerified, userToken) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userEmail);
         stmt.setString(2, userName); 
         stmt.setString(3, userRole);
         stmt.setLong(4, userPassword.hashCode());
         stmt.setBoolean(5, userVerified);
+        stmt.setString(6, userToken);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void alterUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified) throws Exception {
+    public static void alterUser(String userEmail, String userName, String userRole, String userPassword) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET userName = ?, userRole = ?, userPassword = ?, userVerified = ? "
+        String sql = "UPDATE users SET userName = ?, userRole = ?, userPassword = ? "
                 + "WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userName); 
         stmt.setString(2, userRole);
         stmt.setLong(3, userPassword.hashCode());
-        stmt.setBoolean(4, userVerified);
-        stmt.setString(5, userEmail);
+        stmt.setString(4, userEmail);
         stmt.execute();
         stmt.close();
         con.close();
@@ -124,12 +128,24 @@ public class User {
         stmt.close();
         con.close();
     }
+    
+    public static void changeStatus(String userEmail) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "UPDATE users SET userVerified = ? WHERE userEmail = ?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setBoolean(1, true);
+        stmt.setString(2, userEmail);
+        stmt.execute();
+        stmt.close();
+        con.close();
+    }
 
-    public User(String userEmail, String userName, String userRole, Boolean userVerified) {
+     public User(String userEmail, String userName, String userRole, Boolean userVerified, String userToken) {
         this.userEmail = userEmail;
         this.userName = userName;
         this.userRole = userRole;
         this.userVerified = userVerified;
+        this.userToken = userToken;
     }
 
     public String getUserRole() {
@@ -159,8 +175,19 @@ public class User {
     public Boolean getUserVerified() {
         return userVerified;
     }
-
-    public void setUserVarified(Boolean userVerified) {
+     
+    public void setUserVerified(Boolean userVerified) {
         this.userVerified = userVerified;
     }
+     
+    public String getUserToken() {
+        return userToken;
+    }
+     
+    public void setUserToken(String userToken) throws Exception {
+        this.userToken = userToken;
+    }
+
+
+    
 }

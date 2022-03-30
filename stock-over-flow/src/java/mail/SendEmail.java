@@ -1,5 +1,6 @@
 package mail;
 
+import db.User;
 import java.util.Properties;
 import java.util.Random;
 import javax.mail.Authenticator;

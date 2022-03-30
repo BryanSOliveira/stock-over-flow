@@ -5,18 +5,39 @@
 <%
     String headerError = null;
     
+    if(request.getParameter("validate") != null){
+        try{
+        String userEmail = (String)session.getAttribute("loggedUser.userEmail");
+        String userPassword = (String)session.getAttribute("loggedUser.userPassword");
+        User loggedUser = User.getUser(userEmail, userPassword);
+        String userInsertToken = request.getParameter("userInsertToken");
+        String userToken = loggedUser.getUserToken();
+            if(userInsertToken.equals(userToken)){
+                loggedUser.changeStatus(loggedUser.getUserEmail());
+                session.setAttribute("loggedUser.userVerified", true);
+                session.removeAttribute("loggedUser.userPassword");
+                response.sendRedirect(request.getRequestURI());
+            }else{
+                headerError = "Chave Incorreta";}
+        }catch(Exception ex){}
+    }
+    
     if (request.getParameter("userEmail") != null && request.getParameter("userPassword") != null) {
         String userEmail = request.getParameter("userEmail");
         String userPassword = request.getParameter("userPassword");
-        headerError = null;
+        
         try { 
             User loggedUser = User.getUser(userEmail, userPassword);
             if (loggedUser == null) {
                 headerError = "Usuário / senha não encontrado";
-            } else {
+           
+            }else {
                 session.setAttribute("loggedUser.userEmail", loggedUser.getUserEmail());
+                session.setAttribute("loggedUser.userPassword", userPassword);
                 session.setAttribute("loggedUser.userName", loggedUser.getUserName());
                 session.setAttribute("loggedUser.userRole", loggedUser.getUserRole());
+                session.setAttribute("loggedUser.userVerified", loggedUser.getUserVerified());
+
                 response.sendRedirect(request.getRequestURI());
             }
         } catch(Exception ex) {
@@ -26,11 +47,13 @@
         session.removeAttribute("loggedUser.userEmail");
         session.removeAttribute("loggedUser.userName");
         session.removeAttribute("loggedUser.userRole");
+        session.removeAttribute("loggedUser.userVerified");
         response.sendRedirect(request.getRequestURI());
     }
 
     String sessionUserEmail = (String) session.getAttribute("loggedUser.userEmail");
     String sessionUserRole = (String) session.getAttribute("loggedUser.userRole");
+    Boolean sessionUserVerified = (Boolean) session.getAttribute("loggedUser.userVerified");
 %>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
@@ -116,7 +139,7 @@
 <div class="container mt-2">
     <div class="card">
         <div class="card-body">
-            <form method="post">
+            <form method="get">
                 <div class="mb-3">
                     <label for="userEmail" class="form-label"><i class="bi bi-person-circle"></i> E-mail</label>
                     <input type="text" name="userEmail" class="form-control" id="userEmail" aria-describedby="emailHelp" required>
@@ -126,7 +149,23 @@
                     <label for="userPassword" class="form-label"><i class="bi bi-lock"></i> Senha</label>
                     <input type="password" name="userPassword" class="form-control" id="userPassword" required>
                 </div>
-                <button type="submit" name="login" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
+                <button type="submit" name="login" value="login" class="btn btn-primary"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
+            </form>
+        </div>
+    </div>
+</div>
+<%}else if(sessionUserVerified == false){%>
+<div class="container mt-2">
+    <div class="card">
+        <div class="card-body">
+            <form method="get">
+                
+                <div class="mb-3">
+                    <label for="userInsertToken" class="form-label"><i class="bi bi-key-fill"></i> Token</label>
+                    <input type="text" name="userInsertToken" class="form-control" id="userInsertToken" aria-describedby="tokenHelp" required>
+                    <div id="tokenHelp" class="form-text">Cheque seu e-mail pela chave de 8 digitos enviada anteriormente.</div>
+                </div>
+                <button type="submit" name="validate" value="validate" class="btn btn-primary"><i class="bi journal-check"></i> Validar</button>
             </form>
         </div>
     </div>

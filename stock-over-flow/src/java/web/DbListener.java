@@ -24,7 +24,7 @@ import javax.servlet.ServletContextListener;
  */
 public class DbListener implements ServletContextListener {
     public static final String CLASS_NAME = "org.sqlite.JDBC";
-    public static final String URL = "jdbc:sqlite:stock27.db";
+    public static final String URL = "jdbc:sqlite:stock50.db";
     
     public static Exception exception = null;
     
@@ -56,7 +56,7 @@ public class DbListener implements ServletContextListener {
             */
             
             if(User.getUsers().isEmpty()) {
-                User.insertUser("admin", "Administrador", "admin", "123", true);
+                User.insertUser("admin", "Administrador", "admin", "123", true, "99999999");
             }
             if(Produto.getProdutos().isEmpty()) {
                 Produto.insertProd("Tênis", 1, "Composto", "41/42");

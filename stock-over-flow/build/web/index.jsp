@@ -16,7 +16,7 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <% if (sessionUserEmail != null) { %>
+        <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
         <div class="container mt-5">
             <h1 class="text-center">
                 <img src="https://pbs.twimg.com/media/DlDgB8BU4AAXoGq.jpg"/>

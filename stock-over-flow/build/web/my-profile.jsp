@@ -17,7 +17,7 @@
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUserEmail != null) { %>
+            <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
             <div class="card">
                 <div class="card-body">
                     <h2>Meu perfil</h2>
