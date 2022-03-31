@@ -6,11 +6,6 @@
 package web;
 
 import db.*;
-/*import db.Marca;
-import db.Movement;
-import db.Produto;
-import db.Provider;
-import db.User;*/
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
@@ -24,7 +19,7 @@ import javax.servlet.ServletContextListener;
  */
 public class DbListener implements ServletContextListener {
     public static final String CLASS_NAME = "org.sqlite.JDBC";
-    public static final String URL = "jdbc:sqlite:stock50.db";
+    public static final String URL = "jdbc:sqlite:stock51.db";
     
     public static Exception exception = null;
     
@@ -39,13 +34,13 @@ public class DbListener implements ServletContextListener {
             Connection con = getConnection();
             Statement stmt = con.createStatement();
             
-            ///*
+            
             stmt.execute(User.getCreateStatement());
             stmt.execute(Produto.getCreateStatement());
             stmt.execute(Marca.getCreateStatement());
             stmt.execute(Provider.getCreateStatement());
             stmt.execute(Movement.getCreateStatement());
-            //*/
+            
             
             /*
             stmt.execute(User.getDestroyStatement());
