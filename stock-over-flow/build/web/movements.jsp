@@ -59,6 +59,10 @@
 
             Movement.alterMovement(movId, movProd, movProv, movType, movQuantity, movValue, movDescription);
             response.sendRedirect(request.getRequestURI());
+        } else if (request.getParameter("report") != null) {
+            movements = Movement.getMovements();
+            Movement.generateReport(movements, response);
+            response.sendRedirect(request.getRequestURI());
         }
         movements = Movement.getMovements();
 
@@ -88,6 +92,12 @@
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
+                        <!-- Button report in excel -->
+                        <form method="post" class="d-inline">
+                            <button type="submit" name="report" class="btn btn-primary">
+                                <i class="bi bi-filetype-pdf"></i>
+                            </button>
+                        </form>
                     </h2>
                     <!-- Modal add provider -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
