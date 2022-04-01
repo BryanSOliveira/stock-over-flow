@@ -5,21 +5,20 @@
  */
 package db;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPRow;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import java.io.FileOutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 import web.DbListener;
 
@@ -132,12 +131,15 @@ public class Movement {
         document.add(new Paragraph("Movimentações:"));
         document.add(new Paragraph(" "));
         PdfPTable table = new PdfPTable(8);
+        table.setWidthPercentage(100);
+        float[] widths = new float[] {20f, 120f, 50f, 70f, 70f, 30f, 50f, 100f};
+        table.setWidths(widths);
         PdfPCell col1 = new PdfPCell(new Paragraph("ID"));
         PdfPCell col2 = new PdfPCell(new Paragraph("Horário | Data"));
-        PdfPCell col3 = new PdfPCell(new Paragraph("Tipo de Movimentação"));
+        PdfPCell col3 = new PdfPCell(new Paragraph("Mov."));
         PdfPCell col4 = new PdfPCell(new Paragraph("Produto"));
         PdfPCell col5 = new PdfPCell(new Paragraph("Fornecedor"));
-        PdfPCell col6 = new PdfPCell(new Paragraph("Quantidade"));
+        PdfPCell col6 = new PdfPCell(new Paragraph("Qtd."));
         PdfPCell col7 = new PdfPCell(new Paragraph("Valor"));
         PdfPCell col8 = new PdfPCell(new Paragraph("Descrição"));
         table.addCell(col1);
@@ -157,6 +159,16 @@ public class Movement {
             table.addCell(Integer.toString(movements.get(i).getMovQuantity()));
             table.addCell(Double.toString(movements.get(i).getMovValue()));
             table.addCell(movements.get(i).getMovDescription());
+        }
+        int i = 0;
+        for(PdfPRow r: table.getRows()) {
+            for(PdfPCell c: r.getCells()) {
+                if(i == 0)
+                    c.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                else 
+                    c.setBackgroundColor(i % 2 == 0 ? BaseColor.ORANGE : BaseColor.WHITE);
+            }
+            i++;
         }
         document.add(table);
         document.close();

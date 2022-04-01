@@ -22,8 +22,10 @@
                 <div class="card-body">
                     <h2>Meu perfil</h2>
                 </div>
-                <div class="alert alert-warning" role="alert">
-                    <i class="bi bi-exclamation-triangle"></i> Em obras!
+                <div class="container-fluid">
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle"></i> Em obras!
+                    </div>
                 </div>
             </div>
             <% }%>
