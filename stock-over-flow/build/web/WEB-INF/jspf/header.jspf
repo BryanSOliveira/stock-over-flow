@@ -52,6 +52,7 @@
     }
 
     String sessionUserEmail = (String) session.getAttribute("loggedUser.userEmail");
+    String sessionUserName = (String)session.getAttribute("loggedUser.userName");
     String sessionUserRole = (String) session.getAttribute("loggedUser.userRole");
     Boolean sessionUserVerified = (Boolean) session.getAttribute("loggedUser.userVerified");
 %>

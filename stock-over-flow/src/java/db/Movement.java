@@ -12,6 +12,8 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPRow;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -128,6 +130,37 @@ public class Movement {
 	response.addHeader("Content-Disposition", "inline; filename=" + "movimentacoes.pdf");
         PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
+        
+        PdfPTable profitTable = new PdfPTable(3);
+        profitTable.setWidthPercentage(100);
+        //float[] widths = new float[] {20f, 120f, 50f, 70f, 70f, 30f, 50f, 100f};
+        //profitTable.setWidths(widths);
+        PdfPCell colProfit1 = new PdfPCell(new Paragraph("Total de Custo"));
+        colProfit1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        PdfPCell colProfit2 = new PdfPCell(new Paragraph("Total de Vendas"));
+        colProfit2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        PdfPCell colProfit3 = new PdfPCell(new Paragraph("Lucro / Prejuízo"));
+        colProfit3.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        profitTable.addCell(colProfit1);
+        profitTable.addCell(colProfit2);
+        profitTable.addCell(colProfit3);    
+
+        double valueAllEntries = 0, valueAllOutputs = 0;
+        for(Movement movement: movements) {
+            if(movement.getMovType().equals("Entrada")) {
+                valueAllEntries += movement.getMovValue();
+            } else if(movement.getMovType().equals("Saída")) {
+                valueAllOutputs += movement.getMovValue();
+            }
+        }
+        BigDecimal entries = new BigDecimal(valueAllEntries).setScale(2, RoundingMode.HALF_EVEN);
+        BigDecimal outputs = new BigDecimal(valueAllOutputs).setScale(2, RoundingMode.HALF_EVEN);
+        BigDecimal profit = new BigDecimal(valueAllOutputs - valueAllEntries).setScale(2, RoundingMode.HALF_EVEN);
+        profitTable.addCell(String.valueOf(entries.doubleValue()));
+        profitTable.addCell(String.valueOf(outputs.doubleValue()));
+        profitTable.addCell(String.valueOf(profit.doubleValue()));
+        document.add(profitTable);
+        
         document.add(new Paragraph("Movimentações:"));
         document.add(new Paragraph(" "));
         PdfPTable table = new PdfPTable(8);
