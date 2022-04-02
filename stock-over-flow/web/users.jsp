@@ -8,7 +8,7 @@
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-   
+
     String requestError = null;
     ArrayList<User> users = new ArrayList<>();
     try {
@@ -23,15 +23,12 @@
             String userToken = mailInstance.genToken();
 
             User.insertUser(userEmail, userName, userRole, userPassword, userVerified, userToken);
-            
+
             User verifyUser = new User(userEmail, userName, userRole, userVerified, userToken);
             boolean emailSent = mailInstance.sendEmail(verifyUser);
 
-           
- 
             response.sendRedirect(request.getRequestURI());
-            
-            
+
         } else if (request.getParameter("delete") != null) {
             String userEmail = request.getParameter("targetUserEmail");
             User.deleteUser(userEmail);
@@ -180,13 +177,13 @@
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="targetUserVerified-<%= i%>">Status</label>
-                                                                   <% if (user.getUserVerified() == true) { %>
-                                                                   <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
+                                                                <% if (user.getUserVerified() == true) {%>
+                                                                <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
                                                                        value="Ativada" disabled/>
-                                                                   <% } else { %>
-                                                                   <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
+                                                                <% } else {%>
+                                                                <input type="text" class="form-control" name="targetUserVerified" id="targetUserVerified-<%= i%>" 
                                                                        value="Pendente" disabled/>
-                                                                   <% }%>
+                                                                <% }%>
                                                                 </select>
                                                             </div>
                                                         </div>

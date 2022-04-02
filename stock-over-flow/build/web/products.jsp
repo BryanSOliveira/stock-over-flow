@@ -52,15 +52,16 @@
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <div class="container-fluid mt-2">
-            <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
+            <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
                 <div class="card-body">
-                    <% if (sessionUserRole.equals("admin")) {%>
                     <h2>Produtos (<%= products.size()%>)
+                        <% if (sessionUserRole.equals("admin")) {%>
                         <!-- Button add prod -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
+                        <% } %>
                     </h2>
                     <!-- Modal add prod -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -115,7 +116,9 @@
                                     <th>Material</th>
                                     <th>Tamanho</th>
                                     <th>Quantidade</th>
+                                        <% if (sessionUserRole.equals("admin")) {%>
                                     <th></th>
+                                        <% } %>
                                 </tr>
                             </thead>
                             <tbody>
@@ -132,6 +135,7 @@
                                     <td><%= prod.getProdMaterial()%></td>
                                     <td><%= prod.getProdSize()%></td>
                                     <td><%= Movement.getQntById(prod.getProdId())%></td>
+                                    <% if (sessionUserRole.equals("admin")) {%>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
@@ -163,8 +167,12 @@
                                                                 <label for="prodBrand-<%= i%>">Marca</label>
                                                                 <select class="form-control" name="prodBrand" id="prodBrand-<%= i%>">
                                                                     <% ArrayList<Integer> editBrandIds = Marca.getBrandIds();
-                                                                    for (int f = 0; f < editBrandIds.size(); f++) {%>
+                                                                        for (int f = 0; f < editBrandIds.size(); f++) {%>
+                                                                    <% if (editBrandIds.get(f).equals(prod.getProdBrand())) {%>
+                                                                    <option value="<%=editBrandIds.get(f)%>" selected><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
+                                                                    <%} else {%>
                                                                     <option value="<%=editBrandIds.get(f)%>"><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
+                                                                    <%}%>
                                                                     <%}%>
                                                                 </select>
                                                             </div>
@@ -194,6 +202,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <% } %>
                                 </tr>
                                 <% i++; %>
                                 <% } %>
@@ -202,9 +211,6 @@
                     </div>
                 </div>
             </div>
-            <% } else { %>
-            Página restrita
-            <% } %>
             <% }%>
         </div>
         <script>

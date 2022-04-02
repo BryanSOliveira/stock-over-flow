@@ -92,12 +92,14 @@
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
+                        <% if (sessionUserRole.equals("admin")) {%>
                         <!-- Button report in excel -->
                         <form method="post" class="d-inline">
                             <button type="submit" name="report" class="btn btn-primary">
                                 <i class="bi bi-filetype-pdf"></i>
                             </button>
                         </form>
+                        <% } %>
                     </h2>
                     <!-- Modal add provider -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -224,8 +226,12 @@
                                                                 <label for="movProd-<%= i%>">Produto</label>
                                                                 <select class="form-control" name="movProd" id="movProd-<%= i%>">
                                                                     <% ArrayList<Integer> editProdIds = Produto.getProdIds();
-                                                                    for (int f = 0; f < editProdIds.size(); f++) {%>
+                                                                        for (int f = 0; f < editProdIds.size(); f++) {%>
+                                                                    <% if (editProdIds.get(f).equals(x.getMovProd())) {%>
+                                                                    <option value="<%=editProdIds.get(f)%>" selected><%=Produto.getProdNameById(editProdIds.get(f))%></option>
+                                                                    <% } else {%>
                                                                     <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
+                                                                    <%}%>
                                                                     <%}%>
                                                                 </select>
                                                             </div>
@@ -233,16 +239,26 @@
                                                                 <label for="movProv-<%= i%>">Fornecedor</label>
                                                                 <select class="form-control" name="movProv" id="movProv-<%= i%>">
                                                                     <% ArrayList<Integer> editProvIds = Provider.getProvIds();
-                                                                    for (int q = 0; q < editProvIds.size(); q++) {%>
+                                                                        for (int q = 0; q < editProvIds.size(); q++) {%>
+
+                                                                    <% if (editProdIds.get(q).equals(x.getMovProv())) {%>
+                                                                    <option value="<%=editProvIds.get(q)%>" selected><%=Provider.getProvNameById(editProvIds.get(q))%></option>
+                                                                    <% } else {%>
                                                                     <option value="<%=editProvIds.get(q)%>"><%=Provider.getProvNameById(editProvIds.get(q))%></option>
+                                                                    <%}%>
                                                                     <%}%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>
                                                                 <select class="form-control" name="movType" id="movType-<%= i%>">
-                                                                    <option value="out">Saída</option>
+                                                                    <% if (x.getMovType().equals("Saída")) { %>
+                                                                    <option value="out" selected>Saída</option>
                                                                     <option value="in">Entrada</option>
+                                                                    <% } else { %>
+                                                                    <option value="out">Saída</option>
+                                                                    <option value="in" selected>Entrada</option>
+                                                                    <% }%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">

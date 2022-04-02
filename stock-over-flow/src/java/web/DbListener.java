@@ -19,7 +19,7 @@ import javax.servlet.ServletContextListener;
  */
 public class DbListener implements ServletContextListener {
     public static final String CLASS_NAME = "org.sqlite.JDBC";
-    public static final String URL = "jdbc:sqlite:stock51.db";
+    public static final String URL = "jdbc:sqlite:stk-db.db";
     
     public static Exception exception = null;
     
@@ -52,6 +52,7 @@ public class DbListener implements ServletContextListener {
             
             if(User.getUsers().isEmpty()) {
                 User.insertUser("admin", "Administrador", "admin", "123", true, "99999999");
+                User.insertUser("user", "Usuário", "user", "123", true, "99999999");
             }
             if(Produto.getProdutos().isEmpty()) {
                 Produto.insertProd("Tênis", 1, "Composto", "41/42");
@@ -61,7 +62,7 @@ public class DbListener implements ServletContextListener {
             if(Movement.getMovements().isEmpty()) {
                 Movement.insertMovement(1, 1, "Entrada", 20, 15.99, "Entrada de produtos");
                 Movement.insertMovement(1, 2, "Entrada", 30, 14.99, "Preparação de estoque");
-                Movement.insertMovement(1, 1, "Saida", -4, 17.99, "Venda padrão");
+                Movement.insertMovement(1, 1, "Saída", -4, 17.99, "Venda padrão");
             }
             if(Marca.getBrands().isEmpty()) {
                 Marca.insertBrand("Nike", "Roupas");

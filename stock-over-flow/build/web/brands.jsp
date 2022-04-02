@@ -50,10 +50,12 @@
             <div class="card">
                 <div class="card-body">
                     <h2>Marcas (<%= brands.size()%>)
+                        <% if (sessionUserRole.equals("admin")) {%>
                         <!-- Button add brand -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
+                        <% } %>
                     </h2>
                     <!-- Modal add user -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -91,7 +93,9 @@
                                     <th>ID</th>
                                     <th>Nome</th>
                                     <th>Descrição</th>
+                                        <% if (sessionUserRole.equals("admin")) {%>
                                     <th></th>
+                                        <% } %>
                                 </tr>
                             </thead>
                             <tbody>
@@ -102,6 +106,7 @@
                                     <td><%= brand.getBrandId()%></td>
                                     <td><%= brand.getBrandName()%></td>
                                     <td><%= brand.getBrandDesc()%></td>
+                                    <% if (sessionUserRole.equals("admin")) {%>
                                     <td>
                                         <form method="post">
                                             <!-- Button edit modal -->
@@ -145,6 +150,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <% } %>
                                 </tr>
                                 <% } %>
                             </tbody>

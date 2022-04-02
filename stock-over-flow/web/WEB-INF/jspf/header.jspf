@@ -4,34 +4,36 @@
 <%@ page pageEncoding="UTF-8" %>
 <%
     String headerError = null;
-    
-    if(request.getParameter("validate") != null){
-        try{
-        String userEmail = (String)session.getAttribute("loggedUser.userEmail");
-        String userPassword = (String)session.getAttribute("loggedUser.userPassword");
-        User loggedUser = User.getUser(userEmail, userPassword);
-        String userInsertToken = request.getParameter("userInsertToken");
-        String userToken = loggedUser.getUserToken();
-            if(userInsertToken.equals(userToken)){
+
+    if (request.getParameter("validate") != null) {
+        try {
+            String userEmail = (String) session.getAttribute("loggedUser.userEmail");
+            String userPassword = (String) session.getAttribute("loggedUser.userPassword");
+            User loggedUser = User.getUser(userEmail, userPassword);
+            String userInsertToken = request.getParameter("userInsertToken");
+            String userToken = loggedUser.getUserToken();
+            if (userInsertToken.equals(userToken)) {
                 loggedUser.changeStatus(loggedUser.getUserEmail());
                 session.setAttribute("loggedUser.userVerified", true);
                 session.removeAttribute("loggedUser.userPassword");
                 response.sendRedirect(request.getRequestURI());
-            }else{
-                headerError = "Chave Incorreta";}
-        }catch(Exception ex){}
+            } else {
+                headerError = "Chave Incorreta";
+            }
+        } catch (Exception ex) {
+        }
     }
-    
+
     if (request.getParameter("userEmail") != null && request.getParameter("userPassword") != null) {
         String userEmail = request.getParameter("userEmail");
         String userPassword = request.getParameter("userPassword");
-        
-        try { 
+
+        try {
             User loggedUser = User.getUser(userEmail, userPassword);
             if (loggedUser == null) {
                 headerError = "Usuário / senha não encontrado";
-           
-            }else {
+
+            } else {
                 session.setAttribute("loggedUser.userEmail", loggedUser.getUserEmail());
                 session.setAttribute("loggedUser.userPassword", userPassword);
                 session.setAttribute("loggedUser.userName", loggedUser.getUserName());
@@ -40,7 +42,7 @@
 
                 response.sendRedirect(request.getRequestURI());
             }
-        } catch(Exception ex) {
+        } catch (Exception ex) {
             headerError = ex.getMessage();
         }
     } else if (request.getParameter("logout") != null) {
@@ -52,72 +54,72 @@
     }
 
     String sessionUserEmail = (String) session.getAttribute("loggedUser.userEmail");
-    String sessionUserName = (String)session.getAttribute("loggedUser.userName");
+    String sessionUserName = (String) session.getAttribute("loggedUser.userName");
     String sessionUserRole = (String) session.getAttribute("loggedUser.userRole");
     Boolean sessionUserVerified = (Boolean) session.getAttribute("loggedUser.userVerified");
 %>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
-        <% if (sessionUserEmail == null) { %>
+        <% if (sessionUserEmail == null) {%>
         <a class="navbar-brand" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-box2"></i></a>
-        <% } %>
-        <% if (sessionUserEmail != null) { %>
+            <% } %>
+            <% if (sessionUserEmail != null) { %>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("index.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-house"></i> Home</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-house"></i> Home</a>
+                    <% if (request.getRequestURI().contains("index.jsp") || request.getRequestURI().equals("/stock-over-flow/")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-house"></i> Home</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/index.jsp"><i class="bi bi-house"></i> Home</a>
                     <% } %>
                 </li>
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("products.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/products.jsp"><i class="bi bi-list"></i> Produtos</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/products.jsp"><i class="bi bi-list"></i> Produtos</a>
+                    <% if (request.getRequestURI().contains("providers.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
                     <% } %>
                 </li>
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("my-profile.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% if (request.getRequestURI().contains("brands.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
                     <% } %>
                 </li>
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("brands.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/brands.jsp"><i class="bi bi-building"></i> Marcas</a>
+                    <% if (request.getRequestURI().contains("products.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/products.jsp"><i class="bi bi-list"></i> Produtos</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/products.jsp"><i class="bi bi-list"></i> Produtos</a>
                     <% } %>
                 </li>
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("providers.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/providers.jsp"><i class="bi bi-box-seam"></i> Fornecedores</a>
+                    <% if (request.getRequestURI().contains("movements.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
                     <% } %>
                 </li>
+                <% if (sessionUserRole.equals("admin")) { %>
                 <li class="nav-item">
-                    <% if(request.getRequestURI().contains("movements.jsp")) { %>
-                        <a class="nav-link active" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
-                    <% } else { %>
-                        <a class="nav-link" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
+                    <% if (request.getRequestURI().contains("users.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
                     <% } %>
                 </li>
-                <% if(sessionUserRole.equals("admin")) { %>
-                    <li class="nav-item">
-                        <% if(request.getRequestURI().contains("users.jsp")) { %>
-                            <a class="nav-link active" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
-                        <% } else { %>
-                            <a class="nav-link" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>
-                        <% } %>
-                    </li>
                 <% } %>
+                <li class="nav-item">
+                    <% if (request.getRequestURI().contains("my-profile.jsp")) {%>
+                    <a class="nav-link active" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% } else {%>
+                    <a class="nav-link" href="<%= request.getContextPath()%>/my-profile.jsp"><i class="bi bi-person-lines-fill"></i> Meu perfil</a>
+                    <% } %>
+                </li>
             </ul>
             <form method="post">
                 <button type="submit" name="logout" class="btn btn-dark"><i class="bi bi-box-arrow-right"></i> Logout</button>
@@ -126,18 +128,19 @@
         <% } %>
     </div>
 </nav>
-<% if(DbListener.exception != null) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= DbListener.exception.getMessage() %>
-    </div>
-<% } %>
-<% if(headerError != null) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= headerError %>
-    </div>
-<% } %>
-<% if (sessionUserEmail == null) { %>
 <div class="container mt-2">
+    <% if (DbListener.exception != null) {%>
+    <div class="alert alert-danger" role="alert">
+        <%= DbListener.exception.getMessage()%>
+    </div>
+    <% } %>
+    <% if (headerError != null) {%>
+    <div class="alert alert-danger" role="alert">
+        <%= headerError%>
+    </div>
+    <% } %>
+    <% if (sessionUserEmail == null) { %>
+
     <div class="card">
         <div class="card-body">
             <form method="get">
@@ -154,13 +157,11 @@
             </form>
         </div>
     </div>
-</div>
-<%}else if(sessionUserVerified == false){%>
-<div class="container mt-2">
+    <%} else if (sessionUserVerified == false) {%>
     <div class="card">
         <div class="card-body">
             <form method="get">
-                
+
                 <div class="mb-3">
                     <label for="userInsertToken" class="form-label"><i class="bi bi-key-fill"></i> Token</label>
                     <input type="text" name="userInsertToken" class="form-control" id="userInsertToken" aria-describedby="tokenHelp" required>
@@ -170,5 +171,6 @@
             </form>
         </div>
     </div>
+
+    <%}%>
 </div>
-<%}%>

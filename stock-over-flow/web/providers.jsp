@@ -46,6 +46,7 @@
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
+        <%@include file="WEB-INF/jspf/sweetalert-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
@@ -54,10 +55,12 @@
             <div class="card">
                 <div class="card-body">
                     <h2>Fornecedores (<%= providers.size()%>)
+                        <% if (sessionUserRole.equals("admin")) {%>
                         <!-- Button add providers -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
+                        <% } %>
                     </h2>
                     <!-- Modal add provider -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -106,7 +109,9 @@
                                     <th>Telefone</th>
                                     <th>Email</th>
                                     <th>Produtos (Estoque)</th>
+                                        <% if (sessionUserRole.equals("admin")) {%>
                                     <th></th>
+                                        <% } %>
                                 </tr>
                             </thead>
                             <tbody>
@@ -120,13 +125,15 @@
                                     <td><%= provider.getProvTelephone()%></td>
                                     <td><%= provider.getProvMail()%></td>
                                     <td><%= Provider.getProvQntById(provider.getProvId())%></td>
+                                    <% if (sessionUserRole.equals("admin")) {%>
                                     <td>
-                                        <form method="post">
+                                        <form name="providers-<%= i%>" method="post">
                                             <!-- Button edit modal -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <input type="hidden" name="provId" value="<%= provider.getProvId()%>"/>
+                                            <!-- onclick="confirmDeletion()" -->
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -178,6 +185,7 @@
                                             </div>
                                         </div>
                                     </td>
+                                    <% } %>
                                 </tr>
                                 <% } %>
                             </tbody>
@@ -200,5 +208,6 @@
                 });
             });
         </script>
+        <script src="scripts/sweetalert.js"></script>
     </body>
 </html>

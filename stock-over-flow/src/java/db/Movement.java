@@ -156,9 +156,9 @@ public class Movement {
         BigDecimal entries = new BigDecimal(valueAllEntries).setScale(2, RoundingMode.HALF_EVEN);
         BigDecimal outputs = new BigDecimal(valueAllOutputs).setScale(2, RoundingMode.HALF_EVEN);
         BigDecimal profit = new BigDecimal(valueAllOutputs - valueAllEntries).setScale(2, RoundingMode.HALF_EVEN);
-        profitTable.addCell(String.valueOf(entries.doubleValue()));
-        profitTable.addCell(String.valueOf(outputs.doubleValue()));
-        profitTable.addCell(String.valueOf(profit.doubleValue()));
+        profitTable.addCell("R$ " + String.valueOf(entries.doubleValue()));
+        profitTable.addCell("R$ " + String.valueOf(outputs.doubleValue()));
+        profitTable.addCell("R$ " + String.valueOf(profit.doubleValue()));
         document.add(profitTable);
         
         document.add(new Paragraph("Movimentações:"));
