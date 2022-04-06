@@ -140,7 +140,7 @@ public class Produto {
     }
 
     public String getProdName() {
-        return prodName;
+        return prodName.replaceAll("\"","&quot");
     }
 
     public void setProdName(String prodName) {
@@ -156,14 +156,14 @@ public class Produto {
     }
     
     public String getProdMaterial() {
-        return prodMaterial;
+        return prodMaterial.replaceAll("\"","&quot");
     }
 
     public void setProdMaterial(String prodMaterial) {
         this.prodMaterial = prodMaterial;
     }
     public String getProdSize() {
-        return prodSize;
+        return prodSize.replaceAll("\"","&quot");
     }
 
     public void setProdSize(String prodSize) {

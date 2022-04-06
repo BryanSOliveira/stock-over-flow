@@ -76,8 +76,7 @@
                                         <div class="mb-3">
                                             <label for="prodBrand">Marca</label>
                                             <select class="form-control" name="prodBrand" id="prodBrand">
-                                                <%
-                                                    ArrayList<Integer> brandIds = Marca.getBrandIds();
+                                                <%  ArrayList<Integer> brandIds = Marca.getBrandIds();
                                                     for (int p = 0; p < brandIds.size(); p++) {%>
                                                 <option value="<%=brandIds.get(p)%>"><%=Marca.getBrandNameById(brandIds.get(p))%></option>
                                                 <%}%>
@@ -115,6 +114,7 @@
                                     <th>Marca</th>
                                     <th>Material</th>
                                     <th>Tamanho</th>
+                                    <th>Valor Médio</th>
                                     <th>Quantidade</th>
                                         <% if (sessionUserRole.equals("admin")) {%>
                                     <th></th>
@@ -134,6 +134,7 @@
 
                                     <td><%= prod.getProdMaterial()%></td>
                                     <td><%= prod.getProdSize()%></td>
+                                    <td><%= Movement.getAvgById(prod.getProdId())%></td>
                                     <td><%= Movement.getQntById(prod.getProdId())%></td>
                                     <% if (sessionUserRole.equals("admin")) {%>
                                     <td>
@@ -185,6 +186,11 @@
                                                                 <label for="prodSize-<%= i%>">Tamanho</label>
                                                                 <input type="text" class="form-control" name="prodSize" id="prodSize-<%= i%>" 
                                                                        value="<%= prod.getProdSize()%>"/>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="prodAvgValue-<%= i%>">Valor Médio</label>
+                                                                <input type="number" class="form-control" name="prodAvgValue" id="prodAvgValue-<%= i%>" 
+                                                                       value="<%= Movement.getAvgById(prod.getProdId())%>" disabled/>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movQuantity-<%= i%>">Quantidade</label>

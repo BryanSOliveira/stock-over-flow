@@ -157,7 +157,7 @@ public class User {
     }
 
     public String getUserEmail() {
-        return userEmail;
+        return userEmail.replaceAll("\"","&quot");
     }
 
     public void setUserEmail(String userEmail) {
@@ -165,7 +165,7 @@ public class User {
     }
 
     public String getUserName() {
-        return userName;
+        return userName.replaceAll("\"","&quot");
     }
 
     public void setName(String userName) {

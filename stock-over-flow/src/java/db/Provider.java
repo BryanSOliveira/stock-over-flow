@@ -108,19 +108,19 @@ public class Provider {
     }
 
     public String getProvName() {
-        return provName;
+        return provName.replaceAll("\"","&quot");
     }
 
     public String getProvLocation() {
-        return provLocation;
+        return provLocation.replaceAll("\"","&quot");
     }
 
     public String getProvTelephone() {
-        return provTelephone;
+        return provTelephone.replaceAll("\"","&quot");
     }
 
     public String getProvMail() {
-        return provMail;
+        return provMail.replaceAll("\"","&quot");
     }
     
     public void setProvId(int provId) {

@@ -97,11 +97,11 @@ public class Marca {
     }
 
     public String getBrandName() {
-        return brandName;
+        return brandName.replaceAll("\"","&quot");
     }
     
     public String getBrandDesc() {
-        return brandDesc;
+        return brandDesc.replaceAll("\"","&quot");
     }
 
     public void setBrandId(int brandId) {

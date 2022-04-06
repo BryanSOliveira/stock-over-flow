@@ -247,7 +247,7 @@ public class Movement {
     }
 
     public String getMovDescription() {
-        return movDescription;
+        return movDescription.replaceAll("\"","&quot");
     }
 
     public void setMovId(int movId) {
@@ -293,6 +293,19 @@ public class Movement {
         con.close();
         rs.close();
         return actualQuantity;
+    }
+    
+    public static double getAvgById(Integer movProd) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT AVG(movValue) FROM movement WHERE movProd=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, movProd);
+        ResultSet rs = stmt.executeQuery();
+        double prodAvgValue = rs.getInt("AVG(movValue)"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return prodAvgValue;
     }
     
     
