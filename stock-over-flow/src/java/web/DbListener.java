@@ -19,7 +19,7 @@ import javax.servlet.ServletContextListener;
  */
 public class DbListener implements ServletContextListener {
     public static final String CLASS_NAME = "org.sqlite.JDBC";
-    public static final String URL = "jdbc:sqlite:stk-db.db";
+    public static final String URL = "jdbc:sqlite:stk-07.db";
     
     public static Exception exception = null;
     
@@ -55,14 +55,14 @@ public class DbListener implements ServletContextListener {
                 User.insertUser("user", "Usuário", "user", "123", true, "99999999");
             }
             if(Produto.getProdutos().isEmpty()) {
-                Produto.insertProd("Tênis", 1, "Composto", "41/42");
-                Produto.insertProd("Camisa", 2, "Poliester", "G");
-                Produto.insertProd("Calça Jeans", 3, "Jeans", "42");
+                Produto.insertProd("Tênis", "Nike", "Composto", "41/42");
+                Produto.insertProd("Camisa", "Adidas", "Poliester", "G");
+                Produto.insertProd("Calça Jeans", "Offtrack", "Jeans", "42");
             }
             if(Movement.getMovements().isEmpty()) {
-                Movement.insertMovement(1, 1, "Entrada", 20, 15.99, "Entrada de produtos");
-                Movement.insertMovement(1, 2, "Entrada", 30, 14.99, "Preparação de estoque");
-                Movement.insertMovement(1, 1, "Saída", -4, 17.99, "Venda padrão");
+                Movement.insertMovement(1, "Departure Selling", "Entrada", 20, 15.99, "Entrada de produtos");
+                Movement.insertMovement(1, "Mannugaroupas", "Entrada", 30, 14.99, "Preparação de estoque");
+                Movement.insertMovement(1, "Departure Selling", "Saída", -4, 17.99, "Venda padrão");
             }
             if(Marca.getBrands().isEmpty()) {
                 Marca.insertBrand("Nike", "Roupas");

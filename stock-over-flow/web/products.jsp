@@ -15,7 +15,7 @@
     try {
         if (request.getParameter("insert") != null) {
             String prodName = request.getParameter("prodName");
-            Integer prodBrand = Integer.parseInt(request.getParameter("prodBrand"));
+            String prodBrand = request.getParameter("prodBrand");
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
             Produto.insertProd(prodName, prodBrand, prodMaterial, prodSize);
@@ -27,7 +27,7 @@
         } else if (request.getParameter("edit") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
             String prodName = request.getParameter("prodName");
-            Integer prodBrand = Integer.parseInt(request.getParameter("prodBrand"));
+            String prodBrand = request.getParameter("prodBrand");
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
             Produto.alterProd(prodId, prodName, prodBrand, prodMaterial, prodSize);
@@ -76,9 +76,9 @@
                                         <div class="mb-3">
                                             <label for="prodBrand">Marca</label>
                                             <select class="form-control" name="prodBrand" id="prodBrand">
-                                                <%  ArrayList<Integer> brandIds = Marca.getBrandIds();
-                                                    for (int p = 0; p < brandIds.size(); p++) {%>
-                                                <option value="<%=brandIds.get(p)%>"><%=Marca.getBrandNameById(brandIds.get(p))%></option>
+                                                <%  ArrayList<String> brandNames = Marca.getBrandNames();
+                                                    for (int p = 0; p < brandNames.size(); p++) {%>
+                                                <option value="<%=brandNames.get(p)%>"><%=brandNames.get(p)%></option>
                                                 <%}%>
                                             </select>
                                         </div>
@@ -129,9 +129,7 @@
                                 <tr>
                                     <td><%= prod.getProdId()%></td>
                                     <td><%= prod.getProdName()%></td>     
-
-                                    <td><%= Marca.getBrandNameById(prod.getProdBrand())%></td>
-
+                                    <td><%= prod.getProdBrand()%></td>
                                     <td><%= prod.getProdMaterial()%></td>
                                     <td><%= prod.getProdSize()%></td>
                                     <td><%= Movement.getAvgById(prod.getProdId())%></td>
@@ -167,14 +165,13 @@
                                                             <div class="mb-3">
                                                                 <label for="prodBrand-<%= i%>">Marca</label>
                                                                 <select class="form-control" name="prodBrand" id="prodBrand-<%= i%>">
-                                                                    <% ArrayList<Integer> editBrandIds = Marca.getBrandIds();
-                                                                        for (int f = 0; f < editBrandIds.size(); f++) {%>
-                                                                    <% if (editBrandIds.get(f).equals(prod.getProdBrand())) {%>
-                                                                    <option value="<%=editBrandIds.get(f)%>" selected><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
+                                                                    <% ArrayList<String> editBrandNames = Marca.getBrandNames();
+                                                                        for (int f = 0; f < editBrandNames.size(); f++) {%>
+                                                                    <% if (editBrandNames.get(f).equals(prod.getProdBrand())) {%>
+                                                                    <option value="<%=editBrandNames.get(f)%>" selected><%=editBrandNames.get(f)%></option>
                                                                     <%} else {%>
-                                                                    <option value="<%=editBrandIds.get(f)%>"><%=Marca.getBrandNameById(editBrandIds.get(f))%></option>
-                                                                    <%}%>
-                                                                    <%}%>
+                                                                    <option value="<%=editBrandNames.get(f)%>"><%=editBrandNames.get(f)%></option>
+                                                                    <%}}%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">

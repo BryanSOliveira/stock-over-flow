@@ -17,14 +17,14 @@
             Marca.insertBrand(brandName, brandDesc);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            int brandId = Integer.parseInt(request.getParameter("brandId"));
-            Marca.deleteBrand(brandId);
+            String brandName = request.getParameter("brandName");
+            Marca.deleteBrand(brandName);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            int brandId = Integer.parseInt(request.getParameter("brandId"));
+            String oldBrandName = request.getParameter("oldBrandName");
             String brandName = request.getParameter("brandName");
             String brandDesc = request.getParameter("brandDesc");
-            Marca.alterBrand(brandId, brandName, brandDesc);
+            Marca.alterBrand(oldBrandName, brandName, brandDesc);
             response.sendRedirect(request.getRequestURI());
         }
         brands = Marca.getBrands();
@@ -90,7 +90,6 @@
                         <table class="table table-striped" id="table-brands">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>ID</th>
                                     <th>Nome</th>
                                     <th>Descrição</th>
                                         <% if (sessionUserRole.equals("admin")) {%>
@@ -103,7 +102,6 @@
                                 <% for (Marca brand : brands) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= brand.getBrandId()%></td>
                                     <td><%= brand.getBrandName()%></td>
                                     <td><%= brand.getBrandDesc()%></td>
                                     <% if (sessionUserRole.equals("admin")) {%>
@@ -113,7 +111,7 @@
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="brandId" value="<%= brand.getBrandId()%>"/>
+                                            <input type="hidden" name="brandName" value="<%= brand.getBrandName()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -124,11 +122,6 @@
                                                 <div class="modal-content">
                                                     <form>
                                                         <div class="modal-body">
-                                                            <div class="mb-3">
-                                                                <label for="brandId-<%= i%>">ID</label>
-                                                                <input type="text" class="form-control" name="brandId" id="brandId-<%= i%>" 
-                                                                       value="<%= brand.getBrandId()%>" disabled/>
-                                                            </div>
                                                             <div class="mb-3">
                                                                 <label for="brandName-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="brandName" id="brandName-<%= i%>" 
@@ -142,7 +135,7 @@
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                                            <input type="hidden" name="brandId" value="<%= brand.getBrandId()%>"/>
+                                                            <input type="hidden" name="oldBrandName" value="<%= brand.getBrandName()%>"/>
                                                             <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>

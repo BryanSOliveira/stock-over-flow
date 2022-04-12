@@ -17,7 +17,6 @@ import web.DbListener;
  * @author spbry
  */
 public class Provider {
-    private int provId;
     private String provName;
     private String provLocation;
     private String provTelephone;
@@ -25,7 +24,6 @@ public class Provider {
     
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS provider("
-                + "provId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "provName VARCHAR(50) UNIQUE NOT NULL,"
                 + "provLocation VARCHAR(100),"
                 + "provTelephone VARCHAR(15) UNIQUE,"
@@ -43,12 +41,11 @@ public class Provider {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * FROM provider");
         while(rs.next()) {
-            int provId = rs.getInt("provId");
             String provName = rs.getString("provName");
             String provLocation = rs.getString("provLocation");
             String provTelephone = rs.getString("provTelephone");
             String provMail = rs.getString("provMail");
-            list.add(new Provider(provId, provName, provLocation, provTelephone, provMail));
+            list.add(new Provider(provName, provLocation, provTelephone, provMail));
         }
         rs.close();
         stmt.close();
@@ -70,41 +67,36 @@ public class Provider {
         con.close();
     }
     
-    public static void alterProvider(int provId, String provName, String provLocation, String provTelephone, String provMail) throws Exception {
+    public static void alterProvider(String oldProvName, String provName, String provLocation, String provTelephone, String provMail) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "UPDATE provider SET provName = ?, provLocation = ?, provTelephone = ?, provMail = ? "
-                + "WHERE provId = ?";
+                + "WHERE provName = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, provName); 
         stmt.setString(2, provLocation);
         stmt.setString(3, provTelephone);
         stmt.setString(4, provMail);
-        stmt.setInt(5, provId);
+        stmt.setString(5, oldProvName);
         stmt.execute();
         stmt.close();
         con.close();
     }
     
-    public static void deleteProvider(int provId) throws Exception {
+    public static void deleteProvider(String provName) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM provider WHERE provId = ? ";
+        String sql = "DELETE FROM provider WHERE provName = ? ";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, provId);
+        stmt.setString(1, provName);
         stmt.execute();
         stmt.close();
         con.close();
     }
 
-    public Provider(int provId, String provName, String provLocation, String provTelephone, String provMail) {
-        this.provId = provId;
+    public Provider(String provName, String provLocation, String provTelephone, String provMail) {
         this.provName = provName;
         this.provLocation = provLocation;
         this.provTelephone = provTelephone;
         this.provMail = provMail;
-    }
-
-    public int getProvId() {
-        return provId;
     }
 
     public String getProvName() {
@@ -121,10 +113,6 @@ public class Provider {
 
     public String getProvMail() {
         return provMail.replaceAll("\"","&quot");
-    }
-    
-    public void setProvId(int provId) {
-        this.provId = provId;
     }
 
     public void setProvName(String provName) {
@@ -143,39 +131,26 @@ public class Provider {
         this.provMail = provMail;
     }
     
-    public static ArrayList<Integer> getProvIds() throws Exception {
-        ArrayList<Integer> idList = new ArrayList<>();
+    public static ArrayList<String> getProvNames() throws Exception {
+        ArrayList<String> provList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT provId FROM provider");
+        ResultSet rs = stmt.executeQuery("SELECT provName FROM provider");
         while(rs.next()) {
-            int provId = rs.getInt("provId");
-            idList.add(provId);
+            String provName = rs.getString("provName");
+            provList.add(provName);
         }
         rs.close();
         stmt.close();
         con.close();
-        return idList;
+        return provList;
     }
     
-    public static String getProvNameById(Integer provId) throws Exception {
-        Connection con = DbListener.getConnection();
-        String sql = "SELECT provName FROM provider WHERE provId=?";
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, provId);
-        ResultSet rs = stmt.executeQuery();
-        String provName = rs.getString("provName"); 
-        stmt.close();
-        con.close();
-        rs.close();
-        return provName;
-    }
-    
-    public static Integer getProvQntById(Integer provId) throws Exception {
+    public static Integer getProvQnt(String provName) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "SELECT SUM(movQuantity) FROM movement WHERE movProv=?";
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, provId);
+        stmt.setString(1, provName);
         ResultSet rs = stmt.executeQuery();
         Integer provQnt = rs.getInt("SUM(movQuantity)"); 
         stmt.close();

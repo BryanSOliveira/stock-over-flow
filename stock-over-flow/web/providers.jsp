@@ -19,16 +19,16 @@
             Provider.insertProvider(provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("delete") != null) {
-            int provId = Integer.parseInt(request.getParameter("provId"));
-            Provider.deleteProvider(provId);
+            String provName = request.getParameter("provName");
+            Provider.deleteProvider(provName);
             response.sendRedirect(request.getRequestURI());
         } else if (request.getParameter("edit") != null) {
-            int provId = Integer.parseInt(request.getParameter("provId"));
+            String oldProvName = request.getParameter("oldProvName");
             String provName = request.getParameter("provName");
             String provLocation = request.getParameter("provLocation");
             String provTelephone = request.getParameter("provTelephone");
             String provMail = request.getParameter("provMail");
-            Provider.alterProvider(provId, provName, provLocation, provTelephone, provMail);
+            Provider.alterProvider(oldProvName, provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
         }
         providers = Provider.getProviders();
@@ -103,7 +103,6 @@
                         <table class="table table-striped" id="table-providers">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>ID</th>
                                     <th>Nome</th>
                                     <th>Endereço</th>
                                     <th>Telefone</th>
@@ -119,12 +118,11 @@
                                 <% for (Provider provider : providers) { %>
                                 <% i++;%>
                                 <tr>
-                                    <td><%= provider.getProvId()%></td>
                                     <td><%= provider.getProvName()%></td>
                                     <td><%= provider.getProvLocation()%></td>
                                     <td><%= provider.getProvTelephone()%></td>
                                     <td><%= provider.getProvMail()%></td>
-                                    <td><%= Provider.getProvQntById(provider.getProvId())%></td>
+                                    <td><%= Provider.getProvQnt(provider.getProvName())%></td>
                                     <% if (sessionUserRole.equals("admin")) {%>
                                     <td>
                                         <form name="providers-<%= i%>" method="post">
@@ -132,7 +130,7 @@
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
-                                            <input type="hidden" name="provId" value="<%= provider.getProvId()%>"/>
+                                            <input type="hidden" name="provName" value="<%= provider.getProvName()%>"/>
                                             <!-- onclick="confirmDeletion()" -->
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
@@ -144,11 +142,6 @@
                                                 <div class="modal-content">
                                                     <form>
                                                         <div class="modal-body">
-                                                            <div class="mb-3">
-                                                                <label for="provId-<%= i%>">ID</label>
-                                                                <input type="text" class="form-control" name="provId" id="provId-<%= i%>" 
-                                                                       value="<%= provider.getProvId()%>" disabled/>
-                                                            </div>
                                                             <div class="mb-3">
                                                                 <label for="provName-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="provName" id="provName-<%= i%>" 
@@ -172,12 +165,12 @@
                                                             <div class="mb-3">
                                                                 <label for="provQnt-<%= i%>">Produto (Estoque)</label>
                                                                 <input type="text" class="form-control" name="provQnt" id="provQnt-<%= i%>" 
-                                                                       value="<%= Provider.getProvQntById(provider.getProvId())%>" disabled/>
+                                                                       value="<%= Provider.getProvQnt(provider.getProvName())%>" disabled/>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                            <input type="hidden" name="provId" value="<%= provider.getProvId()%>"/>
+                                                            <input type="hidden" name="oldProvName" value="<%= provider.getProvName()%>"/>
                                                             <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>

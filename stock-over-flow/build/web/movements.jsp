@@ -18,7 +18,7 @@
     try {
         if (request.getParameter("insert") != null) {
             int movProd = Integer.parseInt(request.getParameter("movProd"));
-            int movProv = Integer.parseInt(request.getParameter("movProv"));
+            String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
@@ -28,7 +28,7 @@
                 movQuantity = Math.abs(movQuantity);
             } else if (movType.equals("out")) {
                 movType = "Saída";
-                movQuantity = -movQuantity;
+                movQuantity = -movQuantity;  
             } else {
                 movType = "Invalido";
             }
@@ -42,7 +42,7 @@
         } else if (request.getParameter("edit") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
             int movProd = Integer.parseInt(request.getParameter("movProd"));
-            int movProv = Integer.parseInt(request.getParameter("movProv"));
+            String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
             int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
@@ -52,7 +52,7 @@
                 movQuantity = Math.abs(movQuantity);
             } else if (movType.equals("out")) {
                 movType = "Saída";
-                movQuantity = -movQuantity;
+                movQuantity = -movQuantity; 
             } else {
                 movType = "Invalido";
             }
@@ -112,8 +112,11 @@
                                             <select class="form-control" name="movProd" id="movProd">
                                                 <%
                                                     ArrayList<Integer> prodIds = Produto.getProdIds();
+                                                    if(prodIds.size() > 0){
                                                     for (int p = 0; p < prodIds.size(); p++) {%>
                                                 <option value="<%=prodIds.get(p)%>"><%=Produto.getProdNameById(prodIds.get(p))%></option>
+                                                <%}}else{%>
+                                                <option value="---" selected>Cadastre produtos na guia "Produtos"</option>
                                                 <%}%>
                                             </select>
                                         </div>
@@ -121,9 +124,12 @@
                                             <label for="movProv">Fornecedor</label>
                                             <select class="form-control" name="movProv" id="movProv">
                                                 <%
-                                                    ArrayList<Integer> provIds = Provider.getProvIds();
-                                                    for (int r = 0; r < provIds.size(); r++) {%>
-                                                <option value="<%=provIds.get(r)%>"><%=Provider.getProvNameById(provIds.get(r))%></option>
+                                                    ArrayList<String> provList = Provider.getProvNames();
+                                                    if(provList.size() > 0){
+                                                    for (int r = 0; r < provList.size(); r++) {%>
+                                                <option value="<%=provList.get(r)%>"><%=provList.get(r)%></option>
+                                                <%}}else{%>
+                                                <option value="---" selected>Cadastre fornecedores na guia "Fornecedores"</option>
                                                 <%}%>
                                             </select>
                                         </div>
@@ -185,13 +191,13 @@
                                     <td><%= x.getMovDate()%></td>
                                     <td><%= x.getMovType()%></td>
                                     <td><%= Produto.getProdNameById(x.getMovProd())%></td>
-                                    <td><%= Provider.getProvNameById(x.getMovProv())%></td>
+                                    <td><%= x.getMovProv()%></td>
                                     <%if (x.getMovQuantity() > 0) {%>
                                     <td style="color:green;"><%= x.getMovQuantity()%></td>
                                     <%} else if (x.getMovQuantity() < 0) {%>
                                     <td style="color:red;"><%= x.getMovQuantity()%></td>
                                     <%} else {%>
-                                    <td style="color:blue;><%= x.getMovQuantity()%></td>
+                                    <td style="color:blue;"><%= x.getMovQuantity()%></td>
                                         <%}%>
                                         <td><%= x.getMovValue()%></td>
                                         <td><%= x.getMovDescription()%></td>
@@ -226,25 +232,27 @@
                                                                 <label for="movProd-<%= i%>">Produto</label>
                                                                 <select class="form-control" name="movProd" id="movProd-<%= i%>">
                                                                     <% ArrayList<Integer> editProdIds = Produto.getProdIds();
+                                                                    if(editProdIds.size() > 0){
                                                                         for (int f = 0; f < editProdIds.size(); f++) {%>
                                                                     <% if (editProdIds.get(f).equals(x.getMovProd())) {%>
                                                                     <option value="<%=editProdIds.get(f)%>" selected><%=Produto.getProdNameById(editProdIds.get(f))%></option>
                                                                     <% } else {%>
                                                                     <option value="<%=editProdIds.get(f)%>"><%=Produto.getProdNameById(editProdIds.get(f))%></option>
-                                                                    <%}%>
+                                                                    <%}}}else{%>
+                                                                    <option value="<%=Produto.getProdNameById(i)%>" selected><%=Produto.getProdNameById(i)%></option>
                                                                     <%}%>
                                                                 </select>
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label for="movProv-<%= i%>">Fornecedor</label>
                                                                 <select class="form-control" name="movProv" id="movProv-<%= i%>">
-                                                                    <% ArrayList<Integer> editProvIds = Provider.getProvIds();
-                                                                        for (int q = 0; q < editProvIds.size(); q++) {%>
+                                                                    <% ArrayList<String> editProvList = Provider.getProvNames();
+                                                                        for (int q = 0; q < editProvList.size(); q++) {%>
 
-                                                                    <% if (editProdIds.get(q).equals(x.getMovProv())) {%>
-                                                                    <option value="<%=editProvIds.get(q)%>" selected><%=Provider.getProvNameById(editProvIds.get(q))%></option>
+                                                                    <% if (editProvList.get(q).equals(x.getMovProv())) {%>
+                                                                    <option value="<%=editProvList.get(q)%>" selected><%=editProvList.get(q)%></option>
                                                                     <% } else {%>
-                                                                    <option value="<%=editProvIds.get(q)%>"><%=Provider.getProvNameById(editProvIds.get(q))%></option>
+                                                                    <option value="<%=editProvList.get(q)%>"><%=editProvList.get(q)%></option>
                                                                     <%}%>
                                                                     <%}%>
                                                                 </select>
