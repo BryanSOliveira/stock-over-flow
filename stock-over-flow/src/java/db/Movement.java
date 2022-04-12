@@ -301,7 +301,8 @@ public class Movement {
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, movProd);
         ResultSet rs = stmt.executeQuery();
-        double prodAvgValue = rs.getInt("AVG(movValue)"); 
+        double prodAvgValue = Math.round(rs.getDouble("AVG(movValue)")*100); 
+               prodAvgValue = prodAvgValue/100;
         stmt.close();
         con.close();
         rs.close();
