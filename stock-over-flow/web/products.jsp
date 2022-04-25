@@ -4,36 +4,43 @@
     Author     : spbry
 --%>
 
-<%@page import="db.Marca"%>
+<%@page import="db.Brand"%>
 <%@page import="db.Movement"%>
-<%@page import="db.Produto"%>
+<%@page import="db.Product"%>
 <%@page import="java.util.ArrayList"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestError = null;
-    ArrayList<Produto> products = new ArrayList<>();
+    ArrayList<Product> products = new ArrayList<>();
     try {
+        //ADD PRODUCT
         if (request.getParameter("insert") != null) {
             String prodName = request.getParameter("prodName");
             String prodBrand = request.getParameter("prodBrand");
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
-            Produto.insertProd(prodName, prodBrand, prodMaterial, prodSize);
+            Product.insertProd(prodName, prodBrand, prodMaterial, prodSize);
             response.sendRedirect(request.getRequestURI());
-        } else if (request.getParameter("delete") != null) {
-            Integer prodId = Integer.parseInt(request.getParameter("prodId"));
-            Produto.deleteProd(prodId);
-            response.sendRedirect(request.getRequestURI());
+            
+        //EDIT PRODUCT
         } else if (request.getParameter("edit") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
             String prodName = request.getParameter("prodName");
             String prodBrand = request.getParameter("prodBrand");
             String prodMaterial = request.getParameter("prodMaterial");
             String prodSize = request.getParameter("prodSize");
-            Produto.alterProd(prodId, prodName, prodBrand, prodMaterial, prodSize);
+            Product.alterProd(prodId, prodName, prodBrand, prodMaterial, prodSize);
+            response.sendRedirect(request.getRequestURI());
+            
+        //DELETE PRODUCT
+        } else if (request.getParameter("delete") != null) {
+            Integer prodId = Integer.parseInt(request.getParameter("prodId"));
+            Product.deleteProd(prodId);
             response.sendRedirect(request.getRequestURI());
         }
-        products = Produto.getProdutos();
+        
+        products = Product.getProds();
+        
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -56,41 +63,46 @@
             <div class="card">
                 <div class="card-body">
                     <h2>Produtos (<%= products.size()%>)
-                        <% if (sessionUserRole.equals("admin")) {%>
-                        <!-- Button add prod -->
+                        <% if (sessionUserRole.equals("Admin")) {%>
+                        <!-- BUTTON ADD PRODUCT -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                         <% } %>
                     </h2>
-                    <!-- Modal add prod -->
+                    <!-- ADD PRODUCT SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <form method="post">
                                     <div class="modal-body">
+                                        <!-- PRODUCT NAME -->
                                         <div class="mb-3">
                                             <label for="prodName">Nome</label>
-                                            <input type="text" class="form-control" name="prodName" id="prodName"/>
+                                            <input type="text" class="form-control" name="prodName" id="prodName" required/>
                                         </div>
+                                        <!-- PRODUCT BRAND -->
                                         <div class="mb-3">
                                             <label for="prodBrand">Marca</label>
                                             <select class="form-control" name="prodBrand" id="prodBrand">
-                                                <%  ArrayList<String> brandNames = Marca.getBrandNames();
-                                                    for (int p = 0; p < brandNames.size(); p++) {%>
-                                                <option value="<%=brandNames.get(p)%>"><%=brandNames.get(p)%></option>
+                                                <%  ArrayList<String> brandNames = Brand.getBrandNames();
+                                                    for (int j = 0; j < brandNames.size(); j++) {%>
+                                                <option value="<%=brandNames.get(j)%>"><%=brandNames.get(j)%></option>
                                                 <%}%>
                                             </select>
                                         </div>
+                                        <!-- PRODUCT MATERIAL -->
                                         <div class="mb-3">
                                             <label for="prodMaterial">Material</label>
                                             <input type="text" class="form-control" name="prodMaterial" id="prodMaterial"/>
                                         </div>
+                                        <!-- PRODUCT SIZE -->
                                         <div class="mb-3">
                                             <label for="prodSize">Tamanho</label>
                                             <input type="text" class="form-control" name="prodSize" id="prodSize"/>
                                         </div>
                                     </div>
+                                    <!-- PRODUCT SAVE AND CANCEL BUTTON -->
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                         <input type="submit" name="insert" value="Adicionar" class="btn btn-primary">
@@ -99,12 +111,13 @@
                             </div>
                         </div>
                     </div>
+                    <!-- SHOW ERROR CODE -->
                     <% if (requestError != null) {%>
                     <div class="alert alert-danger" role="alert">
                         <%= requestError%>
                     </div>
                     <% } %>
-                    <!-- Table prod -->
+                    <!-- PRODUCT MAIN TABLE -->
                     <div class="table-responsive">
                         <table class="table table-striped" id="table-products">
                             <thead class="bg-light">
@@ -116,88 +129,91 @@
                                     <th>Tamanho</th>
                                     <th>Valor Médio</th>
                                     <th>Quantidade</th>
-                                        <% if (sessionUserRole.equals("admin")) {%>
-                                    <th></th>
-                                        <% } %>
+                                    <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% int i = 0;
-                                    for (Produto prod : products) {
-                                        i++;
-                                %>
+                                   for (Product product : products) {
+                                   i++; %>
                                 <tr>
-                                    <td><%= prod.getProdId()%></td>
-                                    <td><%= prod.getProdName()%></td>     
-                                    <td><%= prod.getProdBrand()%></td>
-                                    <td><%= prod.getProdMaterial()%></td>
-                                    <td><%= prod.getProdSize()%></td>
-                                    <td><%= Movement.getAvgById(prod.getProdId())%></td>
-                                    <td><%= Movement.getQntById(prod.getProdId())%></td>
-                                    <% if (sessionUserRole.equals("admin")) {%>
+                                    <td><%= product.getProdId()%></td>
+                                    <td><%= product.getProdName()%></td>     
+                                    <td><%= product.getProdBrand()%></td>
+                                    <td><%= product.getProdMaterial()%></td>
+                                    <td><%= product.getProdSize()%></td>
+                                    <td><%= Movement.getAvgById(product.getProdId())%></td>
+                                    <td><%= Movement.getQntById(product.getProdId())%></td>
+                                    <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
                                         <form method="post">
-                                            <!-- Button edit modal -->
+                                            <!-- BUTTON EDIT PRODUCT -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
-                                            <input type="hidden" name="prodId" value="<%= prod.getProdId()%>"/>
+                                                <i class="bi bi-pencil-square"></i></button>
+                                            <input type="hidden" name="prodId" value="<%= product.getProdId()%>"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
+                                                <i class="bi bi-trash3"></i></button>
                                         </form>
-                                        <!-- Modal edit -->
+                                        <!-- EDIT PRODUCT SCREEN -->
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <form>
                                                         <div class="modal-body">
+                                                            <!-- PRODUCT ID -->
                                                             <div class="mb-3">
                                                                 <label for="prodId-<%= i%>">ID</label>
                                                                 <input type="text" class="form-control" name="prodId" id="prodId-<%= i%>" 
-                                                                       value="<%= prod.getProdId()%>" disabled/>
+                                                                       value="<%= product.getProdId()%>" disabled/>
                                                             </div>
+                                                            <!-- PRODUCT NAME -->
                                                             <div class="mb-3">
                                                                 <label for="prodName-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="prodName" id="prodName-<%= i%>" 
-                                                                       value="<%= prod.getProdName()%>"/>
+                                                                       value="<%= product.getProdName()%>" required/>
                                                             </div>
+                                                            <!-- PRODUCT BRAND -->
                                                             <div class="mb-3">
                                                                 <label for="prodBrand-<%= i%>">Marca</label>
                                                                 <select class="form-control" name="prodBrand" id="prodBrand-<%= i%>">
-                                                                    <% ArrayList<String> editBrandNames = Marca.getBrandNames();
-                                                                        for (int f = 0; f < editBrandNames.size(); f++) {%>
-                                                                    <% if (editBrandNames.get(f).equals(prod.getProdBrand())) {%>
-                                                                    <option value="<%=editBrandNames.get(f)%>" selected><%=editBrandNames.get(f)%></option>
-                                                                    <%} else {%>
-                                                                    <option value="<%=editBrandNames.get(f)%>"><%=editBrandNames.get(f)%></option>
-                                                                    <%}}%>
+                                                                    <% ArrayList<String> brandNamesEdit = Brand.getBrandNames();
+                                                                        for (int k = 0; k < brandNamesEdit.size(); k++) {
+                                                                            if (brandNamesEdit.get(k).equals(product.getProdBrand())) {%>
+                                                                                <option value="<%=brandNamesEdit.get(k)%>" selected><%=brandNamesEdit.get(k)%></option>
+                                                                            <%} else {%>
+                                                                                <option value="<%=brandNamesEdit.get(k)%>"><%=brandNamesEdit.get(k)%></option>
+                                                                        <%}}%>
                                                                 </select>
                                                             </div>
+                                                            <!-- PRODUCT MATERIAL -->
                                                             <div class="mb-3">
                                                                 <label for="prodMaterial-<%= i%>">Material</label>
                                                                 <input type="text" class="form-control" name="prodMaterial" id="prodMaterial-<%= i%>" 
-                                                                       value="<%= prod.getProdMaterial()%>"/>
+                                                                       value="<%= product.getProdMaterial()%>"/>
                                                             </div>
+                                                            <!-- PRODUCT SIZE -->
                                                             <div class="mb-3">
                                                                 <label for="prodSize-<%= i%>">Tamanho</label>
                                                                 <input type="text" class="form-control" name="prodSize" id="prodSize-<%= i%>" 
-                                                                       value="<%= prod.getProdSize()%>"/>
+                                                                       value="<%= product.getProdSize()%>"/>
                                                             </div>
+                                                            <!-- PRODUCT AVG VALUE -->
                                                             <div class="mb-3">
                                                                 <label for="prodAvgValue-<%= i%>">Valor Médio</label>
                                                                 <input type="number" class="form-control" name="prodAvgValue" id="prodAvgValue-<%= i%>" 
-                                                                       value="<%= Movement.getAvgById(prod.getProdId())%>" disabled/>
+                                                                       value="<%= Movement.getAvgById(product.getProdId())%>" disabled/>
                                                             </div>
+                                                            <!-- PRODUCT QUANTITY -->
                                                             <div class="mb-3">
                                                                 <label for="movQuantity-<%= i%>">Quantidade</label>
                                                                 <input type="number" class="form-control" name="movQuantity" id="movQuantity-<%= i%>" 
-                                                                       value="<%= Movement.getQntById(prod.getProdId())%>" disabled/>
+                                                                       value="<%= Movement.getQntById(product.getProdId())%>" disabled/>
                                                             </div>
                                                         </div>
+                                                        <!-- PRODUCT SAVE AND CANCEL BUTTON -->
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                            <input type="hidden" name="prodId" value="<%= prod.getProdId()%>"/>
+                                                            <input type="hidden" name="prodId" value="<%= product.getProdId()%>"/>
                                                             <input type="submit" name="edit" value="Salvar" class="btn btn-primary">
                                                         </div>
                                                     </form>
@@ -207,7 +223,6 @@
                                     </td>
                                     <% } %>
                                 </tr>
-                                <% i++; %>
                                 <% } %>
                             </tbody>
                         </table>
@@ -216,6 +231,7 @@
             </div>
             <% }%>
         </div>
+        <!-- SEARCH BAR -->
         <script>
             $(document).ready(function () {
                 $('#table-products').DataTable({

@@ -11,6 +11,8 @@
     String requestError = null;
     ArrayList<Provider> providers = new ArrayList<>();
     try {
+    
+        //ADD PROVIDER
         if (request.getParameter("insert") != null) {
             String provName = request.getParameter("provName");
             String provLocation = request.getParameter("provLocation");
@@ -18,10 +20,8 @@
             String provMail = request.getParameter("provMail");
             Provider.insertProvider(provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
-        } else if (request.getParameter("delete") != null) {
-            String provName = request.getParameter("provName");
-            Provider.deleteProvider(provName);
-            response.sendRedirect(request.getRequestURI());
+            
+        //EDIT PROVIDER
         } else if (request.getParameter("edit") != null) {
             String oldProvName = request.getParameter("oldProvName");
             String provName = request.getParameter("provName");
@@ -30,8 +30,16 @@
             String provMail = request.getParameter("provMail");
             Provider.alterProvider(oldProvName, provName, provLocation, provTelephone, provMail);
             response.sendRedirect(request.getRequestURI());
+            
+        //DELETE PROVIDER
+        } else if (request.getParameter("delete") != null) {
+            String provName = request.getParameter("provName");
+            Provider.deleteProvider(provName);
+            response.sendRedirect(request.getRequestURI());
         }
+        
         providers = Provider.getProviders();
+        
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
@@ -55,36 +63,41 @@
             <div class="card">
                 <div class="card-body">
                     <h2>Fornecedores (<%= providers.size()%>)
-                        <% if (sessionUserRole.equals("admin")) {%>
-                        <!-- Button add providers -->
+                        <% if (sessionUserRole.equals("Admin")) {%>
+                        <!-- BUTTON ADD PROVIDER -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                         <% } %>
                     </h2>
-                    <!-- Modal add provider -->
+                    <!-- ADD PROVIDER SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <form method="post">
                                     <div class="modal-body">
+                                        <!-- PROVIDER NAME -->
                                         <div class="mb-3">
                                             <label for="provName">Nome</label>
-                                            <input type="text" class="form-control" name="provName" id="provName"/>
+                                            <input type="text" class="form-control" name="provName" id="provName" required/>
                                         </div>
+                                        <!-- PROVIDER LOCATION -->
                                         <div class="mb-3">
                                             <label for="provLocation">Endereço</label>
                                             <input type="text" class="form-control" name="provLocation" id="provLocation"/>
                                         </div>
+                                        <!-- PROVIDER TELEPHONE -->
                                         <div class="mb-3">
                                             <label for="provTelephone">Telefone</label>
                                             <input type="text" class="form-control" name="provTelephone" id="provTelephone"/>
                                         </div>
+                                        <!-- PROVIDER EMAIL -->
                                         <div class="mb-3">
                                             <label for="provMail">E-mail</label>
                                             <input type="text" class="form-control" name="provMail" id="provMail"/>
                                         </div>
                                     </div>
+                                    <!-- PROVIDER SAVE AND CANCEL BUTTON -->
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                         <input type="submit" name="insert" value="Salvar" class="btn btn-primary">
@@ -93,12 +106,13 @@
                             </div>
                         </div>
                     </div>
+                    <!-- SHOW ERROR CODE -->
                     <% if (requestError != null) {%>
                     <div class="alert alert-danger" role="alert">
                         <%= requestError%>
                     </div>
                     <% } %>
-                    <!-- Table provider -->
+                    <!-- PROVIDER MAIN TABLE -->
                     <div class="table-responsive">
                         <table class="table table-striped" id="table-providers">
                             <thead class="bg-light">
@@ -108,66 +122,67 @@
                                     <th>Telefone</th>
                                     <th>Email</th>
                                     <th>Produtos (Estoque)</th>
-                                        <% if (sessionUserRole.equals("admin")) {%>
-                                    <th></th>
-                                        <% } %>
+                                        <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% int i = 0; %>
-                                <% for (Provider provider : providers) { %>
-                                <% i++;%>
+                                <% int i = 0; 
+                                   for (Provider provider : providers) { 
+                                   i++; %>
                                 <tr>
                                     <td><%= provider.getProvName()%></td>
                                     <td><%= provider.getProvLocation()%></td>
                                     <td><%= provider.getProvTelephone()%></td>
                                     <td><%= provider.getProvMail()%></td>
                                     <td><%= Provider.getProvQnt(provider.getProvName())%></td>
-                                    <% if (sessionUserRole.equals("admin")) {%>
+                                    <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
                                         <form name="providers-<%= i%>" method="post">
-                                            <!-- Button edit modal -->
+                                            <!-- BUTTON EDIT PROVIDER -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
+                                                <i class="bi bi-pencil-square"></i></button>
                                             <input type="hidden" name="provName" value="<%= provider.getProvName()%>"/>
-                                            <!-- onclick="confirmDeletion()" -->
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash3"></i>
-                                            </button>
+                                                <i class="bi bi-trash3"></i></button>
                                         </form>
-                                        <!-- Modal edit -->
+                                        <!-- EDIT PROVIDER SCREEN -->
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
                                                     <form>
                                                         <div class="modal-body">
+                                                            <!-- PROVIDER NAME -->
                                                             <div class="mb-3">
                                                                 <label for="provName-<%= i%>">Nome</label>
                                                                 <input type="text" class="form-control" name="provName" id="provName-<%= i%>" 
-                                                                       value="<%= provider.getProvName()%>"/>
+                                                                       value="<%= provider.getProvName()%>" required/>
                                                             </div>
+                                                            <!-- PROVIDER LOCATION -->
                                                             <div class="mb-3">
                                                                 <label for="provLocation-<%= i%>">Endereço</label>
                                                                 <input type="text" class="form-control" name="provLocation" id="provLocation-<%= i%>" 
                                                                        value="<%= provider.getProvLocation()%>"/>
                                                             </div>
+                                                            <!-- PROVIDER TELEPHONE -->
                                                             <div class="mb-3">
                                                                 <label for="provTelephone-<%= i%>">Telefone</label>
                                                                 <input type="text" class="form-control" name="provTelephone" id="provTelephone-<%= i%>" 
                                                                        value="<%= provider.getProvTelephone()%>"/>
                                                             </div>
+                                                            <!-- PROVIDER EMAIL -->
                                                             <div class="mb-3">
                                                                 <label for="provMail-<%= i%>">E-mail</label>
                                                                 <input type="text" class="form-control" name="provMail" id="provMail-<%= i%>" 
                                                                        value="<%= provider.getProvMail()%>"/>
                                                             </div>
+                                                            <!-- PROVIDER STOCK QUANTITY -->
                                                             <div class="mb-3">
                                                                 <label for="provQnt-<%= i%>">Produto (Estoque)</label>
                                                                 <input type="text" class="form-control" name="provQnt" id="provQnt-<%= i%>" 
                                                                        value="<%= Provider.getProvQnt(provider.getProvName())%>" disabled/>
                                                             </div>
                                                         </div>
+                                                        <!-- PROVIDER SAVE AND CANCEL BUTTON -->
                                                         <div class="modal-footer">
                                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                                                             <input type="hidden" name="oldProvName" value="<%= provider.getProvName()%>"/>
@@ -188,6 +203,7 @@
             </div>
             <% }%>
         </div>
+        <!-- SEARCH BAR -->
         <script>
             $(document).ready(function () {
                 $('#table-providers').DataTable({

@@ -104,7 +104,7 @@
                     <a class="nav-link" href="<%= request.getContextPath()%>/movements.jsp"><i class="bi bi-arrow-left-right"></i> Movimentações</a>
                     <% } %>
                 </li>
-                <% if (sessionUserRole.equals("admin")) { %>
+                <% if (sessionUserRole.equals("Admin")) { %>
                 <li class="nav-item">
                     <% if (request.getRequestURI().contains("users.jsp")) {%>
                     <a class="nav-link active" href="<%= request.getContextPath()%>/users.jsp"><i class="bi bi-people"></i> Usuários</a>

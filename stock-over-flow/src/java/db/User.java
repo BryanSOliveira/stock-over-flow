@@ -24,7 +24,7 @@ public class User {
     private String userToken;
     
     public static String getCreateStatement() {
-        return "CREATE TABLE IF NOT EXISTS users("
+        return "CREATE TABLE IF NOT EXISTS user("
                 + "userEmail VARCHAR(50) UNIQUE NOT NULL,"
                 + "userName VARCHAR(200) NOT NULL,"
                 + "userRole VARCHAR(20) NOT NULL,"
@@ -35,14 +35,14 @@ public class User {
     }
     
     public static String getDestroyStatement() {
-        return "DROP TABLE IF EXISTS users";
+        return "DROP TABLE IF EXISTS user";
     }
     
     public static ArrayList<User> getUsers() throws Exception {
         ArrayList<User> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT * FROM users");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM user");
         while(rs.next()) {
             String userEmail = rs.getString("userEmail");
             String userName = rs.getString("userName");
@@ -60,7 +60,7 @@ public class User {
     public static User getUser(String userEmail, String userPassword) throws Exception {
         User gotUser = null;
         Connection con = DbListener.getConnection();
-        String sql = "SELECT * FROM users WHERE userEmail = ? AND userPassword = ?";
+        String sql = "SELECT * FROM user WHERE userEmail = ? AND userPassword = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userEmail);
         stmt.setLong(2, userPassword.hashCode());
@@ -80,7 +80,7 @@ public class User {
     
     public static void insertUser(String userEmail, String userName, String userRole, String userPassword, Boolean userVerified, String userToken) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO users( userEmail, userName, userRole, userPassword, userVerified, userToken) "
+        String sql = "INSERT INTO user( userEmail, userName, userRole, userPassword, userVerified, userToken) "
                 + "VALUES(?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userEmail);
@@ -96,7 +96,7 @@ public class User {
     
     public static void alterUser(String userEmail, String userName, String userRole, String userPassword) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET userName = ?, userRole = ?, userPassword = ? "
+        String sql = "UPDATE user SET userName = ?, userRole = ?, userPassword = ? "
                 + "WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userName); 
@@ -110,7 +110,7 @@ public class User {
     
     public static void deleteUser(String userEmail) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "DELETE FROM users WHERE userEmail = ? AND userRole <> 'admin'";
+        String sql = "DELETE FROM user WHERE userEmail = ? AND userRole <> 'admin'";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, userEmail);
         stmt.execute();
@@ -120,7 +120,7 @@ public class User {
     
     public static void changePassword(String userEmail, String userPassword) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET userPassword = ? WHERE userEmail = ?";
+        String sql = "UPDATE user SET userPassword = ? WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setLong(1, userPassword.hashCode());
         stmt.setString(2, userEmail);
@@ -131,7 +131,7 @@ public class User {
     
     public static void changeStatus(String userEmail) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "UPDATE users SET userVerified = ? WHERE userEmail = ?";
+        String sql = "UPDATE user SET userVerified = ? WHERE userEmail = ?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setBoolean(1, true);
         stmt.setString(2, userEmail);

@@ -32,6 +32,7 @@ public class Movement {
     private int movId;
     private String movDate;
     private int movProd;
+    private String movName;
     private String movProv;
     private String movType;
     private int movQuantity;
@@ -43,6 +44,7 @@ public class Movement {
                 + "movId INTEGER PRIMARY KEY AUTOINCREMENT,"
                 + "movDate VARCHAR(21) NOT NULL,"
                 + "movProd INTEGER,"
+                + "movName VARCHAR(200),"
                 + "movProv VARCHAR(50),"
                 + "movType VARCHAR(7),"
                 + "movQuantity INTEGER NOT NULL,"
@@ -63,13 +65,14 @@ public class Movement {
         while(rs.next()) {
             int movId = rs.getInt("movId");
             int movProd = rs.getInt("movProd");
+            String movName = rs.getString("movName");
             String movProv = rs.getString("movProv");
             String movDate = rs.getString("movDate");
             String movType = rs.getString("movType");
             int movQuantity = rs.getInt("movQuantity");
             Double movValue = rs.getDouble("movValue");
             String movDescription = rs.getString("movDescription");
-            list.add(new Movement(movId, movDate, movProd, movProv, movType, movQuantity, movValue, movDescription));
+            list.add(new Movement(movId, movDate, movProd, movName, movProv, movType, movQuantity, movValue, movDescription));
         }
         rs.close();
         stmt.close();
@@ -79,17 +82,19 @@ public class Movement {
     
     public static void insertMovement(int movProd, String movProv, String movType,int movQuantity, Double movValue, String movDescription) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "INSERT INTO movement(movDate, movProd, movProv, movType, movQuantity, movValue, movDescription) "
-                + "VALUES(?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO movement(movDate, movProd, movName, movProv, movType, movQuantity, movValue, movDescription) "
+                + "VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = con.prepareStatement(sql);
         String currentDate = new SimpleDateFormat("HH:mm:ss | dd/MM/yyyy").format(Calendar.getInstance().getTime());
+        String prodTarget = Product.getProdNameById(movProd);
         stmt.setString(1, currentDate);
         stmt.setInt(2, movProd);
-        stmt.setString(3, movProv);
-        stmt.setString(4, movType);
-        stmt.setDouble(5, movQuantity);
-        stmt.setDouble(6, movValue);
-        stmt.setString(7, movDescription);
+        stmt.setString(3, prodTarget);
+        stmt.setString(4, movProv);
+        stmt.setString(5, movType);
+        stmt.setDouble(6, movQuantity);
+        stmt.setDouble(7, movValue);
+        stmt.setString(8, movDescription);
         stmt.execute();
         stmt.close();
         con.close();
@@ -185,7 +190,7 @@ public class Movement {
             table.addCell(Integer.toString(movements.get(i).getMovId()));
             table.addCell(movements.get(i).getMovDate());
             table.addCell(movements.get(i).getMovType());
-            table.addCell(Produto.getProdNameById(movements.get(i).getMovProd()));
+            table.addCell(Product.getProdNameById(movements.get(i).getMovProd()));
             table.addCell(movements.get(i).getMovProv());
             table.addCell(Integer.toString(movements.get(i).getMovQuantity()));
             table.addCell(Double.toString(movements.get(i).getMovValue()));
@@ -205,10 +210,11 @@ public class Movement {
         document.close();
     }
 
-    public Movement(int movId, String movDate, int movProd, String movProv, String movType, int movQuantity, double movValue, String movDescription) {
+    public Movement(int movId, String movDate, int movProd, String movName, String movProv, String movType, int movQuantity, double movValue, String movDescription) {
         this.movId = movId;
         this.movDate = movDate;
         this.movProd = movProd;
+        this.movName = movName;
         this.movProv = movProv;
         this.movType = movType;
         this.movQuantity = movQuantity;
@@ -226,6 +232,10 @@ public class Movement {
     
     public int getMovProd() {
         return movProd;
+    }
+    
+    public String getMovName() {
+        return movName;
     }
     
     public String getMovProv() {
@@ -258,6 +268,10 @@ public class Movement {
     
     public void setMovProd(int movProd) {
         this.movProd = movProd;
+    }
+    
+    public void setMovName(String movName) {
+        this.movName = movName;
     }
     
     public void setMovProv(String movProv) {
@@ -307,5 +321,19 @@ public class Movement {
         return prodAvgValue;
     }
     
+    public static ArrayList<String> getMovNames() throws Exception {
+        ArrayList<String> nameList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT movName FROM movement");
+        while(rs.next()) {
+            String movName = rs.getString("movName");
+            nameList.add(movName);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return nameList;
+    }
     
 }
