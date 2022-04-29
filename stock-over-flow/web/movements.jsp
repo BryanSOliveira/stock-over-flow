@@ -19,16 +19,17 @@
         //ADD MOVEMENT
         if (request.getParameter("insert") != null) {
             int movProd = Integer.parseInt(request.getParameter("movProd"));
+            String movOp = (String) session.getAttribute("loggedUser.userName");
             String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
-            int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
+            int movQnt = Integer.parseInt(request.getParameter("movQnt"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
-            String movDescription = request.getParameter("movDescription");
+            String movDesc = request.getParameter("movDesc");
             
-            if (movType.equals("Entrada")) movQuantity = Math.abs(movQuantity);
-            else if (movType.equals("Saida")) movQuantity = -movQuantity;  
+            if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
+            else if (movType.equals("Saida")) movQnt = -movQnt;  
             
-            Movement.insertMovement(movProd, movProv, movType, movQuantity, movValue, movDescription);
+            Movement.insertMovement(movProd, movOp, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
             
         //EDIT MOVEMENT
@@ -37,13 +38,13 @@
             int movProd = Integer.parseInt(request.getParameter("movProd"));
             String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
-            int movQuantity = Integer.parseInt(request.getParameter("movQuantity"));
+            int movQnt = Integer.parseInt(request.getParameter("movQnt"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
-            String movDescription = request.getParameter("movDescription");
-            if (movType.equals("Entrada")) movQuantity = Math.abs(movQuantity);
-            else if (movType.equals("Saida")) movQuantity = -movQuantity; 
+            String movDesc = request.getParameter("movDesc");
+            if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
+            else if (movType.equals("Saida")) movQnt = -movQnt; 
             
-            Movement.alterMovement(movId, movProd, movProv, movType, movQuantity, movValue, movDescription);
+            Movement.alterMovement(movId, movProd, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
         
         //DELETE MOVEMENT
@@ -140,8 +141,8 @@
                                         </div>
                                         <!-- MOVEMENT QUANTITY -->
                                         <div class="mb-3">
-                                            <label for="movQuantityt">Quantidade</label>
-                                            <input type="number" min="0" class="form-control" name="movQuantity" id="movQuantity" required/>
+                                            <label for="movQnt">Quantidade</label>
+                                            <input type="number" min="0" class="form-control" name="movQnt" id="movQnt" required/>
                                         </div>
                                         <!-- MOVEMENT VALUE -->
                                         <div class="mb-3">
@@ -150,8 +151,8 @@
                                         </div>
                                         <!-- MOVEMENT DESCRIPTION -->
                                         <div class="mb-3">
-                                            <label for="movDescription">Descrição</label>
-                                            <input type="text" class="form-control" name="movDescription" id="movDescription"/>
+                                            <label for="movDesc">Descrição</label>
+                                            <input type="text" class="form-control" name="movDesc" id="movDesc"/>
                                         </div>
                                     </div>
                                     <!-- MOVEMENT SAVE AND CANCEL BUTTON -->
@@ -178,6 +179,7 @@
                                     <th>Horário | Data</th>
                                     <th>Tipo de Movimentação</th>
                                     <th>Produto</th>
+                                    <th>Operador</th>
                                     <th>Fornecedor</th>
                                     <th>Quantidade</th>
                                     <th>Valor</th>
@@ -194,12 +196,13 @@
                                     <td><%= movement.getMovDate()%></td>
                                     <td><%= movement.getMovType()%></td>
                                     <td><%= movement.getMovName()%></td>
+                                    <td><%= movement.getMovOp()%></td>
                                     <td><%= movement.getMovProv()%></td>
-                                    <%if (movement.getMovQuantity() > 0) {%> <td style="color:green;"><%= movement.getMovQuantity()%></td>
-                                    <%}else if (movement.getMovQuantity() < 0) {%> <td style="color:red;"><%= movement.getMovQuantity()%></td>
-                                    <%}else {%> <td style="color:blue;"><%= movement.getMovQuantity()%></td><%}%>
+                                    <%if (movement.getMovQnt() > 0) {%> <td style="color:green;"><%= movement.getMovQnt()%></td>
+                                    <%}else if (movement.getMovQnt() < 0) {%> <td style="color:red;"><%= movement.getMovQnt()%></td>
+                                    <%}else {%> <td style="color:blue;"><%= movement.getMovQnt()%></td><%}%>
                                     <td><%= movement.getMovValue()%></td>
-                                    <td><%= movement.getMovDescription()%></td>
+                                    <td><%= movement.getMovDesc()%></td>
                                     <td>
                                         <form method="post">
                                         <!-- BUTTON EDIT MOVEMENT -->
@@ -241,6 +244,12 @@
                                                                     <%}}}%>
                                                                 </select>
                                                             </div>
+                                                            <!-- MOVEMENT OPERATOR -->
+                                                            <div class="mb-3">
+                                                                <label for="movOp-<%= i%>">Operador</label>
+                                                                <input type="text" class="form-control" name="movOp" id="movOp-<%= i%>" 
+                                                                       value="<%= movement.getMovOp()%>" disabled/>
+                                                            </div>
                                                             <!-- MOVEMENT PROVIDER -->
                                                             <div class="mb-3">
                                                                 <label for="movProv-<%= i%>">Fornecedor</label>
@@ -269,9 +278,9 @@
                                                             </div>
                                                             <!-- MOVEMENT QUANTITY -->
                                                             <div class="mb-3">
-                                                                <label for="movQuantity-<%= i%>">Quantidade</label>
-                                                                <input type="number" min="0" class="form-control" name="movQuantity" id="movQuantity-<%= i%>" 
-                                                                       value="<%= movement.getMovQuantity()%>" required/>
+                                                                <label for="movQnt-<%= i%>">Quantidade</label>
+                                                                <input type="number" min="0" class="form-control" name="movQnt" id="movQnt-<%= i%>" 
+                                                                       value="<%= Math.abs(movement.getMovQnt())%>" required/>
                                                             </div>
                                                             <!-- MOVEMENT VALUE -->
                                                             <div class="mb-3">
@@ -287,9 +296,9 @@
                                                             </div>
                                                             <!-- MOVEMENT DESCRIPTION -->
                                                             <div class="mb-3">
-                                                                <label for="movDescription-<%= i%>">Descrição</label>
-                                                                <input type="text" class="form-control" name="movDescription" id="movDescription-<%= i%>" 
-                                                                       value="<%= movement.getMovDescription()%>"/>
+                                                                <label for="movDesc-<%= i%>">Descrição</label>
+                                                                <input type="text" class="form-control" name="movDesc" id="movDesc-<%= i%>" 
+                                                                       value="<%= movement.getMovDesc()%>"/>
                                                             </div>
                                                         </div>
                                                         <!-- MOVEMENT SAVE AND CANCEL BUTTON -->

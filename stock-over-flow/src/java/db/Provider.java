@@ -148,11 +148,11 @@ public class Provider {
     
     public static Integer getProvQnt(String provName) throws Exception {
         Connection con = DbListener.getConnection();
-        String sql = "SELECT SUM(movQuantity) FROM movement WHERE movProv=?";
+        String sql = "SELECT SUM(movQnt) FROM movement WHERE movProv=?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setString(1, provName);
         ResultSet rs = stmt.executeQuery();
-        Integer provQnt = rs.getInt("SUM(movQuantity)"); 
+        Integer provQnt = rs.getInt("SUM(movQnt)"); 
         stmt.close();
         con.close();
         rs.close();
