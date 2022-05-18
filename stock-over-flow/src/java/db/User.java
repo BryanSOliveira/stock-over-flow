@@ -187,7 +187,5 @@ public class User {
     public void setUserToken(String userToken) throws Exception {
         this.userToken = userToken;
     }
-
-
-    
+ 
 }

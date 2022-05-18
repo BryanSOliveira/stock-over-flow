@@ -15,6 +15,11 @@
 <%
     String requestError = null;
     ArrayList<Movement> movements = new ArrayList<>();
+    int pgNum = 0;
+         
+    int qtdMov = Movement.getAll();
+    int pageMov = (int) Math.ceil((double)qtdMov/10);
+    
     try {
         //ADD MOVEMENT
         if (request.getParameter("insert") != null) {
@@ -27,7 +32,7 @@
             String movDesc = request.getParameter("movDesc");
             
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saida")) movQnt = -movQnt;  
+            else if (movType.equals("Saída")) movQnt = -movQnt;  
             
             Movement.insertMovement(movProd, movOp, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
@@ -42,7 +47,7 @@
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDesc = request.getParameter("movDesc");
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saida")) movQnt = -movQnt; 
+            else if (movType.equals("Saída")) movQnt = -(Math.abs(movQnt)); 
             
             Movement.alterMovement(movId, movProd, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
@@ -60,11 +65,19 @@
             response.sendRedirect(request.getRequestURI());
         }
         
-        movements = Movement.getMovements();
-
+        if (request.getParameter("page") != null) {
+        pgNum = Integer.parseInt(request.getParameter("page"));
+        pgNum = (pgNum-1)*10;
+        
+        }
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
+    String ord = "movId";
+    session.setAttribute("order",ord);
+    String getOrder = (String) session.getAttribute("order");
+    movements = Movement.getPageOrderBy(pgNum, getOrder, null);
+    session.removeAttribute("order");
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -72,18 +85,19 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Movimentações</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <h1><%=(String) session.getAttribute("order")%></h1>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Movimentações (<%= movements.size()%>)
+                    <h2>Movimentações (<%=qtdMov%>)
                         <!-- BUTTON ADD MOVEMENTS -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
@@ -101,20 +115,22 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form method="post">
+                                <form name="newMovement" id="mov-form" method="post">
                                     <div class="modal-body">
+                                        
                                         <!-- MOVEMENT PRODUCT -->
                                         <div class="mb-3">
                                             <label for="movProd">Produto</label>
                                             <select class="form-control" name="movProd" id="movProd">
-                                                <%
+                                                <%  
                                                     ArrayList<Integer> prodIds = Product.getProdIds();
                                                     if(prodIds.size() > 0){
                                                     for (int j = 0; j < prodIds.size(); j++) {%>
                                                 <option value="<%=prodIds.get(j)%>"><%=Product.getProdNameById(prodIds.get(j))%></option>
                                                 <%}}else{%>
-                                                <option value="---" selected>Cadastre produtos na guia "Produtos"</option>
+                                                <option value="errorCode:notSelected" disabled selected hidden>Sem produtos cadastrados</option>
                                                 <%}%>
+                                                <option value="errorCode:notSelected" disabled selected hidden>---</option>
                                             </select>
                                         </div>
                                         <!-- MOVEMENT PROVIDER -->
@@ -127,16 +143,18 @@
                                                     for (int k = 0; k < provNames.size(); k++) {%>
                                                 <option value="<%=provNames.get(k)%>"><%=provNames.get(k)%></option>
                                                 <%}}else{%>
-                                                <option value="---" selected>Cadastre fornecedores na guia "Fornecedores"</option>
+                                                <option value="errorCode:notSelected" disabled selected hidden>Sem fornecedores disponíveis</option>
                                                 <%}%>
+                                                <option value="errorCode:notSelected" disabled selected hidden>---</option>
                                             </select>
                                         </div>
                                         <!-- MOVEMENT TYPE -->
                                         <div class="mb-3">
                                             <label for="movType">Tipo de Movimentação</label>
                                             <select class="form-control" name="movType" id="movType">
-                                                <option value="Saida">Saida</option>
+                                                <option value="Saída">Saída</option>
                                                 <option value="Entrada">Entrada</option>
+                                                <option value="errorCode:notSelected" disabled selected hidden>---</option>
                                             </select>
                                         </div>
                                         <!-- MOVEMENT QUANTITY -->
@@ -154,6 +172,7 @@
                                             <label for="movDesc">Descrição</label>
                                             <input type="text" class="form-control" name="movDesc" id="movDesc"/>
                                         </div>
+                                        <div id="errorShow" style="color:red;" class="mb-3"></div>
                                     </div>
                                     <!-- MOVEMENT SAVE AND CANCEL BUTTON -->
                                     <div class="modal-footer">
@@ -172,7 +191,7 @@
                     <% } %>
                     <!-- MOVEMENT MAIN TABLE -->
                     <div class="table-responsive">
-                        <table class="table table-striped" id="table-movements">
+                        <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
@@ -241,7 +260,9 @@
                                                                                 <option value="<%=prodIdsEdit.get(l)%>" selected><%=Product.getProdNameById(prodIdsEdit.get(l))%></option>
                                                                             <% } else {%>
                                                                                 <option value="<%=prodIdsEdit.get(l)%>"><%=Product.getProdNameById(prodIdsEdit.get(l))%></option>
-                                                                    <%}}}%>
+                                                                    <%}}}else{%>
+                                                                                <option value="notFound">Seus produtos aparecerão aqui</option>
+                                                                    <%}%>
                                                                 </select>
                                                             </div>
                                                             <!-- MOVEMENT OPERATOR -->
@@ -268,10 +289,10 @@
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>
                                                                 <select class="form-control" name="movType" id="movType-<%= i%>">
                                                                     <% if (movement.getMovType().equals("Saída")) { %>
-                                                                    <option value="Saida" selected>Saida</option>
+                                                                    <option value="Saída" selected>Saída</option>
                                                                     <option value="Entrada">Entrada</option>
                                                                     <% } else { %>
-                                                                    <option value="Saida">Saida</option>
+                                                                    <option value="Saída">Saída</option>
                                                                     <option value="Entrada" selected>Entrada</option>
                                                                     <% }%>
                                                                 </select>
@@ -317,23 +338,64 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- NAVEGATION BUTTONS -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                              <a class="page-link" href="movements.jsp?page=<%=(pageMov-1)%>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                              </a>
+                            </li>
+                            <%
+                            
+                            
+                            for(int k = 1; k <= pageMov;k++){%>
+                            <li class="page-item"><a class="page-link" href="movements.jsp?page=<%=k%>"><%=k%></a></li>
+                            <%}%>
+                            <li class="page-item">
+                                <a class="page-link" href="movements.jsp?page=<%=pageMov%>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <% }%>
         </div>
-        <!-- SEARCH BAR -->
+        <!--VALIDATE FORM-->
         <script>
-            $(document).ready(function () {
-                $('#table-movements').DataTable({
-                    "language": {
-                        "lengthMenu": "Mostrando _MENU_ registros por página",
-                        "zeroRecords": "Nada encontrado",
-                        "info": "Mostrando página _PAGE_ de _PAGES_",
-                        "infoEmpty": "Nenhum registro disponível",
-                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
+            $('#mov-form').submit(validateForm);
+            
+            function validateForm(){
+                var prodMv = document.forms["newMovement"]["movProd"].value;
+                var provMv = document.forms["newMovement"]["movProv"].value;
+                var typeMv = document.forms["newMovement"]["movType"].value;
+                var qntMv = document.forms["newMovement"]["movQnt"].value;
+                var valueMv = document.forms["newMovement"]["movValue"].value;
+                
+                const allProd = <%=Product.getProdIds()%>;
+                
+                    if (prodMv == "errorCode:notSelected"){
+                        $("#errorShow").text("Produto não escolhido!");
+                        return false;
+                    }else if (provMv == "errorCode:notSelected"){
+                        $("#errorShow").text("Fornecedor não escolhido!");
+                        return false;
+                    }else if (typeMv == "errorCode:notSelected"){
+                        $("#errorShow").text("Tipo de movimentação não escolhido!");
+                        return false;
+                    }else if(valueMv < 0){
+                        $("#errorShow").text("Coloque um valor positivo!");
+                        return false;
+                    }else if(typeMv=="Saída" && qntMv < Movement.getQntById(prodMv)){
+                        $("#errorShow").text("Quantidade em estoque insuficiente!");
+                        return false;
+                        //VERIFY DUPES
+                    }else{
+                        return true;
                     }
-                });
-            });
+            }
         </script>
     </body>
 </html>

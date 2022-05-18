@@ -50,7 +50,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Fornecedores</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
@@ -89,12 +89,12 @@
                                         <!-- PROVIDER TELEPHONE -->
                                         <div class="mb-3">
                                             <label for="provTelephone">Telefone</label>
-                                            <input type="text" class="form-control" name="provTelephone" id="provTelephone"/>
+                                            <input type="tel" class="form-control" name="provTelephone" id="provTelephone"/>
                                         </div>
                                         <!-- PROVIDER EMAIL -->
                                         <div class="mb-3">
                                             <label for="provMail">E-mail</label>
-                                            <input type="text" class="form-control" name="provMail" id="provMail"/>
+                                            <input type="email" class="form-control" name="provMail" id="provMail"/>
                                         </div>
                                     </div>
                                     <!-- PROVIDER SAVE AND CANCEL BUTTON -->
@@ -114,7 +114,7 @@
                     <% } %>
                     <!-- PROVIDER MAIN TABLE -->
                     <div class="table-responsive">
-                        <table class="table table-striped" id="table-providers">
+                        <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
                                     <th>Nome</th>
@@ -166,13 +166,13 @@
                                                             <!-- PROVIDER TELEPHONE -->
                                                             <div class="mb-3">
                                                                 <label for="provTelephone-<%= i%>">Telefone</label>
-                                                                <input type="text" class="form-control" name="provTelephone" id="provTelephone-<%= i%>" 
+                                                                <input type="tel" class="form-control" name="provTelephone" id="provTelephone-<%= i%>" 
                                                                        value="<%= provider.getProvTelephone()%>"/>
                                                             </div>
                                                             <!-- PROVIDER EMAIL -->
                                                             <div class="mb-3">
                                                                 <label for="provMail-<%= i%>">E-mail</label>
-                                                                <input type="text" class="form-control" name="provMail" id="provMail-<%= i%>" 
+                                                                <input type="email" class="form-control" name="provMail" id="provMail-<%= i%>" 
                                                                        value="<%= provider.getProvMail()%>"/>
                                                             </div>
                                                             <!-- PROVIDER STOCK QUANTITY -->
@@ -203,20 +203,6 @@
             </div>
             <% }%>
         </div>
-        <!-- SEARCH BAR -->
-        <script>
-            $(document).ready(function () {
-                $('#table-providers').DataTable({
-                    "language": {
-                        "lengthMenu": "Mostrando _MENU_ registros por página",
-                        "zeroRecords": "Nada encontrado",
-                        "info": "Mostrando página _PAGE_ de _PAGES_",
-                        "infoEmpty": "Nenhum registro disponível",
-                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
-                    }
-                });
-            });
-        </script>
         <script src="scripts/sweetalert.js"></script>
     </body>
 </html>

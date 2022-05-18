@@ -4,6 +4,7 @@
     Author     : spbry
 --%>
 
+<%@page import="mail.SendEmail"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String requestError = null;
@@ -20,6 +21,10 @@
                 requestError = "Confirmação de nova senha inválida!";
             } else {
                 User.changePassword(login, newPassword);
+                
+                SendEmail pswInstance = new SendEmail();
+                
+                boolean pswSent = pswInstance.sendPassword(login, confirmNewPassword);
                 response.sendRedirect(request.getRequestURI());
             }
         }
@@ -34,7 +39,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Meu perfil</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>

@@ -92,6 +92,34 @@ public class Provider {
         con.close();
     }
 
+    public static ArrayList<String> getProvNames() throws Exception {
+        ArrayList<String> provList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT provName FROM provider");
+        while(rs.next()) {
+            String provName = rs.getString("provName");
+            provList.add(provName);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return provList;
+    }
+    
+    public static Integer getProvQnt(String provName) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT SUM(movQnt) FROM movement WHERE movProv=?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setString(1, provName);
+        ResultSet rs = stmt.executeQuery();
+        Integer provQnt = rs.getInt("SUM(movQnt)"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return provQnt;
+    }
+    
     public Provider(String provName, String provLocation, String provTelephone, String provMail) {
         this.provName = provName;
         this.provLocation = provLocation;
@@ -130,32 +158,5 @@ public class Provider {
     public void setProvMail(String provMail) {
         this.provMail = provMail;
     }
-    
-    public static ArrayList<String> getProvNames() throws Exception {
-        ArrayList<String> provList = new ArrayList<>();
-        Connection con = DbListener.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT provName FROM provider");
-        while(rs.next()) {
-            String provName = rs.getString("provName");
-            provList.add(provName);
-        }
-        rs.close();
-        stmt.close();
-        con.close();
-        return provList;
-    }
-    
-    public static Integer getProvQnt(String provName) throws Exception {
-        Connection con = DbListener.getConnection();
-        String sql = "SELECT SUM(movQnt) FROM movement WHERE movProv=?";
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setString(1, provName);
-        ResultSet rs = stmt.executeQuery();
-        Integer provQnt = rs.getInt("SUM(movQnt)"); 
-        stmt.close();
-        con.close();
-        rs.close();
-        return provQnt;
-    }
+
 }

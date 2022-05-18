@@ -114,6 +114,48 @@ public class Product {
         con.close();
     }
 
+    public static ArrayList<Integer> getProdIds() throws Exception {
+        ArrayList<Integer> idList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT prodId FROM product");
+        while(rs.next()) {
+            int prodId = rs.getInt("prodId");
+            idList.add(prodId);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return idList;
+    }
+    
+    public static String getProdNameById(Integer prodId) throws Exception {
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT prodName FROM product WHERE prodId = ?";
+        PreparedStatement stmt = con.prepareStatement(sql);
+        stmt.setInt(1, prodId);
+        ResultSet rs = stmt.executeQuery();
+        String prodName = rs.getString("prodName"); 
+        stmt.close();
+        con.close();
+        rs.close();
+        return prodName;
+    }
+    
+    public static int countProds() throws Exception {
+        int prodQuantity = 0;
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM product");
+        
+        prodQuantity = rs.getInt("COUNT(*)");
+        
+        rs.close();
+        stmt.close();
+        con.close();
+        return prodQuantity;
+    }
+    
     public Product(Integer prodId, String prodName, String prodBrand, String prodMaterial, String prodSize) {
         this.prodId = prodId;
         this.prodName = prodName;
@@ -160,46 +202,5 @@ public class Product {
     public void setProdSize(String prodSize) {
         this.prodSize = prodSize;
     }
-    
-    public static ArrayList<Integer> getProdIds() throws Exception {
-        ArrayList<Integer> idList = new ArrayList<>();
-        Connection con = DbListener.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT prodId FROM product");
-        while(rs.next()) {
-            int prodId = rs.getInt("prodId");
-            idList.add(prodId);
-        }
-        rs.close();
-        stmt.close();
-        con.close();
-        return idList;
-    }
-    
-    public static String getProdNameById(Integer prodId) throws Exception {
-        Connection con = DbListener.getConnection();
-        String sql = "SELECT prodName FROM product WHERE prodId = ?";
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, prodId);
-        ResultSet rs = stmt.executeQuery();
-        String prodName = rs.getString("prodName"); 
-        stmt.close();
-        con.close();
-        rs.close();
-        return prodName;
-    }
-    
-    public static int countProds() throws Exception {
-        int prodQuantity = 0;
-        Connection con = DbListener.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM product");
-        while(rs.next()) {
-            prodQuantity = rs.getInt("COUNT(*)");
-        }
-        rs.close();
-        stmt.close();
-        con.close();
-        return prodQuantity;
-    }
+
 }

@@ -4,6 +4,7 @@
     Author     : spbry
 --%>
 
+<%@page import="db.Movement"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -11,7 +12,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Home</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <style>
             
@@ -29,10 +30,10 @@
                                     <th>Tabelas</th>
                                     <th>Lucro</th>
                                     <th>Gasto</th>
-                                    <th>Saidas</th>
+                                    <th>Saídas</th>
                                     <th>Entradas</th>
-                                    <th>Operador/Mes</th>
-                                    <th>Fornecedor/Mes</th>
+                                    <th>Operador(Saída)</th>
+                                    <th>Fornecedor(Saída)</th>
                                     <th>Produto/Vendido</th>
                                 </tr>
                             </thead>
@@ -41,11 +42,11 @@
                                     <th>7</th>
                                     <th>R$18.000</th>
                                     <th>R$5.000</th>
-                                    <th>402</th>
-                                    <th>587</th>
-                                    <th>Thaina</th>
-                                    <th>MindF</th>
-                                    <th>Blusa</th>
+                                    <th><%=Movement.getOuts()%></th>
+                                    <th><%=Movement.getIns()%></th>
+                                    <th><%=Movement.getFrequentUser()%></th>
+                                    <th><%=Movement.getFrequentProv()%></th>
+                                    <th><%=Movement.getFrequentProd()%></th>
             
         </div>
         <%}%>

@@ -82,6 +82,21 @@ public class Brand {
         stmt.close();
         con.close();
     }
+    
+    public static ArrayList<String> getBrandNames() throws Exception {
+        ArrayList<String> brandList = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT brandName FROM brand");
+        while(rs.next()) {
+            String brandName = rs.getString("brandName");
+            brandList.add(brandName);
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return brandList;
+    }
 
     public Brand(String brandName, String brandDesc) {
         this.brandName = brandName;
@@ -103,20 +118,5 @@ public class Brand {
     public void setBrandDesc(String brandDesc) {
         this.brandDesc = brandDesc;
     }
-    
-    public static ArrayList<String> getBrandNames() throws Exception {
-        ArrayList<String> brandList = new ArrayList<>();
-        Connection con = DbListener.getConnection();
-        Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT brandName FROM brand");
-        while(rs.next()) {
-            String brandName = rs.getString("brandName");
-            brandList.add(brandName);
-        }
-        rs.close();
-        stmt.close();
-        con.close();
-        return brandList;
-    }
-    
+
 }

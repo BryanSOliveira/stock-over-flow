@@ -15,16 +15,29 @@
     
         //ADD USER
         if (request.getParameter("insert") != null) {
-            String userEmail = request.getParameter("targetUserEmail");
-            String userName = request.getParameter("targetUserName");
-            String userRole = request.getParameter("targetUserRole");
-            String userPassword = request.getParameter("targetUserPassword");
-            Boolean userVerified = Boolean.parseBoolean(request.getParameter("targetUserVerified"));
+            final HttpServletRequest a = request;
+            
+            new Thread(new Runnable() {
+            public void run() {
+            String userEmail = a.getParameter("targetUserEmail");
+            String userName = a.getParameter("targetUserName");
+            String userRole = a.getParameter("targetUserRole");
+            String userPassword = a.getParameter("targetUserPassword");
+            Boolean userVerified = Boolean.parseBoolean(a.getParameter("targetUserVerified"));
             SendEmail mailInstance = new SendEmail();
             String userToken = mailInstance.genToken();
+            try{
             User.insertUser(userEmail, userName, userRole, userPassword, userVerified, userToken);
             User verifyUser = new User(userEmail, userName, userRole, userVerified, userToken);
             boolean emailSent = mailInstance.sendEmail(verifyUser);
+            } catch (Exception ex) {
+            //throw new Exception (ex.getMessage());
+            System.out.println(ex.getMessage());
+            }
+                
+            }
+            }).start();
+            
             response.sendRedirect(request.getRequestURI());
         
         //EDIT USER
@@ -55,7 +68,7 @@
         <meta http-equiv="Conten<t-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Usuários</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
     </head>
     <body>
@@ -225,19 +238,5 @@
             <% } %>
             <% }%>
         </div>
-        <!-- SEARCH BAR -->
-        <script>
-            $(document).ready(function () {
-                $('#table-user').DataTable({
-                    "language": {
-                        "lengthMenu": "Mostrando _MENU_ registros por página",
-                        "zeroRecords": "Nada encontrado",
-                        "info": "Mostrando página _PAGE_ de _PAGES_",
-                        "infoEmpty": "Nenhum registro disponível",
-                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
-                    }
-                });
-            });
-        </script>
     </body>
 </html>

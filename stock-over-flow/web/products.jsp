@@ -51,7 +51,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Produtos</title>
-        <link rel="icon" type="image/x-icon" href="images/favicon.png">
+        <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
@@ -119,7 +119,7 @@
                     <% } %>
                     <!-- PRODUCT MAIN TABLE -->
                     <div class="table-responsive">
-                        <table class="table table-striped" id="table-products">
+                        <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
                                     <th>ID</th>
@@ -231,19 +231,5 @@
             </div>
             <% }%>
         </div>
-        <!-- SEARCH BAR -->
-        <script>
-            $(document).ready(function () {
-                $('#table-products').DataTable({
-                    "language": {
-                        "lengthMenu": "Mostrando _MENU_ registros por página",
-                        "zeroRecords": "Nada encontrado",
-                        "info": "Mostrando página _PAGE_ de _PAGES_",
-                        "infoEmpty": "Nenhum registro disponível",
-                        "infoFiltered": "(filtrado de _MAX_ registros no total)"
-                    }
-                });
-            });
-        </script>
     </body>
 </html>
