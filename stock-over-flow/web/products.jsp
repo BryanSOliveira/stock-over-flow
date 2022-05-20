@@ -12,6 +12,14 @@
 <%
     String requestError = null;
     ArrayList<Product> products = new ArrayList<>();
+    int pgNum = 0;    
+    int qtdProd = Product.getAll();
+    String bySrc="";
+    String byOrd = (String) session.getAttribute("prodOrder");
+    
+    if((String) session.getAttribute("prodSearch")!=null){
+    bySrc = (String) session.getAttribute("prodSearch");
+    }
     try {
         //ADD PRODUCT
         if (request.getParameter("insert") != null) {
@@ -39,11 +47,40 @@
             response.sendRedirect(request.getRequestURI());
         }
         
-        products = Product.getProds();
+        if (request.getParameter("page") != null) {
+            pgNum = Integer.parseInt(request.getParameter("page"));
+            pgNum = (pgNum-1)*10;
+        }
+        
+        if (request.getParameter("srcFilter")!= null){
+            bySrc = request.getParameter("searchFor");
+            qtdProd = Product.getSearchPage(bySrc);
+            session.setAttribute("prodSearch", bySrc);
+        }
+        
+        if (request.getParameter("orderColumn")!= null){
+            byOrd = request.getParameter("orderColumn");
+            session.setAttribute("prodOrder", byOrd);
+            
+        }
+        
+        if(request.getParameter("clearFilter") != null) {
+            session.removeAttribute("prodSearch");
+            bySrc = "";
+        }
+        
+        
+        if((String)session.getAttribute("prodSearch") != null) {
+            bySrc = (String)session.getAttribute("prodSearch");
+            qtdProd = Product.getSearchPage(bySrc);
+        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
+    
+    int pageProd = (int) Math.ceil((double)qtdProd/10);
+    products = Product.getPageOrderBy(pgNum, byOrd, bySrc);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -62,13 +99,27 @@
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Produtos (<%= products.size()%>)
+                    <h2>Produtos (<%= qtdProd%>)
                         <% if (sessionUserRole.equals("Admin")) {%>
                         <!-- BUTTON ADD PRODUCT -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                         <% } %>
+                        <!-- FILTER INPUT -->
+                        <div class="float-md-end h6">
+                            <form method="post" class="input-group">
+                                <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
+                                <button type="submit" name="srcFilter" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <% if(bySrc != "") { %>
+                                <button type="submit" name="clearFilter" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                <% } %>
+                            </form>
+                        </div>
                     </h2>
                     <!-- ADD PRODUCT SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -122,11 +173,50 @@
                         <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Marca</th>
-                                    <th>Material</th>
-                                    <th>Tamanho</th>
+                                    <th>
+                                        <form method="post">
+                                            ID
+                                            <input type="hidden" name="orderColumn" value="prodId">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Nome
+                                            <input type="hidden" name="orderColumn" value="prodDesc">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Marca
+                                            <input type="hidden" name="orderColumn" value="prodBrand">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Material
+                                            <input type="hidden" name="orderColumn" value="prodMaterial">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Tamanho
+                                            <input type="hidden" name="orderColumn" value="prodSize">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>/th>
                                     <th>Valor Médio</th>
                                     <th>Quantidade</th>
                                     <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
@@ -227,6 +317,24 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- NAVEGATION BUTTONS -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                              <a class="page-link" href="products.jsp?page=<%=(pageProd-1)%>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                              </a>
+                            </li>
+                            <%for(int k = 1; k <= pageProd; k++){%>
+                            <li class="page-item"><a class="page-link" href="products.jsp?page=<%=k%>"><%=k%></a></li>
+                            <%}%>
+                            <li class="page-item">
+                                <a class="page-link" href="products.jsp?page=<%=pageProd%>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <% }%>

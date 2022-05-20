@@ -107,6 +107,87 @@ public class Provider {
         return provList;
     }
     
+    public static ArrayList<Provider> getPageOrderBy(int offSet, String byOrder, String bySearch) throws Exception {
+        ArrayList<Provider> list = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT * FROM provider";
+        String src = "";
+        String ord = "";
+
+        if (byOrder != "" && byOrder != null) {
+            ord = " ORDER BY " + byOrder;
+        }
+        if (bySearch != "" && bySearch != null) {
+            src = " WHERE provName LIKE ? OR provLocation LIKE ?"
+                + " OR provTelephone LIKE ? OR provMail LIKE ?";
+        }
+        sql = sql + src + ord + " LIMIT 10 OFFSET ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+
+        if (bySearch != "" && bySearch != null) {
+
+            stmt.setString(1, "%"+bySearch+"%");
+            stmt.setString(2, "%"+bySearch+"%");
+            stmt.setString(3, "%"+bySearch+"%");
+            stmt.setString(4, "%"+bySearch+"%");
+            
+            stmt.setInt(5, offSet);
+
+        } else {
+            stmt.setInt(1, offSet);
+        }
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            String provName = rs.getString("provName");
+            String provLocation = rs.getString("provLocation");
+            String provTelephone = rs.getString("provTelephone");
+            String provMail = rs.getString("provMail");
+            
+            list.add(new Provider(provName, provLocation, provTelephone, provMail));
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return list;
+    }
+    
+    public static int getSearchPage(String bySearch) throws Exception {
+        int pgCount = 0;
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT COUNT(*) FROM provider"
+                   + " WHERE provName LIKE ? OR provLocation LIKE ?"
+                   + " OR provTelephone LIKE ? OR provMail LIKE ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        stmt.setString(1, "%"+bySearch+"%");
+        stmt.setString(2, "%"+bySearch+"%");
+        stmt.setString(3, "%"+bySearch+"%");
+        stmt.setString(4, "%"+bySearch+"%");
+
+        ResultSet rs = stmt.executeQuery();
+        pgCount = rs.getInt("COUNT(*)");
+        rs.close();
+        stmt.close();
+        con.close();
+        return pgCount;
+    }
+    
+    public static int getAll() throws Exception {
+        int allProv = 0;
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM provider");
+
+        allProv = rs.getInt("COUNT(*)");
+
+        rs.close();
+        stmt.close();
+        con.close();
+        return allProv;
+    }
+    
     public static Integer getProvQnt(String provName) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "SELECT SUM(movQnt) FROM movement WHERE movProv=?";

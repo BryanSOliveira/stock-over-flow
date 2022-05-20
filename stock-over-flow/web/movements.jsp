@@ -15,10 +15,14 @@
 <%
     String requestError = null;
     ArrayList<Movement> movements = new ArrayList<>();
-    int pgNum = 0;
-         
+    int pgNum = 0;    
     int qtdMov = Movement.getAll();
-    int pageMov = (int) Math.ceil((double)qtdMov/10);
+    String bySrc="";
+    String byOrd = (String) session.getAttribute("movOrder");
+    
+    if((String) session.getAttribute("movSearch")!=null){
+    bySrc = (String) session.getAttribute("movSearch");
+    }
     
     try {
         //ADD MOVEMENT
@@ -66,18 +70,39 @@
         }
         
         if (request.getParameter("page") != null) {
-        pgNum = Integer.parseInt(request.getParameter("page"));
-        pgNum = (pgNum-1)*10;
-        
+            pgNum = Integer.parseInt(request.getParameter("page"));
+            pgNum = (pgNum-1)*10;
         }
+        
+        if (request.getParameter("srcFilter")!= null){
+            bySrc = request.getParameter("searchFor");
+            qtdMov = Movement.getSearchPage(bySrc);
+            session.setAttribute("movsearch", bySrc);
+        }
+        
+        if (request.getParameter("orderColumn")!= null){
+            byOrd = request.getParameter("orderColumn");
+            session.setAttribute("movOrder", byOrd);
+            
+        }
+        
+        if(request.getParameter("clearFilter") != null) {
+            session.removeAttribute("movSearch");
+            bySrc = "";
+        }
+        
+        
+        if((String)session.getAttribute("movSearch") != null) {
+            bySrc = (String)session.getAttribute("movSearch");
+            qtdMov = Movement.getSearchPage(bySrc);
+        } 
+        
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
-    String ord = "movId";
-    session.setAttribute("order",ord);
-    String getOrder = (String) session.getAttribute("order");
-    movements = Movement.getPageOrderBy(pgNum, getOrder, null);
-    session.removeAttribute("order");
+    int pageMov = (int) Math.ceil((double)qtdMov/10);
+    movements = Movement.getPageOrderBy(pgNum, byOrd, bySrc);
+    
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -92,7 +117,7 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <h1><%=(String) session.getAttribute("order")%></h1>
+        <h1><%%></h1>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -110,6 +135,20 @@
                             </button>
                         </form>
                         <% } %>
+                        <!-- FILTER INPUT -->
+                        <div class="float-md-end h6">
+                            <form method="post" class="input-group">
+                                <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
+                                <button type="submit" name="srcFilter" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <% if(bySrc != "") { %>
+                                <button type="submit" name="clearFilter" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                <% } %>
+                            </form>
+                        </div>
                     </h2>
                     <!-- ADD MOVEMENT SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -183,6 +222,7 @@
                             </div>
                         </div>
                     </div>
+                    
                     <!-- SHOW ERROR CODE -->
                     <% if (requestError != null) {%>
                     <div class="alert alert-danger" role="alert">
@@ -194,15 +234,87 @@
                         <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Horário | Data</th>
-                                    <th>Tipo de Movimentação</th>
-                                    <th>Produto</th>
-                                    <th>Operador</th>
-                                    <th>Fornecedor</th>
-                                    <th>Quantidade</th>
-                                    <th>Valor</th>
-                                    <th>Descrição</th>
+                                    <th>
+                                        <form method="post">
+                                            ID 
+                                            <input type="hidden" name="orderColumn" value="movId">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Horário | Data
+                                            <input type="hidden" name="orderColumn" value="movDate">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Tipo de Movimentação
+                                            <input type="hidden" name="orderColumn" value="movType">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Produto
+                                            <input type="hidden" name="orderColumn" value="movName">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Operador
+                                            <input type="hidden" name="orderColumn" value="movOp">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Fornecedor
+                                            <input type="hidden" name="orderColumn" value="movProv">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Quantidade
+                                            <input type="hidden" name="orderColumn" value="movQnt">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Valor
+                                            <input type="hidden" name="orderColumn" value="movValue">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Descrição
+                                            <input type="hidden" name="orderColumn" value="movDesc">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -346,10 +458,7 @@
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
-                            <%
-                            
-                            
-                            for(int k = 1; k <= pageMov;k++){%>
+                            <%for(int k = 1; k <= pageMov; k++){%>
                             <li class="page-item"><a class="page-link" href="movements.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">

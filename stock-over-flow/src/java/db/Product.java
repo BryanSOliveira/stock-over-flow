@@ -156,6 +156,93 @@ public class Product {
         return prodQuantity;
     }
     
+    public static ArrayList<Product> getPageOrderBy(int offSet, String byOrder, String bySearch) throws Exception {
+        ArrayList<Product> list = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT * FROM product";
+        String src = "";
+        String ord = "";
+
+        if (byOrder != "" && byOrder != null) {
+            ord = " ORDER BY " + byOrder;
+        }
+        if (bySearch != "" && bySearch != null) {
+            src = " WHERE prodId LIKE ? OR prodName LIKE ?"
+                    + " OR prodBrand LIKE ? OR prodMaterial LIKE ?"
+                    + " OR prodSize LIKE ?";
+
+        }
+        sql = sql + src + ord + " LIMIT 10 OFFSET ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+
+        if (bySearch != "" && bySearch != null) {
+
+            stmt.setString(1, "%"+bySearch+"%");
+            stmt.setString(2, "%"+bySearch+"%");
+            stmt.setString(3, "%"+bySearch+"%");
+            stmt.setString(4, "%"+bySearch+"%");
+            stmt.setString(5, "%"+bySearch+"%");
+            
+            stmt.setInt(6, offSet);
+
+        } else {
+            stmt.setInt(1, offSet);
+        }
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            int prodId = rs.getInt("prodId");
+            String prodName = rs.getString("prodName");
+            String prodBrand = rs.getString("prodBrand");
+            String prodMaterial = rs.getString("prodMaterial");
+            String prodSize = rs.getString("prodSize");
+            
+            list.add(new Product(prodId, prodName, prodBrand, prodMaterial, prodSize));
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return list;
+    }
+    
+    public static int getSearchPage(String bySearch) throws Exception {
+        int pgCount = 0;
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT COUNT(*) FROM product"
+                   + " WHERE prodId LIKE ? OR prodName LIKE ?"
+                   + " OR prodBrand LIKE ? OR prodMaterial LIKE ?"
+                   + " OR prodSize LIKE ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        stmt.setString(1, "%"+bySearch+"%");
+        stmt.setString(2, "%"+bySearch+"%");
+        stmt.setString(3, "%"+bySearch+"%");
+        stmt.setString(4, "%"+bySearch+"%");
+        stmt.setString(5, "%"+bySearch+"%");
+
+        ResultSet rs = stmt.executeQuery();
+        pgCount = rs.getInt("COUNT(*)");
+        rs.close();
+        stmt.close();
+        con.close();
+        return pgCount;
+    }
+
+    public static int getAll() throws Exception {
+        int allProd = 0;
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM product");
+
+        allProd = rs.getInt("COUNT(*)");
+
+        rs.close();
+        stmt.close();
+        con.close();
+        return allProd;
+    }
+    
     public Product(Integer prodId, String prodName, String prodBrand, String prodMaterial, String prodSize) {
         this.prodId = prodId;
         this.prodName = prodName;

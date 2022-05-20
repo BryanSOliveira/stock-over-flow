@@ -10,6 +10,14 @@
 <%
     String requestError = null;
     ArrayList<Provider> providers = new ArrayList<>();
+    int pgNum = 0;    
+    int qtdProv = Provider.getAll();
+    String bySrc="";
+    String byOrd = (String) session.getAttribute("provOrder");
+    
+    if((String) session.getAttribute("provSearch")!=null){
+    bySrc = (String) session.getAttribute("provSearch");
+    }
     try {
     
         //ADD PROVIDER
@@ -38,11 +46,39 @@
             response.sendRedirect(request.getRequestURI());
         }
         
-        providers = Provider.getProviders();
+        if (request.getParameter("page") != null) {
+            pgNum = Integer.parseInt(request.getParameter("page"));
+            pgNum = (pgNum-1)*10;
+        }
+        
+        if (request.getParameter("srcFilter")!= null){
+            bySrc = request.getParameter("searchFor");
+            qtdProv = Provider.getSearchPage(bySrc);
+            session.setAttribute("provSearch", bySrc);
+        }
+        
+        if (request.getParameter("orderColumn")!= null){
+            byOrd = request.getParameter("orderColumn");
+            session.setAttribute("provOrder", byOrd);
+            
+        }
+        
+        if(request.getParameter("clearFilter") != null) {
+            session.removeAttribute("provSearch");
+            bySrc = "";
+        }
+        
+        
+        if((String)session.getAttribute("provSearch") != null) {
+            bySrc = (String)session.getAttribute("provSearch");
+            qtdProv = Provider.getSearchPage(bySrc);
+        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
+    int pageProv = (int) Math.ceil((double)qtdProv/10);
+    providers = Provider.getPageOrderBy(pgNum, byOrd, bySrc);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -62,13 +98,26 @@
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Fornecedores (<%= providers.size()%>)
+                    <h2>Fornecedores (<%= qtdProv%>)
                         <% if (sessionUserRole.equals("Admin")) {%>
                         <!-- BUTTON ADD PROVIDER -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                         <% } %>
+                        <div class="float-md-end h6">
+                            <form method="post" class="input-group">
+                                <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
+                                <button type="submit" name="srcFilter" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <% if(bySrc != "") { %>
+                                <button type="submit" name="clearFilter" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                <% } %>
+                            </form>
+                        </div>
                     </h2>
                     <!-- ADD PROVIDER SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -117,10 +166,41 @@
                         <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Endereço</th>
-                                    <th>Telefone</th>
-                                    <th>Email</th>
+                                    <th>
+                                        <form method="post">
+                                            Nome 
+                                            <input type="hidden" name="orderColumn" value="provName">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Endereço
+                                            <input type="hidden" name="orderColumn" value="provLocation">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Telefone 
+                                            <input type="hidden" name="orderColumn" value="provTelephone">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Email 
+                                            <input type="hidden" name="orderColumn" value="provMail">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form></th>
                                     <th>Produtos (Estoque)</th>
                                         <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
                                 </tr>
@@ -199,6 +279,24 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- NAVEGATION BUTTONS -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                              <a class="page-link" href="providers.jsp?page=<%=(pageProv-1)%>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                              </a>
+                            </li>
+                            <%for(int k = 1; k <= pageProv; k++){%>
+                            <li class="page-item"><a class="page-link" href="providers.jsp?page=<%=k%>"><%=k%></a></li>
+                            <%}%>
+                            <li class="page-item">
+                                <a class="page-link" href="providers.jsp?page=<%=pageProv%>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <% }%>

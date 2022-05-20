@@ -29,6 +29,7 @@ import web.DbListener;
  * @author spbry
  */
 public class Movement {
+
     private int movId;
     private String movDate;
     private int movProd;
@@ -39,7 +40,7 @@ public class Movement {
     private int movQnt;
     private double movValue;
     private String movDesc;
-    
+
     public static String getCreateStatement() {
         return "CREATE TABLE IF NOT EXISTS movement("
                 + "movId INTEGER PRIMARY KEY AUTOINCREMENT,"
@@ -54,17 +55,17 @@ public class Movement {
                 + "movDesc VARCHAR(500)"
                 + ")";
     }
-    
+
     public static String getDestroyStatement() {
         return "DROP TABLE IF EXISTS movement";
     }
-    
+
     public static ArrayList<Movement> getMovements() throws Exception {
         ArrayList<Movement> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT * FROM movement");
-        while(rs.next()) {
+        while (rs.next()) {
             int movId = rs.getInt("movId");
             int movProd = rs.getInt("movProd");
             String movName = rs.getString("movName");
@@ -82,8 +83,8 @@ public class Movement {
         con.close();
         return list;
     }
-    
-    public static void insertMovement(int movProd, String movOp, String movProv, String movType,int movQnt, Double movValue, String movDesc) throws Exception {
+
+    public static void insertMovement(int movProd, String movOp, String movProv, String movType, int movQnt, Double movValue, String movDesc) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "INSERT INTO movement(movDate, movProd, movName, movOp, movProv, movType, movQnt, movValue, movDesc) "
                 + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -103,8 +104,8 @@ public class Movement {
         stmt.close();
         con.close();
     }
-    
-    public static void alterMovement(int movId, int movProd , String movProv, String movType, int movQnt, Double movValue, String movDesc) throws Exception {
+
+    public static void alterMovement(int movId, int movProd, String movProv, String movType, int movQnt, Double movValue, String movDesc) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "UPDATE movement SET movProd = ?, movProv = ?, movType = ?,  movQnt = ?, movValue = ?, movDesc = ? "
                 + "WHERE movId = ?";
@@ -120,7 +121,7 @@ public class Movement {
         stmt.close();
         con.close();
     }
-    
+
     public static void deleteMovement(int movId) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "DELETE FROM movement WHERE movId = ? ";
@@ -130,14 +131,14 @@ public class Movement {
         stmt.close();
         con.close();
     }
-    
+
     public static void generateReport(ArrayList<Movement> movements, HttpServletResponse response) throws Exception {
         Document document = new Document();
         response.setContentType("apllication/pdf");
-	response.addHeader("Content-Disposition", "inline; filename=" + "movimentacoes.pdf");
+        response.addHeader("Content-Disposition", "inline; filename=" + "movimentacoes.pdf");
         PdfWriter.getInstance(document, response.getOutputStream());
         document.open();
-        
+
         PdfPTable profitTable = new PdfPTable(3);
         profitTable.setWidthPercentage(100);
         //float[] widths = new float[] {20f, 120f, 50f, 70f, 70f, 30f, 50f, 100f};
@@ -150,13 +151,13 @@ public class Movement {
         colProfit3.setBackgroundColor(BaseColor.LIGHT_GRAY);
         profitTable.addCell(colProfit1);
         profitTable.addCell(colProfit2);
-        profitTable.addCell(colProfit3);    
+        profitTable.addCell(colProfit3);
 
         double valueAllEntries = 0, valueAllOutputs = 0;
-        for(Movement movement: movements) {
-            if(movement.getMovType().equals("Entrada")) {
+        for (Movement movement : movements) {
+            if (movement.getMovType().equals("Entrada")) {
                 valueAllEntries += movement.getMovValue();
-            } else if(movement.getMovType().equals("Saída")) {
+            } else if (movement.getMovType().equals("Saída")) {
                 valueAllOutputs += movement.getMovValue();
             }
         }
@@ -167,12 +168,12 @@ public class Movement {
         profitTable.addCell("R$ " + String.valueOf(outputs.doubleValue()));
         profitTable.addCell("R$ " + String.valueOf(profit.doubleValue()));
         document.add(profitTable);
-        
+
         document.add(new Paragraph("Movimentações:"));
         document.add(new Paragraph(" "));
         PdfPTable table = new PdfPTable(8);
         table.setWidthPercentage(100);
-        float[] widths = new float[] {20f, 120f, 50f, 70f, 70f, 30f, 50f, 100f};
+        float[] widths = new float[]{20f, 120f, 50f, 70f, 70f, 30f, 50f, 100f};
         table.setWidths(widths);
         PdfPCell col1 = new PdfPCell(new Paragraph("ID"));
         PdfPCell col2 = new PdfPCell(new Paragraph("Horário | Data"));
@@ -190,7 +191,7 @@ public class Movement {
         table.addCell(col6);
         table.addCell(col7);
         table.addCell(col8);
-        for(int i = 0; i < movements.size(); i++) {
+        for (int i = 0; i < movements.size(); i++) {
             table.addCell(Integer.toString(movements.get(i).getMovId()));
             table.addCell(movements.get(i).getMovDate());
             table.addCell(movements.get(i).getMovType());
@@ -201,52 +202,53 @@ public class Movement {
             table.addCell(movements.get(i).getMovDesc());
         }
         int i = 0;
-        for(PdfPRow r: table.getRows()) {
-            for(PdfPCell c: r.getCells()) {
-                if(i == 0)
+        for (PdfPRow r : table.getRows()) {
+            for (PdfPCell c : r.getCells()) {
+                if (i == 0) {
                     c.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                else 
+                } else {
                     c.setBackgroundColor(i % 2 == 0 ? BaseColor.ORANGE : BaseColor.WHITE);
+                }
             }
             i++;
         }
         document.add(table);
         document.close();
     }
-    
+
     public static Integer getQntById(Integer movProd) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "SELECT SUM(movQnt) FROM movement WHERE movProd=?";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, movProd);
         ResultSet rs = stmt.executeQuery();
-        Integer actualQuantity = rs.getInt("SUM(movQnt)"); 
+        Integer actualQuantity = rs.getInt("SUM(movQnt)");
         stmt.close();
         con.close();
         rs.close();
         return actualQuantity;
     }
-    
+
     public static double getAvgById(Integer movProd) throws Exception {
         Connection con = DbListener.getConnection();
         String sql = "SELECT AVG(movValue) FROM movement WHERE movProd=? AND movType = 'Entrada'";
         PreparedStatement stmt = con.prepareStatement(sql);
         stmt.setInt(1, movProd);
         ResultSet rs = stmt.executeQuery();
-        double prodAvgValue = Math.round(rs.getDouble("AVG(movValue)")*100); 
-               prodAvgValue = prodAvgValue/100;
+        double prodAvgValue = Math.round(rs.getDouble("AVG(movValue)") * 100);
+        prodAvgValue = prodAvgValue / 100;
         stmt.close();
         con.close();
         rs.close();
         return prodAvgValue;
     }
-    
+
     public static ArrayList<String> getMovNames() throws Exception {
         ArrayList<String> nameList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movName FROM movement");
-        while(rs.next()) {
+        while (rs.next()) {
             String movName = rs.getString("movName");
             nameList.add(movName);
         }
@@ -255,13 +257,13 @@ public class Movement {
         con.close();
         return nameList;
     }
-    
+
     public static ArrayList<Integer> getSells() throws Exception {
         ArrayList<Integer> sellList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movQnt FROM movement WHERE movQnt < 0");
-        while(rs.next()) {
+        while (rs.next()) {
             Integer movQnt = Math.abs(rs.getInt("movQnt"));
             sellList.add(movQnt);
         }
@@ -270,13 +272,13 @@ public class Movement {
         con.close();
         return sellList;
     }
-    
+
     public static ArrayList<String> getSalesDates() throws Exception {
         ArrayList<String> dataList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movDate FROM movement WHERE movQnt < 0");
-        while(rs.next()) {
+        while (rs.next()) {
             String movDate = rs.getString("movDate").substring(12);
             dataList.add(movDate);
         }
@@ -285,146 +287,129 @@ public class Movement {
         con.close();
         return dataList;
     }
-    
+
     public static String getFrequentUser() throws Exception {
         String mostlyFrequent = "N/A";
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movOp, COUNT(movOp) "
-                                       + "AS mostOp FROM movement "
-                                       + "GROUP BY movOp "
-                                       + "ORDER BY mostOp "
-                                       + "DESC LIMIT 1");
+                + "AS mostOp FROM movement "
+                + "GROUP BY movOp "
+                + "ORDER BY mostOp "
+                + "DESC LIMIT 1");
         mostlyFrequent = rs.getString("movOp");
-        
+
         rs.close();
         stmt.close();
         con.close();
         return mostlyFrequent;
     }
-    
+
     public static String getFrequentProv() throws Exception {
         String mostlyFrequent = "N/A";
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movProv, COUNT(movProv) "
-                                       + "AS mostProv FROM movement "
-                                       + "WHERE movType = 'Saída' "
-                                       + "GROUP BY movProv "
-                                       + "ORDER BY mostProv "
-                                       + "DESC LIMIT 1");
+                + "AS mostProv FROM movement "
+                + "WHERE movType = 'Saída' "
+                + "GROUP BY movProv "
+                + "ORDER BY mostProv "
+                + "DESC LIMIT 1");
         mostlyFrequent = rs.getString("movProv");
-        
+
         rs.close();
         stmt.close();
         con.close();
         return mostlyFrequent;
     }
-    
+
     public static String getFrequentProd() throws Exception {
         String mostlyFrequent = "N/A";
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movName, COUNT(movName) "
-                                       + "AS mostProd FROM movement "
-                                       + "WHERE movType = 'Saída'"
-                                       + "GROUP BY movName "
-                                       + "ORDER BY mostProd "
-                                       + "DESC LIMIT 1");
+                + "AS mostProd FROM movement "
+                + "WHERE movType = 'Saída'"
+                + "GROUP BY movName "
+                + "ORDER BY mostProd "
+                + "DESC LIMIT 1");
         mostlyFrequent = rs.getString("movName");
-        
+
         rs.close();
         stmt.close();
         con.close();
         return mostlyFrequent;
     }
-    
+
     public static int getOuts() throws Exception {
         int allOut = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM movement WHERE movType='Saída'");
-        
+
         allOut = rs.getInt("COUNT(*)");
-        
+
         rs.close();
         stmt.close();
         con.close();
         return allOut;
     }
-    
+
     public static int getIns() throws Exception {
         int allIn = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM movement WHERE movType='Entrada'");
-        
+
         allIn = rs.getInt("COUNT(*)");
-        
+
         rs.close();
         stmt.close();
         con.close();
         return allIn;
     }
-    
-    public static ArrayList<Movement> getPage(int offSet) throws Exception {
-        ArrayList<Movement> list = new ArrayList<>();
-        Connection con = DbListener.getConnection();
-        String sql = "SELECT * FROM movement LIMIT 10 OFFSET ?";
-        PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, offSet);
-        ResultSet rs = stmt.executeQuery();
-        while(rs.next()) {
-            int movId = rs.getInt("movId");
-            int movProd = rs.getInt("movProd");
-            String movName = rs.getString("movName");
-            String movOp = rs.getString("movOp");
-            String movProv = rs.getString("movProv");
-            String movDate = rs.getString("movDate");
-            String movType = rs.getString("movType");
-            int movQnt = rs.getInt("movQnt");
-            Double movValue = rs.getDouble("movValue");
-            String movDesc = rs.getString("movDesc");
-            list.add(new Movement(movId, movDate, movProd, movName, movOp, movProv, movType, movQnt, movValue, movDesc));
-        }
-        rs.close();
-        stmt.close();
-        con.close();
-        return list;
-    }
-    
+
     public static ArrayList<Movement> getPageOrderBy(int offSet, String byOrder, String bySearch) throws Exception {
         ArrayList<Movement> list = new ArrayList<>();
         Connection con = DbListener.getConnection();
-        String sql = "SELECT * FROM movement LIMIT 10 OFFSET ?";
-        if(bySearch != null){
-            if(byOrder == "movId")sql = "SELECT * FROM movement WHERE movId = '"+bySearch+"' OR movDate = '"+bySearch+"' OR movProd = '"+bySearch+"' OR movName = '"+bySearch+"' OR movOp = '"+bySearch+"' OR movProv = '"+bySearch+"' OR movType = '"+bySearch+"' OR movQnt = '"+bySearch+"' OR movValue = '"+bySearch+"' OR movDesc = '"+bySearch+"' ORDER BY movId LIMIT 10 OFFSET ?";
-            if(byOrder == "movDate")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movDate LIMIT 10 OFFSET ?";
-            if(byOrder == "movProd")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movProd LIMIT 10 OFFSET ?";
-            if(byOrder == "movName")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movName LIMIT 10 OFFSET ?";
-            if(byOrder == "movOp")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movOp LIMIT 10 OFFSET ?";
-            if(byOrder == "movProv")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movProv LIMIT 10 OFFSET ?";
-            if(byOrder == "movType")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movType LIMIT 10 OFFSET ?";
-            if(byOrder == "movQnt")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movQnt LIMIT 10 OFFSET ?";
-            if(byOrder == "movValue")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movValue LIMIT 10 OFFSET ?";
-            if(byOrder == "movDesc")sql = "SELECT * FROM movement WHERE movId = "+bySearch+" OR movDate ="+bySearch+" OR movProd = "+bySearch+" OR movName = "+bySearch+" OR movOp = "+bySearch+" OR movProv = "+bySearch+" OR movType = "+bySearch+" OR movQnt = "+bySearch+" OR movValue = "+bySearch+" OR movDesc = "+bySearch+" ORDER BY movVDesc LIMIT 10 OFFSET ?";
-        }else{
-            if(byOrder == "movId")sql = "SELECT * FROM movement ORDER BY movId LIMIT 10 OFFSET ?";
-            if(byOrder == "movDate")sql = "SELECT * FROM movement ORDER BY movDate LIMIT 10 OFFSET ?";
-            if(byOrder == "movProd")sql = "SELECT * FROM movement ORDER BY movProd LIMIT 10 OFFSET ?";
-            if(byOrder == "movName")sql = "SELECT * FROM movement ORDER BY movName LIMIT 10 OFFSET ?";
-            if(byOrder == "movOp")sql = "SELECT * FROM movement ORDER BY movOp LIMIT 10 OFFSET ?";
-            if(byOrder == "movProv")sql = "SELECT * FROM movement ORDER BY movProv LIMIT 10 OFFSET ?";
-            if(byOrder == "movType")sql = "SELECT * FROM movement ORDER BY movType LIMIT 10 OFFSET ?";
-            if(byOrder == "movQnt")sql = "SELECT * FROM movement ORDER BY movQnt LIMIT 10 OFFSET ?";
-            if(byOrder == "movValue")sql = "SELECT * FROM movement ORDER BY movValue LIMIT 10 OFFSET ?";
-            if(byOrder == "movDesc")sql = "SELECT * FROM movement ORDER BY movVDesc LIMIT 10 OFFSET ?";
+        String sql = "SELECT * FROM movement";
+        String src = "";
+        String ord = "";
+
+        if (byOrder != "" && byOrder != null) {
+            ord = " ORDER BY " + byOrder;
         }
-        //sql = "SELECT * FROM movement ORDER BY ? LIMIT 10 OFFSET ?";
+        if (bySearch != "" && bySearch != null) {
+            src = " WHERE movId LIKE ? OR movDate LIKE ?"
+                    + " OR movProd LIKE ? OR movName LIKE ?"
+                    + " OR movOp LIKE ? OR movProv LIKE ?"
+                    + " OR movType LIKE ? OR movQnt LIKE ?"
+                    + " OR movValue LIKE ? OR movDesc LIKE ?";
+
+        }
+        sql = sql + src + ord + " LIMIT 10 OFFSET ?";
+
         PreparedStatement stmt = con.prepareStatement(sql);
-        stmt.setInt(1, offSet);
+
+        if (bySearch != "" && bySearch != null) {
+
+            stmt.setString(1, "%"+bySearch+"%");
+            stmt.setString(2, "%"+bySearch+"%");
+            stmt.setString(3, "%"+bySearch+"%");
+            stmt.setString(4, "%"+bySearch+"%");
+            stmt.setString(5, "%"+bySearch+"%");
+            stmt.setString(6, "%"+bySearch+"%");
+            stmt.setString(7, "%"+bySearch+"%");
+            stmt.setString(8, "%"+bySearch+"%");
+            stmt.setString(9, "%"+bySearch+"%");
+            stmt.setString(10, "%"+bySearch+"%");
+            stmt.setInt(11, offSet);
+
+        } else {
+            stmt.setInt(1, offSet);
+        }
         ResultSet rs = stmt.executeQuery();
-        while(rs.next()) {
+        while (rs.next()) {
             int movId = rs.getInt("movId");
             int movProd = rs.getInt("movProd");
             String movName = rs.getString("movName");
@@ -443,14 +428,45 @@ public class Movement {
         return list;
     }
     
+    public static int getSearchPage(String bySearch) throws Exception {
+        int pgCount = 0;
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT COUNT(*) FROM movement"
+                   + " WHERE movId LIKE ? OR movDate LIKE ?"
+                   + " OR movProd LIKE ? OR movName LIKE ?"
+                   + " OR movOp LIKE ? OR movProv LIKE ?"
+                   + " OR movType LIKE ? OR movQnt LIKE ?"
+                   + " OR movValue LIKE ? OR movDesc LIKE ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        stmt.setString(1, "%"+bySearch+"%");
+        stmt.setString(2, "%"+bySearch+"%");
+        stmt.setString(3, "%"+bySearch+"%");
+        stmt.setString(4, "%"+bySearch+"%");
+        stmt.setString(5, "%"+bySearch+"%");
+        stmt.setString(6, "%"+bySearch+"%");
+        stmt.setString(7, "%"+bySearch+"%");
+        stmt.setString(8, "%"+bySearch+"%");
+        stmt.setString(9, "%"+bySearch+"%");
+        stmt.setString(10, "%"+bySearch+"%");
+
+        ResultSet rs = stmt.executeQuery();
+        pgCount = rs.getInt("COUNT(*)");
+        rs.close();
+        stmt.close();
+        con.close();
+        return pgCount;
+    }
+
     public static int getAll() throws Exception {
         int allMov = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM movement");
-        
+
         allMov = rs.getInt("COUNT(*)");
-        
+
         rs.close();
         stmt.close();
         con.close();
@@ -477,23 +493,23 @@ public class Movement {
     public String getMovDate() {
         return movDate;
     }
-    
+
     public int getMovProd() {
         return movProd;
     }
-    
+
     public String getMovName() {
-        return movName.replaceAll("\"","&quot");
+        return movName.replaceAll("\"", "&quot");
     }
-    
+
     public String getMovOp() {
         return movOp;
     }
-    
+
     public String getMovProv() {
         return movProv;
     }
-    
+
     public String getMovType() {
         return movType;
     }
@@ -507,7 +523,7 @@ public class Movement {
     }
 
     public String getMovDesc() {
-        return movDesc.replaceAll("\"","&quot");
+        return movDesc.replaceAll("\"", "&quot");
     }
 
     public void setMovId(int movId) {
@@ -517,23 +533,23 @@ public class Movement {
     public void setMovDate(String movDate) {
         this.movDate = movDate;
     }
-    
+
     public void setMovProd(int movProd) {
         this.movProd = movProd;
     }
-    
+
     public void setMovName(String movName) {
         this.movName = movName;
     }
-    
+
     public void setMovOp(String movOp) {
         this.movOp = movOp;
     }
-    
+
     public void setMovProv(String movProv) {
         this.movProv = movProv;
     }
-    
+
     public void setMovType(String movType) {
         this.movType = movType;
     }

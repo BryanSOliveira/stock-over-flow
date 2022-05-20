@@ -51,7 +51,7 @@ public class DbListener implements ServletContextListener {
             */
             
             if(User.getUsers().isEmpty()) {
-                User.insertUser("admin", "Administrador", "Administrador", "123", true, "99999999");
+                User.insertUser("admin", "Administrador", "Admin", "123", true, "99999999");
                 User.insertUser("user", "Usuário", "Usuario", "123", true, "99999999");
             }
             if(Product.getProds().isEmpty()) {
@@ -63,7 +63,7 @@ public class DbListener implements ServletContextListener {
                 Movement.insertMovement(1, "Sistema","Nike", "Entrada", 40, 125.95, "Entrada de produtos no estoque");
                 Movement.insertMovement(1, "Sistema","Hering", "Entrada", 30, 189.99, "Entrada de produtos no estoque");
                 Movement.insertMovement(1, "Sistema","Offtrack", "Entrada", 30, 230.00, "Entrada de produtos no estoque");
-                Movement.insertMovement(1, "Sistema","Offtrack", "Saída", 30, 100.00, "Saída de produtos no estoque");
+                Movement.insertMovement(1, "Sistema","Offtrack", "Saída", 5, 100.00, "Saída de produtos no estoque");
                
             }
             if(Brand.getBrands().isEmpty()) {

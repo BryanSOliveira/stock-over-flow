@@ -139,6 +139,92 @@ public class User {
         stmt.close();
         con.close();
     }
+    
+    public static ArrayList<User> getPageOrderBy(int offSet, String byOrder, String bySearch) throws Exception {
+        ArrayList<User> list = new ArrayList<>();
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT * FROM user";
+        String src = "";
+        String ord = "";
+
+        if (byOrder != "" && byOrder != null) {
+            ord = " ORDER BY " + byOrder;
+        }
+        if (bySearch != "" && bySearch != null) {
+            src = " WHERE userEmail LIKE ? OR userName LIKE ?"
+                    + " OR userRole LIKE ? OR userVerified LIKE ?"
+                    + " OR userToken LIKE ?";
+
+        }
+        sql = sql + src + ord + " LIMIT 10 OFFSET ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+
+        if (bySearch != "" && bySearch != null) {
+
+            stmt.setString(1, "%"+bySearch+"%");
+            stmt.setString(2, "%"+bySearch+"%");
+            stmt.setString(3, "%"+bySearch+"%");
+            stmt.setString(4, "%"+bySearch+"%");
+            stmt.setString(5, "%"+bySearch+"%");
+            
+            stmt.setInt(6, offSet);
+
+        } else {
+            stmt.setInt(1, offSet);
+        }
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            String userEmail = rs.getString("userEmail");
+            String userName = rs.getString("userName");
+            String userRole = rs.getString("userRole");
+            Boolean userVerified = rs.getBoolean("userVerified");
+            String userToken = rs.getString("userToken");
+            list.add(new User(userEmail, userName, userRole, userVerified, userToken));
+        }
+        rs.close();
+        stmt.close();
+        con.close();
+        return list;
+    }
+    
+    public static int getSearchPage(String bySearch) throws Exception {
+        int pgCount = 0;
+        Connection con = DbListener.getConnection();
+        String sql = "SELECT COUNT(*) FROM user"
+                   + " WHERE userEmail LIKE ? OR userName LIKE ?"
+                   + " OR userRole LIKE ? OR userVerified LIKE ?"
+                   + " OR userToken LIKE ?";
+
+        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        stmt.setString(1, "%"+bySearch+"%");
+        stmt.setString(2, "%"+bySearch+"%");
+        stmt.setString(3, "%"+bySearch+"%");
+        stmt.setString(4, "%"+bySearch+"%");
+        stmt.setString(5, "%"+bySearch+"%");
+
+        ResultSet rs = stmt.executeQuery();
+        pgCount = rs.getInt("COUNT(*)");
+        rs.close();
+        stmt.close();
+        con.close();
+        return pgCount;
+    }
+
+    public static int getAll() throws Exception {
+        int allUser = 0;
+        Connection con = DbListener.getConnection();
+        Statement stmt = con.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM user");
+
+        allUser = rs.getInt("COUNT(*)");
+
+        rs.close();
+        stmt.close();
+        con.close();
+        return allUser;
+    }
 
      public User(String userEmail, String userName, String userRole, Boolean userVerified, String userToken) {
         this.userEmail = userEmail;

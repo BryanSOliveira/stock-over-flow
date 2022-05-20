@@ -10,6 +10,14 @@
 <%
     String requestError = null;
     ArrayList<Brand> brands = new ArrayList<>();
+    int pgNum = 0;    
+    int qtdBrand = Brand.getAll();
+    String bySrc="";
+    String byOrd = (String) session.getAttribute("brandOrder");
+    
+    if((String) session.getAttribute("brandSearch")!=null){
+    bySrc = (String) session.getAttribute("brandSearch");
+    }
     try {
         //ADD BRAND
         if (request.getParameter("insert") != null) {
@@ -33,11 +41,39 @@
             response.sendRedirect(request.getRequestURI());
         }    
         
-        brands = Brand.getBrands();
+        if (request.getParameter("page") != null) {
+            pgNum = Integer.parseInt(request.getParameter("page"));
+            pgNum = (pgNum-1)*10;
+        }
+        
+        if (request.getParameter("srcFilter")!= null){
+            bySrc = request.getParameter("searchFor");
+            qtdBrand = Brand.getSearchPage(bySrc);
+            session.setAttribute("brandSearch", bySrc);
+        }
+        
+        if (request.getParameter("orderColumn")!= null){
+            byOrd = request.getParameter("orderColumn");
+            session.setAttribute("brandOrder", byOrd);
+            
+        }
+        
+        if(request.getParameter("clearFilter") != null) {
+            session.removeAttribute("brandSearch");
+            bySrc = "";
+        }
+        
+        
+        if((String)session.getAttribute("brandSearch") != null) {
+            bySrc = (String)session.getAttribute("brandSearch");
+            qtdBrand = Brand.getSearchPage(bySrc);
+        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
+    int pageBrand = (int) Math.ceil((double)qtdBrand/10);
+    brands = Brand.getPageOrderBy(pgNum, byOrd, bySrc);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -56,13 +92,27 @@
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
                 <div class="card-body">
-                    <h2>Marcas (<%= brands.size()%>)
+                    <h2>Marcas (<%= qtdBrand%>)
                         <% if (sessionUserRole.equals("Admin")) {%>
                         <!-- BUTTON ADD BRAND -->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-plus-lg"></i>
                         </button>
                         <% } %>
+                        <!-- FILTER INPUT -->
+                        <div class="float-md-end h6">
+                            <form method="post" class="input-group">
+                                <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
+                                <button type="submit" name="srcFilter" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <% if(bySrc != "") { %>
+                                <button type="submit" name="clearFilter" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                <% } %>
+                            </form>
+                        </div>
                     </h2>
                     <!-- ADD BRAND SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -101,8 +151,23 @@
                         <table class="table table-striped">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Descrição</th>
+                                    <th>
+                                        <form method="post">
+                                            Nome
+                                            <input type="hidden" name="orderColumn" value="brandName">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form></th>
+                                    <th>
+                                        <form method="post">
+                                            Descrição
+                                            <input type="hidden" name="orderColumn" value="brandDesc">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
                                     <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
                                 </tr>
                             </thead>
@@ -161,6 +226,24 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- NAVEGATION BUTTONS -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                              <a class="page-link" href="brands.jsp?page=<%=(pageBrand-1)%>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                              </a>
+                            </li>
+                            <%for(int k = 1; k <= pageBrand; k++){%>
+                            <li class="page-item"><a class="page-link" href="brands.jsp?page=<%=k%>"><%=k%></a></li>
+                            <%}%>
+                            <li class="page-item">
+                                <a class="page-link" href="brands.jsp?page=<%=pageBrand%>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <% }%>

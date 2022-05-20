@@ -11,6 +11,14 @@
 
     String requestError = null;
     ArrayList<User> users = new ArrayList<>();
+    int pgNum = 0;    
+    int qtdUser = User.getAll();
+    String bySrc="";
+    String byOrd = (String) session.getAttribute("userOrder");
+    
+    if((String) session.getAttribute("userSearch")!=null){
+    bySrc = (String) session.getAttribute("userSearch");
+    }
     try {
     
         //ADD USER
@@ -56,11 +64,39 @@
             response.sendRedirect(request.getRequestURI());
         }
         
-        users = User.getUsers();
+        if (request.getParameter("page") != null) {
+            pgNum = Integer.parseInt(request.getParameter("page"));
+            pgNum = (pgNum-1)*10;
+        }
+        
+        if (request.getParameter("srcFilter")!= null){
+            bySrc = request.getParameter("searchFor");
+            qtdUser = User.getSearchPage(bySrc);
+            session.setAttribute("userSearch", bySrc);
+        }
+        
+        if (request.getParameter("orderColumn")!= null){
+            byOrd = request.getParameter("orderColumn");
+            session.setAttribute("userOrder", byOrd);
+            
+        }
+        
+        if(request.getParameter("clearFilter") != null) {
+            session.removeAttribute("userSearch");
+            bySrc = "";
+        }
+        
+        
+        if((String)session.getAttribute("userSearch") != null) {
+            bySrc = (String)session.getAttribute("userSearch");
+            qtdUser = User.getSearchPage(bySrc);
+        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
+    int pageUser = (int) Math.ceil((double)qtdUser/10);
+    users = User.getPageOrderBy(pgNum, byOrd, bySrc);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -85,6 +121,20 @@
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add">
                             <i class="bi bi-person-plus"></i>
                         </button>
+                        <!-- FILTER INPUT -->
+                        <div class="float-md-end h6">
+                            <form method="post" class="input-group">
+                                <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
+                                <button type="submit" name="srcFilter" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <% if(bySrc != "") { %>
+                                <button type="submit" name="clearFilter" class="btn btn-secondary">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                                <% } %>
+                            </form>
+                        </div>
                     </h2>
                     <!-- ADD USER SCREEN -->
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
@@ -136,11 +186,51 @@
                         <table class="table table-striped" id="table-user">
                             <thead class="bg-light">
                                 <tr>
-                                    <th>Email</th>
-                                    <th>Nome</th>
-                                    <th>Permissão</th>
-                                    <th>Status</th>
-                                    <th>Token</th>
+                                    <th>
+                                        <form method="post">
+                                            Email
+                                            <input type="hidden" name="orderColumn" value="userEmail">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Nome
+                                            <input type="hidden" name="orderColumn" value="userName">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Permissão
+                                            <input type="hidden" name="orderColumn" value="userRole">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Status
+                                            <input type="hidden" name="orderColumn" value="userVerified">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Token
+                                            <input type="hidden" name="orderColumn" value="userToken">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
                                     <th></th>
                                 </tr>
                             </thead>
@@ -231,6 +321,24 @@
                             </tbody>
                         </table>
                     </div>
+                    <!-- NAVEGATION BUTTONS -->
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination">
+                            <li class="page-item">
+                              <a class="page-link" href="users.jsp?page=<%=(pageUser-1)%>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                              </a>
+                            </li>
+                            <%for(int k = 1; k <= pageUser; k++){%>
+                            <li class="page-item"><a class="page-link" href="users.jsp?page=<%=k%>"><%=k%></a></li>
+                            <%}%>
+                            <li class="page-item">
+                                <a class="page-link" href="users.jsp?page=<%=pageUser%>" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
             <% } else { %>
