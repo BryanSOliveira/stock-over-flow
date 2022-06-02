@@ -14,7 +14,7 @@
     int qtdBrand = Brand.getAll();
     String bySrc="";
     String byOrd = (String) session.getAttribute("brandOrder");
-    
+    Boolean isDeleted = false;
     if((String) session.getAttribute("brandSearch")!=null){
     bySrc = (String) session.getAttribute("brandSearch");
     }
@@ -38,7 +38,7 @@
         } else if (request.getParameter("delete") != null) {
             String brandName = request.getParameter("brandName");
             Brand.deleteBrand(brandName);
-            response.sendRedirect(request.getRequestURI());
+            isDeleted = true;
         }    
         
         if (request.getParameter("page") != null) {
@@ -85,9 +85,19 @@
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
+        <%@include file="WEB-INF/jspf/sweetalert-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <%if(isDeleted == true){%>
+        <script>
+            Swal.fire(
+                'Deletado!',
+                'Seu registro foi deletado com sucesso.',
+                'success'
+                );
+        </script>
+        <%isDeleted = false;}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -180,12 +190,13 @@
                                     <td><%= brand.getBrandDesc()%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form method="post">
-                                            <!-- BUTTON EDIT BRAND -->
+                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                            <!-- BUTTON EDIT & DELETE BRAND -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
                                             </button>
                                             <input type="hidden" name="brandName" value="<%= brand.getBrandName()%>"/>
+                                            <input type="hidden" name="delete" value="del"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i>
                                             </button>
@@ -227,10 +238,22 @@
                         </table>
                     </div>
                     <!-- NAVEGATION BUTTONS -->
+                    <% 
+                    int actualPage = 1;
+                    if(request.getParameter("page")!=null){
+                    actualPage = Integer.parseInt(request.getParameter("page"));
+                    }
+                   
+                    int prevPage = actualPage - 1;
+                    int nxtPage = actualPage + 1;
+                    
+                    if(prevPage < 1)prevPage = 1;
+                    if(nxtPage > pageBrand)nxtPage = pageBrand;
+                    %>
                     <nav aria-label="Page navigation example">
                         <ul class="pagination">
                             <li class="page-item">
-                              <a class="page-link" href="brands.jsp?page=<%=(pageBrand-1)%>" aria-label="Previous">
+                              <a class="page-link" href="brands.jsp?page=<%=prevPage%>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
@@ -238,7 +261,7 @@
                             <li class="page-item"><a class="page-link" href="brands.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">
-                                <a class="page-link" href="brands.jsp?page=<%=pageBrand%>" aria-label="Next">
+                                <a class="page-link" href="brands.jsp?page=<%=nxtPage%>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -248,6 +271,7 @@
             </div>
             <% }%>
         </div>
-        
+        <!-- CONFIRM DELETE -->
+        <script src="scripts/confirmDel.js"></script>
     </body>
 </html>

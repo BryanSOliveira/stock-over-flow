@@ -22,32 +22,34 @@
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
         <div class="container mt-5">
-            
-                <div class="table-responsive">
-                        <table class="table table-striped" id="table-movements">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th>Tabelas</th>
-                                    <th>Lucro</th>
-                                    <th>Gasto</th>
-                                    <th>Saídas</th>
-                                    <th>Entradas</th>
-                                    <th>Operador(Saída)</th>
-                                    <th>Fornecedor(Saída)</th>
-                                    <th>Produto/Vendido</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <th>7</th>
-                                    <th>R$18.000</th>
-                                    <th>R$5.000</th>
-                                    <th><%=Movement.getOuts()%></th>
-                                    <th><%=Movement.getIns()%></th>
-                                    <th><%=Movement.getFrequentUser()%></th>
-                                    <th><%=Movement.getFrequentProv()%></th>
-                                    <th><%=Movement.getFrequentProd()%></th>
-            
+            <div class="table-responsive">
+                <table class="table table-striped" id="table-movements">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Lucro</th>
+                            <th>Valor (Saidas)</th>
+                            <th>Valor (Entradas)</th>
+                            <th>Saida</th>
+                            <th>Entradas</th>
+                            <th>Operador(Saida)</th>
+                            <th>Fornecedor(Saida)</th>
+                            <th>Produto/Vendido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th>R$<%=Movement.getProfit()%></th>
+                            <th>R$<%=Movement.getOutsValue()%></th>
+                            <th>R$<%=Movement.getInsValue()%></th>
+                            <th><%=Movement.getOuts()%></th>
+                            <th><%=Movement.getIns()%></th>
+                            <th><%=Movement.getFrequentUser()%></th>
+                            <th><%=Movement.getFrequentProv()%></th>
+                            <th><%=Movement.getFrequentProd()%></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
         <%}%>
     </body>

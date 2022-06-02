@@ -16,7 +16,7 @@
     int qtdProd = Product.getAll();
     String bySrc="";
     String byOrd = (String) session.getAttribute("prodOrder");
-    
+    Boolean isDeleted = false;
     if((String) session.getAttribute("prodSearch")!=null){
     bySrc = (String) session.getAttribute("prodSearch");
     }
@@ -44,7 +44,7 @@
         } else if (request.getParameter("delete") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
             Product.deleteProd(prodId);
-            response.sendRedirect(request.getRequestURI());
+            isDeleted = true;
         }
         
         if (request.getParameter("page") != null) {
@@ -92,9 +92,19 @@
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
         <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
+        <%@include file="WEB-INF/jspf/sweetalert-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <%if(isDeleted == true){%>
+        <script>
+            Swal.fire(
+                'Deletado!',
+                'Seu registro foi deletado com sucesso.',
+                'success'
+                );
+        </script>
+        <%isDeleted = false;}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -216,7 +226,8 @@
                                             <button type="submit" class="btn btn-sm btn-link">
                                                 <i class="bi bi-caret-down-fill"></i>
                                             </button>
-                                        </form>/th>
+                                        </form>
+                                    </th>
                                     <th>Valor Médio</th>
                                     <th>Quantidade</th>
                                     <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
@@ -236,11 +247,12 @@
                                     <td><%= Movement.getQntById(product.getProdId())%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form method="post">
-                                            <!-- BUTTON EDIT PRODUCT -->
+                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                            <!-- BUTTON EDIT & DELETE PRODUCT -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
                                             <input type="hidden" name="prodId" value="<%= product.getProdId()%>"/>
+                                            <input type="hidden" name="delete" value="del"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i></button>
                                         </form>
@@ -318,10 +330,22 @@
                         </table>
                     </div>
                     <!-- NAVEGATION BUTTONS -->
+                    <% 
+                    int actualPage = 1;
+                    if(request.getParameter("page")!=null){
+                    actualPage = Integer.parseInt(request.getParameter("page"));
+                    }
+                   
+                    int prevPage = actualPage - 1;
+                    int nxtPage = actualPage + 1;
+                    
+                    if(prevPage < 1)prevPage = 1;
+                    if(nxtPage > pageProd)nxtPage = pageProd;
+                    %>
                     <nav aria-label="Page navigation example">
                         <ul class="pagination">
                             <li class="page-item">
-                              <a class="page-link" href="products.jsp?page=<%=(pageProd-1)%>" aria-label="Previous">
+                              <a class="page-link" href="products.jsp?page=<%=prevPage%>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
@@ -329,7 +353,7 @@
                             <li class="page-item"><a class="page-link" href="products.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">
-                                <a class="page-link" href="products.jsp?page=<%=pageProd%>" aria-label="Next">
+                                <a class="page-link" href="products.jsp?page=<%=nxtPage%>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -339,5 +363,7 @@
             </div>
             <% }%>
         </div>
+        <!-- CONFIRM DELETE -->
+        <script src="scripts/confirmDel.js"></script>
     </body>
 </html>

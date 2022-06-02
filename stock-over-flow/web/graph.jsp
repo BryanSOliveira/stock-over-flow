@@ -22,41 +22,38 @@
     </head>
     <body>
         <div>
-        <canvas id="myChart" height="20px" width="200px"></canvas>
-        
-        </div>
-        
-        
-        
-        
-        
-           
+        <canvas id="myChart" height="20px" width="100px"></canvas>      
+        </div>   
     </body>
 </html>
 
 <script>
   const labels = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
+    <%for(int i = 0; i < mov.size(); i++){%>
+        <%if(!(i == (mov.size())-1) ){%>
+       'Element-<%=i%>',
+        <%}else{%>
+       'Element-<%=i%>'
+      <%}}%>
   ];
   var x = 40;
-  alert("<%=dat%>");
+  //alert("<%=dat%>");
   const data = {
     labels: labels,
     datasets: [{
-      label: 'My First dataset',
+      label: 'Vendas',
       backgroundColor: 'rgb(255, 99, 132)',
       borderColor: 'rgb(255, 99, 132)',
-      
-      data: <%=mov%>,
+      data:[
+      <%for(int i = 0; i < mov.size(); i++){%>
+        <%if(!(i == (mov.size())-1) ){%>
+       {x:'Element-<%=i%>', y:<%=mov.get(i)%>},
+        <%}else{%>
+       {x:'Element-<%=i%>', y:<%=mov.get(i)%>}
+      <%}}%>         
+      ]
     }]
   };
-console.log(data);
   const config = {
     type: 'line',
     data: data,

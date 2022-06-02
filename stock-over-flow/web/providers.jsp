@@ -14,7 +14,7 @@
     int qtdProv = Provider.getAll();
     String bySrc="";
     String byOrd = (String) session.getAttribute("provOrder");
-    
+    Boolean isDeleted = false;
     if((String) session.getAttribute("provSearch")!=null){
     bySrc = (String) session.getAttribute("provSearch");
     }
@@ -43,7 +43,7 @@
         } else if (request.getParameter("delete") != null) {
             String provName = request.getParameter("provName");
             Provider.deleteProvider(provName);
-            response.sendRedirect(request.getRequestURI());
+            isDeleted = true;
         }
         
         if (request.getParameter("page") != null) {
@@ -94,6 +94,15 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
+        <%if(isDeleted == true){%>
+        <script>
+            Swal.fire(
+                'Deletado!',
+                'Seu registro foi deletado com sucesso.',
+                'success'
+                );
+        </script>
+        <%isDeleted = false;}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -217,11 +226,12 @@
                                     <td><%= Provider.getProvQnt(provider.getProvName())%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form name="providers-<%= i%>" method="post">
-                                            <!-- BUTTON EDIT PROVIDER -->
+                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                            <!-- BUTTON EDIT & DELETE PROVIDER -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
                                             <input type="hidden" name="provName" value="<%= provider.getProvName()%>"/>
+                                            <input type="hidden" name="delete" value="del"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i></button>
                                         </form>
@@ -280,10 +290,22 @@
                         </table>
                     </div>
                     <!-- NAVEGATION BUTTONS -->
+                    <% 
+                    int actualPage = 1;
+                    if(request.getParameter("page")!=null){
+                    actualPage = Integer.parseInt(request.getParameter("page"));
+                    }
+                   
+                    int prevPage = actualPage - 1;
+                    int nxtPage = actualPage + 1;
+                    
+                    if(prevPage < 1)prevPage = 1;
+                    if(nxtPage > pageProv)nxtPage = pageProv;
+                    %>
                     <nav aria-label="Page navigation example">
                         <ul class="pagination">
                             <li class="page-item">
-                              <a class="page-link" href="providers.jsp?page=<%=(pageProv-1)%>" aria-label="Previous">
+                              <a class="page-link" href="providers.jsp?page=<%=prevPage%>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
@@ -291,7 +313,7 @@
                             <li class="page-item"><a class="page-link" href="providers.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">
-                                <a class="page-link" href="providers.jsp?page=<%=pageProv%>" aria-label="Next">
+                                <a class="page-link" href="providers.jsp?page=<%=nxtPage%>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -301,6 +323,7 @@
             </div>
             <% }%>
         </div>
-        <script src="scripts/sweetalert.js"></script>
+        <!-- CONFIRM DELETE -->
+        <script src="scripts/confirmDel.js"></script>
     </body>
 </html>

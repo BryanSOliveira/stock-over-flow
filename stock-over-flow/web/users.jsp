@@ -15,7 +15,7 @@
     int qtdUser = User.getAll();
     String bySrc="";
     String byOrd = (String) session.getAttribute("userOrder");
-    
+    Boolean isDeleted = false;
     if((String) session.getAttribute("userSearch")!=null){
     bySrc = (String) session.getAttribute("userSearch");
     }
@@ -61,7 +61,7 @@
         } else if (request.getParameter("delete") != null) {
             String userEmail = request.getParameter("targetUserEmail");
             User.deleteUser(userEmail);
-            response.sendRedirect(request.getRequestURI());
+            isDeleted = true;
         }
         
         if (request.getParameter("page") != null) {
@@ -97,6 +97,7 @@
     }
     int pageUser = (int) Math.ceil((double)qtdUser/10);
     users = User.getPageOrderBy(pgNum, byOrd, bySrc);
+    System.out.println(isDeleted);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -106,11 +107,20 @@
         <title>Usuários</title>
         <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
+        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
+        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
-        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
+        <%if(isDeleted == true){%>
+        <script>
+            Swal.fire(
+                'Deletado!',
+                'Seu registro foi deletado com sucesso.',
+                'success'
+                );
+        </script>
+        <%isDeleted = false;}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
             <div class="card">
@@ -245,13 +255,15 @@
                                     <td><% if (user.getUserVerified() == true) {%> Ativada <% } else {%> Pendente <% }%></td>
                                     <td><%= user.getUserToken()%></td>
                                     <td>
-                                        <form method="post">
-                                            <!-- BUTTON EDIT USER -->
+                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                            <!-- BUTTON EDIT & DELETE USER -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
                                             <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
+                                            
                                             <!-- BUTTON DELETE USER -->
                                             <%if(user.getUserEmail().equals(session.getAttribute("loggedUser.userEmail"))){}else{%>
+                                            <input type="hidden" name="delete" value="del"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i></button><%}%>
                                         </form>
@@ -322,10 +334,22 @@
                         </table>
                     </div>
                     <!-- NAVEGATION BUTTONS -->
+                    <% 
+                    int actualPage = 1;
+                    if(request.getParameter("page")!=null){
+                    actualPage = Integer.parseInt(request.getParameter("page"));
+                    }
+                   
+                    int prevPage = actualPage - 1;
+                    int nxtPage = actualPage + 1;
+                    
+                    if(prevPage < 1)prevPage = 1;
+                    if(nxtPage > pageUser)nxtPage = pageUser;
+                    %>
                     <nav aria-label="Page navigation example">
                         <ul class="pagination">
                             <li class="page-item">
-                              <a class="page-link" href="users.jsp?page=<%=(pageUser-1)%>" aria-label="Previous">
+                              <a class="page-link" href="users.jsp?page=<%=prevPage%>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
@@ -333,7 +357,7 @@
                             <li class="page-item"><a class="page-link" href="users.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">
-                                <a class="page-link" href="users.jsp?page=<%=pageUser%>" aria-label="Next">
+                                <a class="page-link" href="users.jsp?page=<%=nxtPage%>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -341,6 +365,8 @@
                     </nav>
                 </div>
             </div>
+            <!-- CONFIRM DELETE -->
+            <script src="scripts/confirmDel.js"></script>
             <% } else { %>
             Página restrita
             <% } %>

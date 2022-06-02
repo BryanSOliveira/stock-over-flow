@@ -4,6 +4,13 @@
     Author     : spbry
 --%>
 
+<%@page import="java.net.URLDecoder"%>
+<%@page import="java.nio.charset.StandardCharsets"%>
+<%@page import="java.net.URLEncoder"%>
+<%@page import="javax.script.ScriptEngine"%>
+<%@page import="javax.script.ScriptEngineManager"%>
+<%@page import="javax.script.ScriptException"%>
+<%@page import="java.io.Reader"%>
 <%@page import="db.Provider"%>
 <%@page import="java.util.Date"%>
 <%@page import="java.text.DateFormat"%>
@@ -19,7 +26,7 @@
     int qtdMov = Movement.getAll();
     String bySrc="";
     String byOrd = (String) session.getAttribute("movOrder");
-    
+    Boolean isDeleted = false;
     if((String) session.getAttribute("movSearch")!=null){
     bySrc = (String) session.getAttribute("movSearch");
     }
@@ -31,13 +38,12 @@
             String movOp = (String) session.getAttribute("loggedUser.userName");
             String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
+            System.out.println(movType);
             int movQnt = Integer.parseInt(request.getParameter("movQnt"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDesc = request.getParameter("movDesc");
-            
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saída")) movQnt = -movQnt;  
-            
+            else if (movType.equals("Saida")) movQnt = -movQnt;  
             Movement.insertMovement(movProd, movOp, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
             
@@ -51,7 +57,7 @@
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDesc = request.getParameter("movDesc");
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saída")) movQnt = -(Math.abs(movQnt)); 
+            else if (movType.equals("Saida")) movQnt = -(Math.abs(movQnt)); 
             
             Movement.alterMovement(movId, movProd, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
@@ -59,8 +65,9 @@
         //DELETE MOVEMENT
         } else if (request.getParameter("delete") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
+            isDeleted = true;
             Movement.deleteMovement(movId);
-            response.sendRedirect(request.getRequestURI());
+            //response.sendRedirect(request.getRequestURI());
             
         //GENERATE REPORT
         } else if (request.getParameter("report") != null) {
@@ -107,17 +114,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+       
         <title>Movimentações</title>
         <link rel="icon" type="image/x-icon" href="images/Stock2Flow.svg">
         <%@include file="WEB-INF/jspf/bootstrap-header.jspf" %>
         <%@include file="WEB-INF/jspf/jquery-header.jspf" %>
-        <%@include file="WEB-INF/jspf/datatable-header.jspf" %>
+        <%@include file="WEB-INF/jspf/sweetalert-header.jspf" %>
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <h1><%%></h1>
+        <%if(isDeleted == true){%>
+        <script>
+            Swal.fire(
+                'Deletado!',
+                'Seu registro foi deletado com sucesso.',
+                'success'
+                );
+        </script>
+        <%isDeleted = false;}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -154,7 +171,7 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form name="newMovement" id="mov-form" method="post">
+                                <form name="newMovement" id="movForm" method="post">
                                     <div class="modal-body">
                                         
                                         <!-- MOVEMENT PRODUCT -->
@@ -191,7 +208,8 @@
                                         <div class="mb-3">
                                             <label for="movType">Tipo de Movimentação</label>
                                             <select class="form-control" name="movType" id="movType">
-                                                <option value="Saída">Saída</option>
+                                                <%String codType = URLDecoder.decode("Saida", StandardCharsets.UTF_8);%>
+                                                <option value="<%=codType%>">Saida</option>
                                                 <option value="Entrada">Entrada</option>
                                                 <option value="errorCode:notSelected" disabled selected hidden>---</option>
                                             </select>
@@ -335,13 +353,16 @@
                                     <td><%= movement.getMovValue()%></td>
                                     <td><%= movement.getMovDesc()%></td>
                                     <td>
-                                        <form method="post">
-                                        <!-- BUTTON EDIT MOVEMENT -->
+                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <!-- BUTTON EDIT & DELETE MOVEMENT -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
-                                                <i class="bi bi-pencil-square"></i></button>
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
                                             <input type="hidden" name="movId" value="<%= movement.getMovId()%>"/>
-                                            <button type="submit" name="delete" class="btn btn-danger btn-sm">
-                                                <i class="bi bi-trash3"></i></button>
+                                            <input type="hidden" name="delete" value="del"/>
+                                            <button type="submit" name="delete" class="btn btn-danger btn-sm" value="del">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
                                         </form>
                                         <!-- EDIT MOVEMENT SCREEN -->
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
@@ -400,11 +421,11 @@
                                                             <div class="mb-3">
                                                                 <label for="movType-<%= i%>">Tipo de Movimentação</label>
                                                                 <select class="form-control" name="movType" id="movType-<%= i%>">
-                                                                    <% if (movement.getMovType().equals("Saída")) { %>
-                                                                    <option value="Saída" selected>Saída</option>
+                                                                    <% if (movement.getMovType().equals("Saida")) { %>
+                                                                    <option value="Saida" selected>Saida</option>
                                                                     <option value="Entrada">Entrada</option>
                                                                     <% } else { %>
-                                                                    <option value="Saída">Saída</option>
+                                                                    <option value="Saida">Saida</option>
                                                                     <option value="Entrada" selected>Entrada</option>
                                                                     <% }%>
                                                                 </select>
@@ -451,10 +472,22 @@
                         </table>
                     </div>
                     <!-- NAVEGATION BUTTONS -->
+                    <% 
+                    int actualPage = 1;
+                    if(request.getParameter("page")!=null){
+                    actualPage = Integer.parseInt(request.getParameter("page"));
+                    }
+                   
+                    int prevPage = actualPage - 1;
+                    int nxtPage = actualPage + 1;
+                    
+                    if(prevPage < 1)prevPage = 1;
+                    if(nxtPage > pageMov)nxtPage = pageMov;
+                    %>
                     <nav aria-label="Page navigation example">
                         <ul class="pagination">
                             <li class="page-item">
-                              <a class="page-link" href="movements.jsp?page=<%=(pageMov-1)%>" aria-label="Previous">
+                              <a class="page-link" href="movements.jsp?page=<%=prevPage%>" aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                               </a>
                             </li>
@@ -462,7 +495,7 @@
                             <li class="page-item"><a class="page-link" href="movements.jsp?page=<%=k%>"><%=k%></a></li>
                             <%}%>
                             <li class="page-item">
-                                <a class="page-link" href="movements.jsp?page=<%=pageMov%>" aria-label="Next">
+                                <a class="page-link" href="movements.jsp?page=<%=nxtPage%>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -472,9 +505,11 @@
             </div>
             <% }%>
         </div>
+        <!-- CONFIRM DELETE -->
+        <script src="scripts/confirmDel.js"></script>
         <!--VALIDATE FORM-->
         <script>
-            $('#mov-form').submit(validateForm);
+            $('#movForm').submit(validateForm);
             
             function validateForm(){
                 var prodMv = document.forms["newMovement"]["movProd"].value;
@@ -485,22 +520,21 @@
                 
                 const allProd = <%=Product.getProdIds()%>;
                 
-                    if (prodMv == "errorCode:notSelected"){
+                    if (prodMv === "errorCode:notSelected"){
                         $("#errorShow").text("Produto não escolhido!");
                         return false;
-                    }else if (provMv == "errorCode:notSelected"){
+                    }else if (provMv === "errorCode:notSelected"){
                         $("#errorShow").text("Fornecedor não escolhido!");
                         return false;
-                    }else if (typeMv == "errorCode:notSelected"){
+                    }else if (typeMv === "errorCode:notSelected"){
                         $("#errorShow").text("Tipo de movimentação não escolhido!");
                         return false;
                     }else if(valueMv < 0){
                         $("#errorShow").text("Coloque um valor positivo!");
                         return false;
-                    }else if(typeMv=="Saída" && qntMv < Movement.getQntById(prodMv)){
+                    }else if(typeMv==="Saida" && qntMv < 0){ //Movement.getQntById(prodMv)
                         $("#errorShow").text("Quantidade em estoque insuficiente!");
                         return false;
-                        //VERIFY DUPES
                     }else{
                         return true;
                     }
