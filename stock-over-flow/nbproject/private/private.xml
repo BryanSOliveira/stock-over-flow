@@ -3,11 +3,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/db/Movement.java</file>
-            <file>file:/C:/stock-over-flow/stock-over-flow/web/graph.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/db/User.java</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/providers.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/db/Product.java</file>
             <file>file:/C:/stock-over-flow/stock-over-flow/web/index.jsp</file>
-            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/web/DbListener.java</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/brands.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/users.jsp</file>
             <file>file:/C:/stock-over-flow/stock-over-flow/web/movements.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/db/Provider.java</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/db/Movement.java</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/scripts/confirmDel.js</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/graph.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/web/products.jsp</file>
+            <file>file:/C:/stock-over-flow/stock-over-flow/src/java/web/DbListener.java</file>
         </group>
     </open-files>
 </project-private>

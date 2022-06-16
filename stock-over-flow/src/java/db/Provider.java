@@ -26,8 +26,8 @@ public class Provider {
         return "CREATE TABLE IF NOT EXISTS provider("
                 + "provName VARCHAR(50) UNIQUE NOT NULL,"
                 + "provLocation VARCHAR(100),"
-                + "provTelephone VARCHAR(15) UNIQUE,"
-                + "provMail VARCHAR(100) UNIQUE"
+                + "provTelephone VARCHAR(15),"
+                + "provMail VARCHAR(100)"
                 + ")";
     }
     

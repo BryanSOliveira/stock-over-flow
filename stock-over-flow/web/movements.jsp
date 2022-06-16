@@ -22,14 +22,17 @@
 <%
     String requestError = null;
     ArrayList<Movement> movements = new ArrayList<>();
-    int pgNum = 0;    
+    int pgNum = 0;
+    if(session.getAttribute("movPage") != null)pgNum = ((Integer)session.getAttribute("movPage")-1)*10;
     int qtdMov = Movement.getAll();
-    String bySrc="";
+    String bySrc = (String) session.getAttribute("movSearch");
+    if(bySrc==null)bySrc="";
+    else qtdMov = Movement.getSearchPage(bySrc);
     String byOrd = (String) session.getAttribute("movOrder");
-    Boolean isDeleted = false;
-    if((String) session.getAttribute("movSearch")!=null){
-    bySrc = (String) session.getAttribute("movSearch");
-    }
+    if(byOrd==null)byOrd="movId";
+    Boolean isDeleted = (Boolean) session.getAttribute("checkMovements");
+    if(isDeleted == null)isDeleted = false;
+    
     
     try {
         //ADD MOVEMENT
@@ -38,12 +41,11 @@
             String movOp = (String) session.getAttribute("loggedUser.userName");
             String movProv = request.getParameter("movProv");
             String movType = request.getParameter("movType");
-            System.out.println(movType);
             int movQnt = Integer.parseInt(request.getParameter("movQnt"));
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDesc = request.getParameter("movDesc");
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saida")) movQnt = -movQnt;  
+            else if (movType.equals("  Saída")) movQnt = -movQnt;  
             Movement.insertMovement(movProd, movOp, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
             
@@ -57,7 +59,7 @@
             Double movValue = Double.parseDouble(request.getParameter("movValue"));
             String movDesc = request.getParameter("movDesc");
             if (movType.equals("Entrada")) movQnt = Math.abs(movQnt);
-            else if (movType.equals("Saida")) movQnt = -(Math.abs(movQnt)); 
+            else if (movType.equals("  Saída")) movQnt = -(Math.abs(movQnt)); 
             
             Movement.alterMovement(movId, movProd, movProv, movType, movQnt, movValue, movDesc);
             response.sendRedirect(request.getRequestURI());
@@ -65,9 +67,9 @@
         //DELETE MOVEMENT
         } else if (request.getParameter("delete") != null) {
             int movId = Integer.parseInt(request.getParameter("movId"));
-            isDeleted = true;
             Movement.deleteMovement(movId);
-            //response.sendRedirect(request.getRequestURI());
+            session.setAttribute("checkMovements",true);
+            response.sendRedirect(request.getRequestURI());
             
         //GENERATE REPORT
         } else if (request.getParameter("report") != null) {
@@ -76,33 +78,35 @@
             response.sendRedirect(request.getRequestURI());
         }
         
+        //PAGE MOVEMENT
         if (request.getParameter("page") != null) {
             pgNum = Integer.parseInt(request.getParameter("page"));
+            session.setAttribute("movPage",pgNum);
             pgNum = (pgNum-1)*10;
         }
         
+        //SEARCH MOVEMENT
         if (request.getParameter("srcFilter")!= null){
             bySrc = request.getParameter("searchFor");
             qtdMov = Movement.getSearchPage(bySrc);
-            session.setAttribute("movsearch", bySrc);
+            session.setAttribute("movSearch", bySrc);
+            session.removeAttribute("movPage");
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //ORDER MOVEMENT
         if (request.getParameter("orderColumn")!= null){
             byOrd = request.getParameter("orderColumn");
             session.setAttribute("movOrder", byOrd);
-            
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //CLEAR SEARCH MOVEMENT
         if(request.getParameter("clearFilter") != null) {
             session.removeAttribute("movSearch");
             bySrc = "";
+            response.sendRedirect(request.getRequestURI());
         }
-        
-        
-        if((String)session.getAttribute("movSearch") != null) {
-            bySrc = (String)session.getAttribute("movSearch");
-            qtdMov = Movement.getSearchPage(bySrc);
-        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
@@ -126,7 +130,9 @@
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
         <h1><%%></h1>
-        <%if(isDeleted == true){%>
+        <%if(isDeleted == true){
+          session.setAttribute("checkMovements", false);
+        %>
         <script>
             Swal.fire(
                 'Deletado!',
@@ -134,7 +140,7 @@
                 'success'
                 );
         </script>
-        <%isDeleted = false;}%>
+        <%}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -154,7 +160,7 @@
                         <% } %>
                         <!-- FILTER INPUT -->
                         <div class="float-md-end h6">
-                            <form method="post" class="input-group">
+                            <form method="post" enctype="application/x-www-form-urlencoded" class="input-group">
                                 <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
                                 <button type="submit" name="srcFilter" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
@@ -171,12 +177,12 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form name="newMovement" id="movForm" method="post">
+                                <form name="newMovement" id="movForm" enctype="application/x-www-form-urlencoded" method="post">
                                     <div class="modal-body">
                                         
                                         <!-- MOVEMENT PRODUCT -->
                                         <div class="mb-3">
-                                            <label for="movProd">Produto</label>
+                                            <label for="movProd">Produto <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <select class="form-control" name="movProd" id="movProd">
                                                 <%  
                                                     ArrayList<Integer> prodIds = Product.getProdIds();
@@ -191,7 +197,7 @@
                                         </div>
                                         <!-- MOVEMENT PROVIDER -->
                                         <div class="mb-3">
-                                            <label for="movProv">Fornecedor</label>
+                                            <label for="movProv">Fornecedor <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <select class="form-control" name="movProv" id="movProv">
                                                 <%
                                                     ArrayList<String> provNames = Provider.getProvNames();
@@ -206,23 +212,23 @@
                                         </div>
                                         <!-- MOVEMENT TYPE -->
                                         <div class="mb-3">
-                                            <label for="movType">Tipo de Movimentação</label>
+                                            <label for="movType">Tipo de Movimentação <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <select class="form-control" name="movType" id="movType">
-                                                <%String codType = URLDecoder.decode("Saida", StandardCharsets.UTF_8);%>
-                                                <option value="<%=codType%>">Saida</option>
+                                                <%String codType = URLDecoder.decode(" Saída", StandardCharsets.UTF_8);%>
+                                                <option value="<%=codType%>">  Saída</option>
                                                 <option value="Entrada">Entrada</option>
                                                 <option value="errorCode:notSelected" disabled selected hidden>---</option>
                                             </select>
                                         </div>
                                         <!-- MOVEMENT QUANTITY -->
                                         <div class="mb-3">
-                                            <label for="movQnt">Quantidade</label>
-                                            <input type="number" min="0" class="form-control" name="movQnt" id="movQnt" required/>
+                                            <label for="movQnt">Quantidade <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
+                                            <input type="number" step=any min="0" class="form-control" name="movQnt" id="movQnt" required/>
                                         </div>
                                         <!-- MOVEMENT VALUE -->
                                         <div class="mb-3">
-                                            <label for="movValue">Valor</label>
-                                            <input type="number" step="0.1" min="0" class="form-control" name="movValue" id="movValue" required/>
+                                            <label for="movValue">Valor <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
+                                            <input type="number" step=any class="form-control" name="movValue" id="movValue"/>
                                         </div>
                                         <!-- MOVEMENT DESCRIPTION -->
                                         <div class="mb-3">
@@ -353,7 +359,7 @@
                                     <td><%= movement.getMovValue()%></td>
                                     <td><%= movement.getMovDesc()%></td>
                                     <td>
-                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <form name="objAlter" id="objAlter-<%= i%>" enctype="application/x-www-form-urlencoded" method="post" onsubmit="validateAlert(<%= i%>, this)">
                                         <!-- BUTTON EDIT & DELETE MOVEMENT -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
@@ -368,7 +374,7 @@
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form>
+                                                    <form enctype="application/x-www-form-urlencoded" method="post">
                                                         <div class="modal-body">
                                                             <!-- MOVEMENT ID -->
                                                             <div class="mb-3">
@@ -384,7 +390,7 @@
                                                             </div>
                                                             <!-- MOVEMENT PRODUCT -->
                                                             <div class="mb-3">
-                                                                <label for="movProd-<%= i%>">Produto</label>
+                                                                <label for="movProd-<%= i%>">Produto <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <select class="form-control" name="movProd" id="movProd-<%= i%>">
                                                                     <% ArrayList<Integer> prodIdsEdit = Product.getProdIds();
                                                                     if(prodIdsEdit.size() > 0){
@@ -406,7 +412,7 @@
                                                             </div>
                                                             <!-- MOVEMENT PROVIDER -->
                                                             <div class="mb-3">
-                                                                <label for="movProv-<%= i%>">Fornecedor</label>
+                                                                <label for="movProv-<%= i%>">Fornecedor <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <select class="form-control" name="movProv" id="movProv-<%= i%>">
                                                                     <% ArrayList<String> provNamesEdit = Provider.getProvNames();
                                                                         for (int m = 0; m < provNamesEdit.size(); m++) {
@@ -419,26 +425,26 @@
                                                             </div>
                                                             <!-- MOVEMENT TYPE -->
                                                             <div class="mb-3">
-                                                                <label for="movType-<%= i%>">Tipo de Movimentação</label>
+                                                                <label for="movType-<%= i%>">Tipo de Movimentação <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <select class="form-control" name="movType" id="movType-<%= i%>">
-                                                                    <% if (movement.getMovType().equals("Saida")) { %>
-                                                                    <option value="Saida" selected>Saida</option>
+                                                                    <% if (movement.getMovType().equals("  Saída")) { %>
+                                                                    <option value="Saída" selected>Saída</option>
                                                                     <option value="Entrada">Entrada</option>
                                                                     <% } else { %>
-                                                                    <option value="Saida">Saida</option>
+                                                                    <option value="Saída"> Saída</option>
                                                                     <option value="Entrada" selected>Entrada</option>
                                                                     <% }%>
                                                                 </select>
                                                             </div>
                                                             <!-- MOVEMENT QUANTITY -->
                                                             <div class="mb-3">
-                                                                <label for="movQnt-<%= i%>">Quantidade</label>
+                                                                <label for="movQnt-<%= i%>">Quantidade <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="number" min="0" class="form-control" name="movQnt" id="movQnt-<%= i%>" 
                                                                        value="<%= Math.abs(movement.getMovQnt())%>" required/>
                                                             </div>
                                                             <!-- MOVEMENT VALUE -->
                                                             <div class="mb-3">
-                                                                <label for="movValue-<%= i%>">Valor</label>
+                                                                <label for="movValue-<%= i%>">Valor <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="number" min="0" step="0.01" class="form-control" name="movValue" id="movValue-<%= i%>" 
                                                                        value="<%= movement.getMovValue()%>" required/>
                                                             </div>
@@ -446,7 +452,7 @@
                                                             <div class="mb-3">
                                                                 <label for="movAvgValue-<%= i%>">Valor médio</label>
                                                                 <input type="number" class="form-control" name="movAvgValue" id="movAvgValue-<%= i%>" 
-                                                                       value="<%= Movement.getAvgById(movement.getMovProd())%>" disabled/>
+                                                                       value="<%= Product.getAvg(movement.getMovProd())%>" disabled/>
                                                             </div>
                                                             <!-- MOVEMENT DESCRIPTION -->
                                                             <div class="mb-3">
@@ -505,6 +511,11 @@
             </div>
             <% }%>
         </div>
+        <!-- TOOLTIP -->
+        <script>
+            $(function () {
+            $('[data-toggle="tooltip"]').tooltip()})
+        </script>
         <!-- CONFIRM DELETE -->
         <script src="scripts/confirmDel.js"></script>
         <!--VALIDATE FORM-->
@@ -520,6 +531,8 @@
                 
                 const allProd = <%=Product.getProdIds()%>;
                 
+                var prodVerify = <%=Product.getProds()%>;
+                
                     if (prodMv === "errorCode:notSelected"){
                         $("#errorShow").text("Produto não escolhido!");
                         return false;
@@ -529,10 +542,13 @@
                     }else if (typeMv === "errorCode:notSelected"){
                         $("#errorShow").text("Tipo de movimentação não escolhido!");
                         return false;
+                    }else if(qntMv % 1 != 0){
+                        $("#errorShow").text("A quantidade precisa ser um valor inteiro!");
+                        return false;
                     }else if(valueMv < 0){
                         $("#errorShow").text("Coloque um valor positivo!");
                         return false;
-                    }else if(typeMv==="Saida" && qntMv < 0){ //Movement.getQntById(prodMv)
+                    }else if(typeMv==="Saída" && qntMv > ){ //Movement.getQntById(prodMv)
                         $("#errorShow").text("Quantidade em estoque insuficiente!");
                         return false;
                     }else{

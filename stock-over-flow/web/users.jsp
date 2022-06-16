@@ -11,11 +11,15 @@
 
     String requestError = null;
     ArrayList<User> users = new ArrayList<>();
-    int pgNum = 0;    
+    int pgNum = 0;
+    if(session.getAttribute("userPage") != null)pgNum = ((Integer)session.getAttribute("userPage")-1)*10;
     int qtdUser = User.getAll();
-    String bySrc="";
+    String bySrc = (String) session.getAttribute("userSearch");
+    if(bySrc==null)bySrc="";
+    else qtdUser = User.getSearchPage(bySrc);
     String byOrd = (String) session.getAttribute("userOrder");
-    Boolean isDeleted = false;
+    Boolean isDeleted = (Boolean) session.getAttribute("checkUsers");
+    if(isDeleted == null)isDeleted = false;
     if((String) session.getAttribute("userSearch")!=null){
     bySrc = (String) session.getAttribute("userSearch");
     }
@@ -39,13 +43,8 @@
             User verifyUser = new User(userEmail, userName, userRole, userVerified, userToken);
             boolean emailSent = mailInstance.sendEmail(verifyUser);
             } catch (Exception ex) {
-            //throw new Exception (ex.getMessage());
             System.out.println(ex.getMessage());
-            }
-                
-            }
-            }).start();
-            
+            }}}).start();
             response.sendRedirect(request.getRequestURI());
         
         //EDIT USER
@@ -61,43 +60,41 @@
         } else if (request.getParameter("delete") != null) {
             String userEmail = request.getParameter("targetUserEmail");
             User.deleteUser(userEmail);
-            isDeleted = true;
+            session.setAttribute("checkUsers",true);
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //PAGE USER
         if (request.getParameter("page") != null) {
             pgNum = Integer.parseInt(request.getParameter("page"));
             pgNum = (pgNum-1)*10;
         }
         
+        //SEARCH USER
         if (request.getParameter("srcFilter")!= null){
             bySrc = request.getParameter("searchFor");
             qtdUser = User.getSearchPage(bySrc);
             session.setAttribute("userSearch", bySrc);
         }
         
+        //ORDER USER
         if (request.getParameter("orderColumn")!= null){
             byOrd = request.getParameter("orderColumn");
             session.setAttribute("userOrder", byOrd);
             
         }
         
+        //CLEAR SEARCH USER
         if(request.getParameter("clearFilter") != null) {
             session.removeAttribute("userSearch");
             bySrc = "";
         }
-        
-        
-        if((String)session.getAttribute("userSearch") != null) {
-            bySrc = (String)session.getAttribute("userSearch");
-            qtdUser = User.getSearchPage(bySrc);
-        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
     }
     int pageUser = (int) Math.ceil((double)qtdUser/10);
     users = User.getPageOrderBy(pgNum, byOrd, bySrc);
-    System.out.println(isDeleted);
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -112,7 +109,8 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <%if(isDeleted == true){%>
+        <%if(isDeleted == true){
+          session.setAttribute("checkBrands", false);%>
         <script>
             Swal.fire(
                 'Deletado!',
@@ -120,7 +118,7 @@
                 'success'
                 );
         </script>
-        <%isDeleted = false;}%>
+        <%}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) { %>
             <div class="card">
@@ -133,7 +131,7 @@
                         </button>
                         <!-- FILTER INPUT -->
                         <div class="float-md-end h6">
-                            <form method="post" class="input-group">
+                            <form method="post" enctype="application/x-www-form-urlencoded" class="input-group">
                                 <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
                                 <button type="submit" name="srcFilter" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
@@ -150,21 +148,21 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form method="post">
+                                <form enctype="application/x-www-form-urlencoded" method="post">
                                     <div class="modal-body">
                                         <!-- USER EMAIL -->
                                         <div class="mb-3">
-                                            <label for="targetUserEmail">Email</label>
+                                            <label for="targetUserEmail">Email <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="email" class="form-control" name="targetUserEmail" id="targetUserEmail" required/>
                                         </div>
                                         <!-- USER NAME -->
                                         <div class="mb-3">
-                                            <label for="targetUserName">Nome</label>
+                                            <label for="targetUserName">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="text" class="form-control" name="targetUserName" id="targetUserName" required/>
                                         </div>
                                         <!-- USER ROLE -->
                                         <div class="mb-3">
-                                            <label for="targetUserRole">Permissão</label>
+                                            <label for="targetUserRole">Permissão <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <select name="targetUserRole" class="form-select" id="tagetUserRole">
                                                 <option value="Admin">Admin</option>
                                                 <option value="Usuario" selected>Usuario</option>
@@ -172,7 +170,7 @@
                                         </div>
                                         <!-- USER PASSWORD -->
                                         <div class="mb-3">
-                                            <label for="targetUserPassword">Senha</label>
+                                            <label for="targetUserPassword">Senha <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="password" class="form-control" name="targetUserPassword" id="targetUserPassword" autocomplete="on" required/>
                                         </div>
                                     </div>
@@ -255,14 +253,15 @@
                                     <td><% if (user.getUserVerified() == true) {%> Ativada <% } else {%> Pendente <% }%></td>
                                     <td><%= user.getUserToken()%></td>
                                     <td>
-                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <form name="objAlter" id="objAlter-<%= i%>" enctype="application/x-www-form-urlencoded" method="post" onsubmit="validateAlert(<%= i%>, this)">
                                             <!-- BUTTON EDIT & DELETE USER -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
-                                            <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
+                                            <!--<input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>-->
                                             
                                             <!-- BUTTON DELETE USER -->
-                                            <%if(user.getUserEmail().equals(session.getAttribute("loggedUser.userEmail"))){}else{%>
+                                            <%if(!user.getUserEmail().equals(session.getAttribute("loggedUser.userEmail"))){%>
+                                            <input type="hidden" name="targetUserEmail" value="<%= user.getUserEmail()%>"/>
                                             <input type="hidden" name="delete" value="del"/>
                                             <button type="submit" name="delete" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash3"></i></button><%}%>
@@ -271,23 +270,23 @@
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form>
+                                                    <form enctype="application/x-www-form-urlencoded">
                                                         <div class="modal-body">
                                                             <!-- USER EMAIL -->
                                                             <div class="mb-3">
-                                                                <label for="targetUserEmail-<%= i%>">Email</label>
+                                                                <label for="targetUserEmail-<%= i%>">Email <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="text" class="form-control" name="targetUserEmail" id="targetUserEmail-<%= i%>" 
                                                                        value="<%= user.getUserEmail()%>" disabled/>
                                                             </div>
                                                             <!-- USER NAME -->
                                                             <div class="mb-3">
-                                                                <label for="targetUserName-<%= i%>">Nome</label>
+                                                                <label for="targetUserName-<%= i%>">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="text" class="form-control" name="targetUserName" id="targetUserName-<%= i%>" 
                                                                        value="<%= user.getUserName()%>"/>
                                                             </div>
                                                             <!-- USER ROLE -->
                                                             <div class="mb-3">
-                                                                <label for="targetUserRole-<%= i%>">Permissão</label>
+                                                                <label for="targetUserRole-<%= i%>">Permissão <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <select name="targetUserRole" class="form-select" id="targetUserRole-<%= i%>">
                                                                     <% if (user.getUserRole().equals("Admin")) { %>
                                                                     <option value="Admin" selected>Admin</option>
@@ -300,7 +299,7 @@
                                                             </div>
                                                             <!-- USER PASSWORD -->
                                                             <div class="mb-3">
-                                                                <label for="targetUserPassword-<%= i%>">Senha</label>
+                                                                <label for="targetUserPassword-<%= i%>">Senha <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="password" class="form-control" name="targetUserPassword" id="targetUserPassword-<%= i%>" autocomplete="on"/>
                                                             </div>
                                                             <!-- USER VERIFIED -->
@@ -365,6 +364,11 @@
                     </nav>
                 </div>
             </div>
+            <!-- TOOLTIP -->
+            <script>
+                $(function () {
+                $('[data-toggle="tooltip"]').tooltip()})
+            </script>
             <!-- CONFIRM DELETE -->
             <script src="scripts/confirmDel.js"></script>
             <% } else { %>

@@ -76,6 +76,7 @@ public class Movement {
             int movQnt = rs.getInt("movQnt");
             Double movValue = rs.getDouble("movValue");
             String movDesc = rs.getString("movDesc");
+            Product.updateProd(movId);
             list.add(new Movement(movId, movDate, movProd, movName, movOp, movProv, movType, movQnt, movValue, movDesc));
         }
         rs.close();
@@ -103,6 +104,7 @@ public class Movement {
         stmt.execute();
         stmt.close();
         con.close();
+        Product.updateProd(movProd);
     }
 
     public static void alterMovement(int movId, int movProd, String movProv, String movType, int movQnt, Double movValue, String movDesc) throws Exception {
@@ -120,6 +122,7 @@ public class Movement {
         stmt.execute();
         stmt.close();
         con.close();
+        Product.updateProd(movProd);
     }
 
     public static void deleteMovement(int movId) throws Exception {
@@ -130,6 +133,7 @@ public class Movement {
         stmt.execute();
         stmt.close();
         con.close();
+        Product.updateProd(movId);
     }
 
     public static void generateReport(ArrayList<Movement> movements, HttpServletResponse response) throws Exception {
@@ -157,7 +161,7 @@ public class Movement {
         for (Movement movement : movements) {
             if (movement.getMovType().equals("Entrada")) {
                 valueAllEntries += movement.getMovValue();
-            } else if (movement.getMovType().equals("Saida")) {
+            } else if (movement.getMovType().equals("Saída")) {
                 valueAllOutputs += movement.getMovValue();
             }
         }
@@ -262,7 +266,7 @@ public class Movement {
         ArrayList<Integer> sellList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT movQnt, movDate FROM movement WHERE movType = 'Saida' ORDER BY movDate");
+        ResultSet rs = stmt.executeQuery("SELECT movQnt, movDate FROM movement WHERE movType = 'Saída' ORDER BY movDate");
         while (rs.next()) {
             Integer movQnt = Math.abs(rs.getInt("movQnt"));
             sellList.add(movQnt);
@@ -277,7 +281,7 @@ public class Movement {
         ArrayList<String> dataList = new ArrayList<>();
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT movDate FROM movement WHERE movType = 'Saida'");
+        ResultSet rs = stmt.executeQuery("SELECT movDate FROM movement WHERE movType = 'Saída'");
         while (rs.next()) {
             String movDate = rs.getString("movDate").substring(12,13);
             dataList.add(movDate);
@@ -311,7 +315,7 @@ public class Movement {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movProv, COUNT(movProv) "
                 + "AS mostProv FROM movement "
-                + "WHERE movType = 'Saida' "
+                + "WHERE movType = 'Saída' "
                 + "GROUP BY movProv "
                 + "ORDER BY mostProv "
                 + "DESC LIMIT 1");
@@ -329,7 +333,7 @@ public class Movement {
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT movName, COUNT(movName) "
                 + "AS mostProd FROM movement "
-                + "WHERE movType = 'Saida'"
+                + "WHERE movType = 'Saída'"
                 + "GROUP BY movName "
                 + "ORDER BY mostProd "
                 + "DESC LIMIT 1");
@@ -345,7 +349,7 @@ public class Movement {
         double allSell = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT movValue, movQnt FROM movement WHERE movType = 'Saida'");
+        ResultSet rs = stmt.executeQuery("SELECT movValue, movQnt FROM movement WHERE movType = 'Saída'");
         while (rs.next()) {
             allSell += rs.getInt("movValue")*Math.abs(rs.getInt("movQnt"));
             
@@ -360,7 +364,7 @@ public class Movement {
         int allOut = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM movement WHERE movType='Saida'");
+        ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM movement WHERE movType='Saída'");
 
         allOut = rs.getInt("COUNT(*)");
 
@@ -494,7 +498,7 @@ public class Movement {
         double buyValue = 0;
         Connection con = DbListener.getConnection();
         Statement stmt = con.createStatement();
-        ResultSet rsell = stmt.executeQuery("SELECT movValue, movQnt FROM movement WHERE movType='Saida'");
+        ResultSet rsell = stmt.executeQuery("SELECT movValue, movQnt FROM movement WHERE movType='Saída'");
         while (rsell.next()) {
            sellValue += rsell.getDouble("movValue")*rsell.getInt("movQnt");
         }

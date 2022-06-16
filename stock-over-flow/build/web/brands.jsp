@@ -10,11 +10,18 @@
 <%
     String requestError = null;
     ArrayList<Brand> brands = new ArrayList<>();
-    int pgNum = 0;    
+    int pgNum = 0;
+    if(session.getAttribute("brandPage") != null)pgNum = ((Integer)session.getAttribute("brandPage")-1)*10;
     int qtdBrand = Brand.getAll();
-    String bySrc="";
+    String bySrc = (String) session.getAttribute("brandSearch");
+    if(bySrc==null)bySrc="";
+    else qtdBrand = Brand.getSearchPage(bySrc);
+    Boolean isDeleted = (Boolean) session.getAttribute("checkBrands");
+    if(isDeleted == null)isDeleted = false;
     String byOrd = (String) session.getAttribute("brandOrder");
-    Boolean isDeleted = false;
+   
+    
+    
     if((String) session.getAttribute("brandSearch")!=null){
     bySrc = (String) session.getAttribute("brandSearch");
     }
@@ -38,36 +45,39 @@
         } else if (request.getParameter("delete") != null) {
             String brandName = request.getParameter("brandName");
             Brand.deleteBrand(brandName);
-            isDeleted = true;
+            session.setAttribute("checkBrands",true);
+            response.sendRedirect(request.getRequestURI());
         }    
         
+        //PAGE BRAND
         if (request.getParameter("page") != null) {
             pgNum = Integer.parseInt(request.getParameter("page"));
+            session.setAttribute("brandPage",pgNum);
             pgNum = (pgNum-1)*10;
         }
         
+        //SEARCH BRAND
         if (request.getParameter("srcFilter")!= null){
             bySrc = request.getParameter("searchFor");
             qtdBrand = Brand.getSearchPage(bySrc);
             session.setAttribute("brandSearch", bySrc);
+            session.removeAttribute("brandPage");
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //ORDER BRAND
         if (request.getParameter("orderColumn")!= null){
             byOrd = request.getParameter("orderColumn");
             session.setAttribute("brandOrder", byOrd);
-            
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //CLEAR SEARCH BRAND
         if(request.getParameter("clearFilter") != null) {
             session.removeAttribute("brandSearch");
             bySrc = "";
+            response.sendRedirect(request.getRequestURI());
         }
-        
-        
-        if((String)session.getAttribute("brandSearch") != null) {
-            bySrc = (String)session.getAttribute("brandSearch");
-            qtdBrand = Brand.getSearchPage(bySrc);
-        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
@@ -89,7 +99,8 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <%if(isDeleted == true){%>
+        <%if(isDeleted == true){
+          session.setAttribute("checkBrands", false);%>
         <script>
             Swal.fire(
                 'Deletado!',
@@ -97,7 +108,7 @@
                 'success'
                 );
         </script>
-        <%isDeleted = false;}%>
+        <%}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -111,7 +122,7 @@
                         <% } %>
                         <!-- FILTER INPUT -->
                         <div class="float-md-end h6">
-                            <form method="post" class="input-group">
+                            <form enctype="application/x-www-form-urlencoded" method="post" class="input-group">
                                 <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
                                 <button type="submit" name="srcFilter" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
@@ -128,11 +139,11 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form method="post">
+                                <form enctype="application/x-www-form-urlencoded" method="post">
                                     <div class="modal-body">
                                         <!-- BRAND NAME -->
                                         <div class="mb-3">
-                                            <label for="name">Nome</label>
+                                            <label for="name">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="text" class="form-control" name="brandName" id="brandName" required/>
                                         </div>
                                         <!-- BRAND DESCRIPTION -->
@@ -190,7 +201,7 @@
                                     <td><%= brand.getBrandDesc()%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <form name="objAlter" id="objAlter-<%= i%>" enctype="application/x-www-form-urlencoded" method="post" onsubmit="validateAlert(<%= i%>, this)">
                                             <!-- BUTTON EDIT & DELETE BRAND -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i>
@@ -205,11 +216,11 @@
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form>
+                                                    <form enctype="application/x-www-form-urlencoded" method="post">
                                                         <div class="modal-body">
                                                             <!-- BRAND NAME -->
                                                             <div class="mb-3">
-                                                                <label for="brandName-<%= i%>">Nome</label>
+                                                                <label for="brandName-<%= i%>">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="text" class="form-control" name="brandName" id="brandName-<%= i%>" 
                                                                        value="<%= brand.getBrandName()%>"/>
                                                             </div>
@@ -271,6 +282,11 @@
             </div>
             <% }%>
         </div>
+        <!-- TOOLTIP -->
+        <script>
+            $(function () {
+            $('[data-toggle="tooltip"]').tooltip()})
+        </script>
         <!-- CONFIRM DELETE -->
         <script src="scripts/confirmDel.js"></script>
     </body>

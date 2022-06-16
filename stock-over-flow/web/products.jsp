@@ -12,11 +12,15 @@
 <%
     String requestError = null;
     ArrayList<Product> products = new ArrayList<>();
-    int pgNum = 0;    
+    int pgNum = 0;
+    if(session.getAttribute("prodPage") != null)pgNum = ((Integer)session.getAttribute("prodPage")-1)*10;
     int qtdProd = Product.getAll();
-    String bySrc="";
+    String bySrc = (String) session.getAttribute("prodSearch");
+    if(bySrc==null)bySrc="";
+    else qtdProd = Product.getSearchPage(bySrc);
     String byOrd = (String) session.getAttribute("prodOrder");
-    Boolean isDeleted = false;
+    Boolean isDeleted = (Boolean) session.getAttribute("checkProducts");
+    if(isDeleted == null)isDeleted = false;
     if((String) session.getAttribute("prodSearch")!=null){
     bySrc = (String) session.getAttribute("prodSearch");
     }
@@ -44,36 +48,38 @@
         } else if (request.getParameter("delete") != null) {
             Integer prodId = Integer.parseInt(request.getParameter("prodId"));
             Product.deleteProd(prodId);
-            isDeleted = true;
+            session.setAttribute("checkProducts",true);
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //PAGE PRODUCT
         if (request.getParameter("page") != null) {
             pgNum = Integer.parseInt(request.getParameter("page"));
+            session.setAttribute("prodPage",pgNum);
             pgNum = (pgNum-1)*10;
         }
         
+        //SEARCH PRODUCT
         if (request.getParameter("srcFilter")!= null){
             bySrc = request.getParameter("searchFor");
             qtdProd = Product.getSearchPage(bySrc);
             session.setAttribute("prodSearch", bySrc);
+            session.removeAttribute("prodPage");
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //ORDER PRODUCT
         if (request.getParameter("orderColumn")!= null){
             byOrd = request.getParameter("orderColumn");
             session.setAttribute("prodOrder", byOrd);
-            
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //CLEAR SEARCH PRODUCT
         if(request.getParameter("clearFilter") != null) {
             session.removeAttribute("prodSearch");
             bySrc = "";
         }
-        
-        
-        if((String)session.getAttribute("prodSearch") != null) {
-            bySrc = (String)session.getAttribute("prodSearch");
-            qtdProd = Product.getSearchPage(bySrc);
-        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
@@ -81,6 +87,7 @@
     
     int pageProd = (int) Math.ceil((double)qtdProd/10);
     products = Product.getPageOrderBy(pgNum, byOrd, bySrc);
+    
 %>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -96,7 +103,8 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <%if(isDeleted == true){%>
+        <%if(isDeleted == true){
+          session.setAttribute("checkProducts", false);%>
         <script>
             Swal.fire(
                 'Deletado!',
@@ -104,7 +112,7 @@
                 'success'
                 );
         </script>
-        <%isDeleted = false;}%>
+        <%}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -118,7 +126,7 @@
                         <% } %>
                         <!-- FILTER INPUT -->
                         <div class="float-md-end h6">
-                            <form method="post" class="input-group">
+                            <form method="post" enctype="application/x-www-form-urlencoded" class="input-group">
                                 <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
                                 <button type="submit" name="srcFilter" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
@@ -135,16 +143,16 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form method="post">
+                                <form enctype="application/x-www-form-urlencoded" method="post">
                                     <div class="modal-body">
                                         <!-- PRODUCT NAME -->
                                         <div class="mb-3">
-                                            <label for="prodName">Nome</label>
+                                            <label for="prodName">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="text" class="form-control" name="prodName" id="prodName" required/>
                                         </div>
                                         <!-- PRODUCT BRAND -->
                                         <div class="mb-3">
-                                            <label for="prodBrand">Marca</label>
+                                            <label for="prodBrand">Marca <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <select class="form-control" name="prodBrand" id="prodBrand">
                                                 <%  ArrayList<String> brandNames = Brand.getBrandNames();
                                                     for (int j = 0; j < brandNames.size(); j++) {%>
@@ -228,8 +236,24 @@
                                             </button>
                                         </form>
                                     </th>
-                                    <th>Valor Médio</th>
-                                    <th>Quantidade</th>
+                                    <th>
+                                        <form method="post">
+                                            Valor Médio
+                                            <input type="hidden" name="orderColumn" value="prodAvg">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
+                                    <th>
+                                        <form method="post">
+                                            Quantidade
+                                            <input type="hidden" name="orderColumn" value="prodQnt">
+                                            <button type="submit" class="btn btn-sm btn-link">
+                                                <i class="bi bi-caret-down-fill"></i>
+                                            </button>
+                                        </form>
+                                    </th>
                                     <% if (sessionUserRole.equals("Admin")) {%><th></th><% } %>
                                 </tr>
                             </thead>
@@ -243,11 +267,11 @@
                                     <td><%= product.getProdBrand()%></td>
                                     <td><%= product.getProdMaterial()%></td>
                                     <td><%= product.getProdSize()%></td>
-                                    <td><%= Movement.getAvgById(product.getProdId())%></td>
-                                    <td><%= Movement.getQntById(product.getProdId())%></td>
+                                    <td><%= product.getProdAvg()%></td>
+                                    <td><%= product.getProdQnt()%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <form name="objAlter" enctype="application/x-www-form-urlencoded" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
                                             <!-- BUTTON EDIT & DELETE PRODUCT -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
@@ -260,7 +284,7 @@
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form>
+                                                    <form enctype="application/x-www-form-urlencoded" method="post">
                                                         <div class="modal-body">
                                                             <!-- PRODUCT ID -->
                                                             <div class="mb-3">
@@ -270,13 +294,13 @@
                                                             </div>
                                                             <!-- PRODUCT NAME -->
                                                             <div class="mb-3">
-                                                                <label for="prodName-<%= i%>">Nome</label>
+                                                                <label for="prodName-<%= i%>">Nome <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="text" class="form-control" name="prodName" id="prodName-<%= i%>" 
                                                                        value="<%= product.getProdName()%>" required/>
                                                             </div>
                                                             <!-- PRODUCT BRAND -->
                                                             <div class="mb-3">
-                                                                <label for="prodBrand-<%= i%>">Marca</label>
+                                                                <label for="prodBrand-<%= i%>">Marca <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <select class="form-control" name="prodBrand" id="prodBrand-<%= i%>">
                                                                     <% ArrayList<String> brandNamesEdit = Brand.getBrandNames();
                                                                         for (int k = 0; k < brandNamesEdit.size(); k++) {
@@ -301,15 +325,15 @@
                                                             </div>
                                                             <!-- PRODUCT AVG VALUE -->
                                                             <div class="mb-3">
-                                                                <label for="prodAvgValue-<%= i%>">Valor Médio</label>
+                                                                <label for="prodAvg-<%= i%>">Valor Médio</label>
                                                                 <input type="number" class="form-control" name="prodAvgValue" id="prodAvgValue-<%= i%>" 
-                                                                       value="<%= Movement.getAvgById(product.getProdId())%>" disabled/>
+                                                                       value="<%= product.getProdAvg()%>" disabled/>
                                                             </div>
                                                             <!-- PRODUCT QUANTITY -->
                                                             <div class="mb-3">
-                                                                <label for="movQuantity-<%= i%>">Quantidade</label>
+                                                                <label for="movQnt-<%= i%>">Quantidade</label>
                                                                 <input type="number" class="form-control" name="movQuantity" id="movQuantity-<%= i%>" 
-                                                                       value="<%= Movement.getQntById(product.getProdId())%>" disabled/>
+                                                                       value="<%= product.getProdQnt()%>" disabled/>
                                                             </div>
                                                         </div>
                                                         <!-- PRODUCT SAVE AND CANCEL BUTTON -->
@@ -363,6 +387,11 @@
             </div>
             <% }%>
         </div>
+        <!-- TOOLTIP -->
+        <script>
+            $(function () {
+            $('[data-toggle="tooltip"]').tooltip()})
+        </script>
         <!-- CONFIRM DELETE -->
         <script src="scripts/confirmDel.js"></script>
     </body>

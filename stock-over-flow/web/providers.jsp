@@ -10,11 +10,15 @@
 <%
     String requestError = null;
     ArrayList<Provider> providers = new ArrayList<>();
-    int pgNum = 0;    
+    int pgNum = 0;
+    if(session.getAttribute("provPage") != null)pgNum = ((Integer)session.getAttribute("provPage")-1)*10;
     int qtdProv = Provider.getAll();
-    String bySrc="";
+    String bySrc = (String) session.getAttribute("provSearch");
+    if(bySrc==null)bySrc="";
+    else qtdProv = Provider.getSearchPage(bySrc);
     String byOrd = (String) session.getAttribute("provOrder");
-    Boolean isDeleted = false;
+    Boolean isDeleted = (Boolean) session.getAttribute("checkProviders");
+    if(isDeleted == null)isDeleted = false;
     if((String) session.getAttribute("provSearch")!=null){
     bySrc = (String) session.getAttribute("provSearch");
     }
@@ -43,36 +47,39 @@
         } else if (request.getParameter("delete") != null) {
             String provName = request.getParameter("provName");
             Provider.deleteProvider(provName);
-            isDeleted = true;
+            session.setAttribute("checkProviders",true);
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //PAGE PROCIDER
         if (request.getParameter("page") != null) {
             pgNum = Integer.parseInt(request.getParameter("page"));
+            session.setAttribute("provPage",pgNum);
             pgNum = (pgNum-1)*10;
         }
         
+        //SEARCH PROVIDER
         if (request.getParameter("srcFilter")!= null){
             bySrc = request.getParameter("searchFor");
             qtdProv = Provider.getSearchPage(bySrc);
             session.setAttribute("provSearch", bySrc);
+            session.removeAttribute("movPage");
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //ORDER PROVIDER
         if (request.getParameter("orderColumn")!= null){
             byOrd = request.getParameter("orderColumn");
             session.setAttribute("provOrder", byOrd);
-            
+            response.sendRedirect(request.getRequestURI());
         }
         
+        //CLEAR SEARCH PROVIDER
         if(request.getParameter("clearFilter") != null) {
             session.removeAttribute("provSearch");
             bySrc = "";
+            response.sendRedirect(request.getRequestURI());
         }
-        
-        
-        if((String)session.getAttribute("provSearch") != null) {
-            bySrc = (String)session.getAttribute("provSearch");
-            qtdProv = Provider.getSearchPage(bySrc);
-        } 
         
     } catch (Exception ex) {
         requestError = ex.getLocalizedMessage();
@@ -94,7 +101,8 @@
     </head>
     <body>
         <%@include file="WEB-INF/jspf/header.jspf" %>
-        <%if(isDeleted == true){%>
+        <%if(isDeleted == true){
+          session.setAttribute("checkProviders", false);%>
         <script>
             Swal.fire(
                 'Deletado!',
@@ -102,7 +110,7 @@
                 'success'
                 );
         </script>
-        <%isDeleted = false;}%>
+        <%}%>
         <div class="container-fluid mt-2">
             <% if (sessionUserEmail != null && sessionUserVerified == true) {%>
             <div class="card">
@@ -115,7 +123,7 @@
                         </button>
                         <% } %>
                         <div class="float-md-end h6">
-                            <form method="post" class="input-group">
+                            <form method="post" enctype="application/x-www-form-urlencoded" class="input-group">
                                 <input type="text" name="searchFor" id="searchFor" class="form-control" value="<%= bySrc %>"/>
                                 <button type="submit" name="srcFilter" class="btn btn-primary">
                                     <i class="bi bi-search"></i>
@@ -132,11 +140,11 @@
                     <div class="modal fade" id="add" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
-                                <form method="post">
+                                <form enctype="application/x-www-form-urlencoded" method="post">
                                     <div class="modal-body">
                                         <!-- PROVIDER NAME -->
                                         <div class="mb-3">
-                                            <label for="provName">Nome</label>
+                                            <label for="provName">Nome  <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                             <input type="text" class="form-control" name="provName" id="provName" required/>
                                         </div>
                                         <!-- PROVIDER LOCATION -->
@@ -226,7 +234,7 @@
                                     <td><%= Provider.getProvQnt(provider.getProvName())%></td>
                                     <% if (sessionUserRole.equals("Admin")) {%>
                                     <td>
-                                        <form name="objAlter" id="objAlter-<%= i%>" method="post" onsubmit="validateAlert(<%= i%>, this)">
+                                        <form name="objAlter" id="objAlter-<%= i%>" enctype="application/x-www-form-urlencoded" method="post" onsubmit="validateAlert(<%= i%>, this)">
                                             <!-- BUTTON EDIT & DELETE PROVIDER -->
                                             <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#edit-<%= i%>">
                                                 <i class="bi bi-pencil-square"></i></button>
@@ -239,11 +247,11 @@
                                         <div class="modal fade" id="edit-<%= i%>" tabindex="-1" aria-hidden="true">
                                             <div class="modal-dialog modal-dialog-centered">
                                                 <div class="modal-content">
-                                                    <form>
+                                                    <form enctype="application/x-www-form-urlencoded" method="post">
                                                         <div class="modal-body">
                                                             <!-- PROVIDER NAME -->
                                                             <div class="mb-3">
-                                                                <label for="provName-<%= i%>">Nome</label>
+                                                                <label for="provName-<%= i%>">Nome  <small><i class="bi bi-exclamation-circle" data-bs-toggle="tooltip" data-bs-placement="right" title="Campo obrigatório"></i></small></label>
                                                                 <input type="text" class="form-control" name="provName" id="provName-<%= i%>" 
                                                                        value="<%= provider.getProvName()%>" required/>
                                                             </div>
@@ -323,6 +331,11 @@
             </div>
             <% }%>
         </div>
+        <!-- TOOLTIP -->
+        <script>
+            $(function () {
+            $('[data-toggle="tooltip"]').tooltip()})
+        </script>
         <!-- CONFIRM DELETE -->
         <script src="scripts/confirmDel.js"></script>
     </body>
